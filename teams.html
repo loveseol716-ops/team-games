@@ -102,7 +102,6 @@ form.onsubmit=async e=>{
   submitting=true;
   submitBtn.disabled=true;
   submitBtn.textContent='CHECKING…';
-  let uploadedPath=null;
 
   try{
     const ev=await event();
@@ -112,13 +111,18 @@ form.onsubmit=async e=>{
     if(current.length>=limit){await render();throw new Error('REGISTRATION_FULL');}
 
     const f=new FormData(form);
+    const phone=f.get('phone').trim();
+    const duplicate=await db.rpc('tg_check_phone',{p_event_slug:C.eventSlug,p_phone:phone});
+    if(duplicate.error) throw duplicate.error;
+    if(duplicate.data) throw new Error('DUPLICATE_PHONE');
+
     const file=f.get('photo');
     if(!file || !file.size) throw new Error('TEAM_PHOTO_REQUIRED');
     if(file.size>5*1024*1024) throw new Error('팀 사진은 5MB 이하로 업로드해 주세요.');
     if(!['image/jpeg','image/png','image/webp'].includes(file.type)) throw new Error('팀 사진은 JPG, PNG, WEBP 형식만 가능합니다.');
 
     const ext=(file.name.split('.').pop()||'jpg').toLowerCase();
-    uploadedPath=`${C.eventSlug}/${crypto.randomUUID()}.${ext}`;
+    const uploadedPath=`${C.eventSlug}/${crypto.randomUUID()}.${ext}`;
     submitBtn.textContent='UPLOADING PHOTO…';
     const up=await db.storage.from('tg-team-photos').upload(uploadedPath,file,{upsert:false});
     if(up.error) throw up.error;
@@ -130,7 +134,7 @@ form.onsubmit=async e=>{
       team_name:f.get('team_name').trim(),
       player_1:f.get('player_1').trim(),
       player_2:f.get('player_2').trim(),
-      phone:f.get('phone').trim(),
+      phone,
       photo_url,
       status:'confirmed'
     }).select('heat_no,station_no').single();
