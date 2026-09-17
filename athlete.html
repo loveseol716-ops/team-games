@@ -63,7 +63,7 @@ function showAuth(mode='login',message=''){
     try{
       const email=authEmail.value.trim(),password=authPassword.value;
       if(mode==='signup'){
-        const {data,error}=await db.auth.signUp({email,password});if(error)throw error;
+        const {data,error}=await db.auth.signUp({email,password,options:{data:{signup_source:'team_games'}}});if(error)throw error;
         if(!data.session){showAuth('login','인증 메일을 확인한 뒤 이 페이지로 돌아와 로그인해 주세요.');return}
       }else{
         const {error}=await db.auth.signInWithPassword({email,password});if(error)throw error;
@@ -116,8 +116,8 @@ async function loadHubData(){
     db.from('tg_athletes').select('*').eq('id',user.id).maybeSingle(),
     db.from('tg_athlete_private').select('phone,privacy_consent_at').eq('athlete_id',user.id).maybeSingle(),
     leaderboard(),
-    db.from('tg_team_invites').select('*').eq('event_id',(await event()).id).order('created_at',{ascending:false}),
-    db.from('tg_team_members').select('team_id,event_id,athlete_id,member_role,active').eq('event_id',(await event()).id).eq('athlete_id',user.id).eq('active',true),
+    db.from('tg_team_invites').select('*').eq('event_id',currentEvent.id).order('created_at',{ascending:false}),
+    db.from('tg_team_members').select('team_id,event_id,athlete_id,member_role,active').eq('event_id',currentEvent.id).eq('athlete_id',user.id).eq('active',true),
     db.from('tg_athletes').select('id,display_name,handle,photo_url,gym,gender,division').eq('profile_public',true).order('display_name'),
     db.rpc('tg_athlete_history',{p_athlete_id:user.id})
   ]);
