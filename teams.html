@@ -39,6 +39,42 @@
         <p class="muted">현재 참가 신청은 마감되었습니다. WAITLIST 안내는 추후 업데이트됩니다.</p>
       </div>
 
+      <div id="successCard" class="entry-success" style="display:none" aria-live="polite">
+        <div class="entry-success-top">
+          <div>
+            <div class="kicker">ENTRY CONFIRMED</div>
+            <div class="entry-check">✓</div>
+          </div>
+          <div class="entry-edition">TEAM GAMES #01</div>
+        </div>
+
+        <div class="entry-success-body">
+          <div class="entry-label">REGISTERED TEAM</div>
+          <h3 id="successTeam">TEAM NAME</h3>
+
+          <div class="entry-slot-grid">
+            <div class="entry-slot">
+              <span>HEAT</span>
+              <strong id="successHeat">—</strong>
+            </div>
+            <div class="entry-slot">
+              <span>STATION</span>
+              <strong id="successStation">—</strong>
+            </div>
+          </div>
+
+          <div class="entry-guide">
+            <div class="entry-guide-title">ENTRY INFO</div>
+            <p>접수가 정상적으로 완료되었습니다.</p>
+            <p>팀 사진과 선수 이름은 TEAM LINE-UP에 공개됩니다.</p>
+            <p>경기 관련 최종 안내는 대표 연락처로 전달됩니다.</p>
+          </div>
+
+          <div class="entry-event-meta">OCT 31, 2026 · SEOUL · TEAM OF 2</div>
+          <a class="btn entry-back" href="#top" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">VIEW TEAM LINE-UP</a>
+        </div>
+      </div>
+
       <form id="form" class="card formgrid">
         <div><label>Team Name</label><input name="team_name" maxlength="60" required></div>
         <div><label>대표 연락처</label><input name="phone" inputmode="tel" autocomplete="tel" placeholder="010-0000-0000" required></div>
@@ -66,6 +102,8 @@ shell("TEAMS");
 const MAX_TEAMS=12;
 let submitting=false;
 
+function esc(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+
 function friendlyError(x){
   const m=String(x?.message||x||'');
   if(m.includes('DUPLICATE_PHONE')||x?.code==='23505') return '이미 신청된 연락처입니다. 기존 신청 내용을 확인해 주세요.';
@@ -78,7 +116,18 @@ function friendlyError(x){
 
 function setSoldOut(isSoldOut){
   soldout.style.display=isSoldOut?'block':'none';
-  form.style.display=isSoldOut?'none':'grid';
+  if(successCard.style.display!=='block') form.style.display=isSoldOut?'none':'grid';
+}
+
+function showSuccess(teamName,heat,station){
+  successTeam.textContent=teamName;
+  successHeat.textContent=heat;
+  successStation.textContent=station;
+  msg.style.display='none';
+  form.style.display='none';
+  soldout.style.display='none';
+  successCard.style.display='block';
+  successCard.scrollIntoView({behavior:'smooth',block:'center'});
 }
 
 async function render(){
@@ -89,11 +138,11 @@ async function render(){
   count.textContent=isSoldOut?`${ts.length} / ${limit} Teams Registered · SOLD OUT`:`${ts.length} / ${limit} Teams Registered`;
   setSoldOut(isSoldOut);
 
-  teamGrid.innerHTML=ts.map((t,i)=>`<article class="card"><div class="num">TEAM ${String(i+1).padStart(2,'0')}</div><div class="photo">${t.photo_url?`<img src="${t.photo_url}" alt="${t.team_name}">`:'TEAM PHOTO'}</div><div class="teamname">${t.team_name}</div><div>${t.player_1} × ${t.player_2}</div><div class="teammeta">HEAT ${t.heat_no} · STATION ${t.station_no}</div></article>`).join('');
+  teamGrid.innerHTML=ts.map((t,i)=>`<article class="card"><div class="num">TEAM ${String(i+1).padStart(2,'0')}</div><div class="photo">${t.photo_url?`<img src="${esc(t.photo_url)}" alt="${esc(t.team_name)}">`:'TEAM PHOTO'}</div><div class="teamname">${esc(t.team_name)}</div><div>${esc(t.player_1)} × ${esc(t.player_2)}</div><div class="teammeta">HEAT ${t.heat_no} · STATION ${t.station_no}</div></article>`).join('');
 
   const h={};
   ts.forEach(t=>(h[t.heat_no]??=[]).push(t));
-  heatGrid.innerHTML=Object.entries(h).map(([n,a])=>`<div class="card heat"><div><div class="num">HEAT ${n}</div><strong>${a[0]?.team_name||'TBD'}</strong></div><div class="vs">VS</div><div style="text-align:right"><div class="num">STATION 2</div><strong>${a[1]?.team_name||'TBD'}</strong></div></div>`).join('');
+  heatGrid.innerHTML=Object.entries(h).map(([n,a])=>`<div class="card heat"><div><div class="num">HEAT ${n}</div><strong>${esc(a[0]?.team_name||'TBD')}</strong></div><div class="vs">VS</div><div style="text-align:right"><div class="num">STATION 2</div><strong>${esc(a[1]?.team_name||'TBD')}</strong></div></div>`).join('');
 }
 
 form.onsubmit=async e=>{
@@ -111,6 +160,7 @@ form.onsubmit=async e=>{
     if(current.length>=limit){await render();throw new Error('REGISTRATION_FULL');}
 
     const f=new FormData(form);
+    const teamName=f.get('team_name').trim();
     const phone=f.get('phone').trim();
     const duplicate=await db.rpc('tg_check_phone',{p_event_slug:C.eventSlug,p_phone:phone});
     if(duplicate.error) throw duplicate.error;
@@ -131,7 +181,7 @@ form.onsubmit=async e=>{
     submitBtn.textContent='REGISTERING…';
     const r=await db.from('tg_teams').insert({
       event_id:ev.id,
-      team_name:f.get('team_name').trim(),
+      team_name:teamName,
       player_1:f.get('player_1').trim(),
       player_2:f.get('player_2').trim(),
       phone,
@@ -141,9 +191,10 @@ form.onsubmit=async e=>{
     if(r.error) throw r.error;
 
     form.reset();
-    notice('msg',`신청 완료 · HEAT ${r.data.heat_no} / STATION ${r.data.station_no}`);
     await render();
+    showSuccess(teamName,r.data.heat_no,r.data.station_no);
   }catch(x){
+    successCard.style.display='none';
     notice('msg',friendlyError(x),true);
     await render().catch(()=>{});
   }finally{
