@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>PLAYER · TEAM GAMES</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="athlete.css">
+</head>
+<body>
+<div id="nav"></div>
+<main>
+  <section class="player-hero">
+    <div class="container">
+      <div class="arcade-eyebrow">PLAYER MODE // ATHLETE ID</div>
+      <h1>BUILD YOUR<br>PLAYER.</h1>
+      <p class="lead">프로필은 남고, 파트너는 매 게임 새로 고른다. 기록과 포인트는 당신의 PLAYER ID에 쌓인다.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div id="authView" class="player-auth"></div>
+      <div id="onboardView" style="display:none"></div>
+      <div id="hubView" style="display:none"></div>
+    </div>
+  </section>
+</main>
+<div id="footer"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+<script>
+shell('PLAYER');
+let user=null,me=null,privateData=null,currentEvent=null,allPlayers=[],myInvites=[],myTeam=null,myRoster=[];
+
+function authError(e){
+  const m=String(e?.message||e||'');
+  if(e?.code==='23505'||m.includes('tg_athletes_handle_uidx'))return '이미 사용 중인 PLAYER ID입니다.';
+  if(m.includes('ATHLETE_ALREADY_LOCKED_IN'))return '둘 중 한 명이 이미 이번 GAME에 팀이 확정되어 있습니다.';
+  if(m.includes('REGISTRATION_FULL'))return '이번 GAME 참가팀이 모두 찼습니다.';
+  if(m.includes('REGISTRATION_CLOSED'))return '현재 참가 신청이 닫혀 있습니다.';
+  if(m.includes('INVITE_NOT_PENDING'))return '이미 처리된 초대입니다.';
+  return m||'처리 중 오류가 발생했습니다.';
+}
+
+function showAuth(mode='login',message=''){
+  authView.style.display='block';onboardView.style.display='none';hubView.style.display='none';
+  authView.innerHTML=`
+    <div class="card">
+      <div class="player-auth-tabs"><button id="loginTab" class="btn ${mode==='login'?'active':'dark'}" type="button">PLAYER LOGIN</button><button id="signupTab" class="btn ${mode==='signup'?'active':'dark'}" type="button">CREATE ACCOUNT</button></div>
+      <div class="kicker">${mode==='login'?'WELCOME BACK':'NEW PLAYER'}</div>
+      <h3>${mode==='login'?'PRESS START.':'GET YOUR PLAYER ID.'}</h3>
+      <form id="authForm" class="player-form">
+        <div class="full"><label>Email</label><input id="authEmail" type="email" autocomplete="email" required></div>
+        <div class="full"><label>Password</label><input id="authPassword" type="password" minlength="8" autocomplete="${mode==='login'?'current-password':'new-password'}" required></div>
+        <div class="full"><button id="authSubmit" class="btn arcade-primary" type="submit">${mode==='login'?'START':'CREATE PLAYER ACCOUNT'}</button><div id="authMsg" class="notice" ${message?'style="display:block"':''}>${esc(message)}</div></div>
+      </form>
+    </div>`;
+  loginTab.onclick=()=>showAuth('login');signupTab.onclick=()=>showAuth('signup');
+  authForm.onsubmit=async e=>{
+    e.preventDefault();authSubmit.disabled=true;
+    try{
+      const email=authEmail.value.trim(),password=authPassword.value;
+      if(mode==='signup'){
+        const {data,error}=await db.auth.signUp({email,password});if(error)throw error;
+        if(!data.session){showAuth('login','인증 메일을 확인한 뒤 이 페이지로 돌아와 로그인해 주세요.');return}
+      }else{
+        const {error}=await db.auth.signInWithPassword({email,password});if(error)throw error;
+      }
+      await boot();
+    }catch(x){notice('authMsg',authError(x),true)}finally{if(document.getElementById('authSubmit'))authSubmit.disabled=false}
+  };
+}
+
+function showOnboarding(){
+  authView.style.display='none';hubView.style.display='none';onboardView.style.display='block';
+  onboardView.innerHTML=`
+    <div class="sectionhead"><div><div class="kicker">PLAYER SETUP</div><h2>CREATE YOUR CARD.</h2></div><button id="logoutSetup" class="btn dark">LOGOUT</button></div>
+    <form id="profileForm" class="card player-form">
+      <div><label>Player Name</label><input id="displayName" maxlength="50" required></div>
+      <div><label>Player ID</label><input id="handle" maxlength="24" pattern="[A-Za-z0-9._-]{2,24}" placeholder="jay.seol" required></div>
+      <div><label>Gender</label><select id="gender"><option value="male">MALE</option><option value="female">FEMALE</option></select></div>
+      <div><label>Division</label><select id="division"><option>OPEN</option><option>PRO</option></select></div>
+      <div><label>Gym / Crew</label><input id="gym" maxlength="60" placeholder="NOLTO GYM"></div>
+      <div><label>Instagram</label><input id="instagram" maxlength="40" placeholder="@handle"></div>
+      <div class="full"><label>Phone</label><input id="phone" inputmode="tel" placeholder="010-0000-0000" required></div>
+      <div class="full"><label>Player Photo · Required</label><input id="playerPhoto" type="file" accept="image/jpeg,image/png,image/webp" required><div class="hint">리더보드와 PLAYER CARD에 공개됩니다. JPG / PNG / WEBP · 최대 5MB</div></div>
+      <div class="full"><label style="display:flex;gap:8px;align-items:flex-start"><input id="consent" type="checkbox" style="width:auto;margin-top:3px" required><span>TEAM GAMES 참가 운영을 위한 이름·연락처·사진 수집 및 공개 프로필 이용에 동의합니다.</span></label></div>
+      <div class="full"><button id="saveProfileBtn" class="btn arcade-primary" type="submit">LOCK PLAYER CARD</button><div id="profileMsg" class="notice"></div></div>
+    </form>`;
+  logoutSetup.onclick=logout;
+  profileForm.onsubmit=saveProfile;
+}
+
+async function saveProfile(e){
+  e.preventDefault();saveProfileBtn.disabled=true;saveProfileBtn.textContent='SAVING…';
+  try{
+    const file=playerPhoto.files[0];if(!file)throw new Error('PLAYER PHOTO REQUIRED');
+    if(file.size>5*1024*1024)throw new Error('사진은 5MB 이하로 업로드해 주세요.');
+    if(!['image/jpeg','image/png','image/webp'].includes(file.type))throw new Error('JPG, PNG, WEBP만 업로드할 수 있습니다.');
+    const ext=(file.name.split('.').pop()||'jpg').toLowerCase();
+    const path=`${user.id}/profile.${ext}`;
+    const up=await db.storage.from('tg-athlete-photos').upload(path,file,{upsert:true,contentType:file.type});if(up.error)throw up.error;
+    const photo_url=db.storage.from('tg-athlete-photos').getPublicUrl(path).data.publicUrl+`?v=${Date.now()}`;
+    const athlete={id:user.id,display_name:displayName.value.trim(),handle:handle.value.trim(),photo_url,gender:gender.value,division:division.value,gym:gym.value.trim()||null,instagram:instagram.value.trim()||null,profile_public:true};
+    const a=await db.from('tg_athletes').upsert(athlete,{onConflict:'id'});if(a.error)throw a.error;
+    const p=await db.from('tg_athlete_private').upsert({athlete_id:user.id,phone:phone.value.trim(),privacy_consent_at:new Date().toISOString()},{onConflict:'athlete_id'});if(p.error)throw p.error;
+    await boot();
+  }catch(x){notice('profileMsg',authError(x),true)}finally{if(document.getElementById('saveProfileBtn')){saveProfileBtn.disabled=false;saveProfileBtn.textContent='LOCK PLAYER CARD'}}
+}
+
+async function loadHubData(){
+  currentEvent=await event();
+  const [{data:a,error:ae},{data:p,error:pe},lb,{data:inv,error:ie},{data:members,error:meErr},{data:players,error:plErr},{data:history,error:hErr}]=await Promise.all([
+    db.from('tg_athletes').select('*').eq('id',user.id).maybeSingle(),
+    db.from('tg_athlete_private').select('phone,privacy_consent_at').eq('athlete_id',user.id).maybeSingle(),
+    leaderboard(),
+    db.from('tg_team_invites').select('*').eq('event_id',(await event()).id).order('created_at',{ascending:false}),
+    db.from('tg_team_members').select('team_id,event_id,athlete_id,member_role,active').eq('event_id',(await event()).id).eq('athlete_id',user.id).eq('active',true),
+    db.from('tg_athletes').select('id,display_name,handle,photo_url,gym,gender,division').eq('profile_public',true).order('display_name'),
+    db.rpc('tg_athlete_history',{p_athlete_id:user.id})
+  ]);
+  if(ae)throw ae;if(pe)throw pe;if(ie)throw ie;if(meErr)throw meErr;if(plErr)throw plErr;if(hErr)throw hErr;
+  me=a;privateData=p;myInvites=inv||[];allPlayers=(players||[]).filter(x=>x.id!==user.id);window.myLeaderboard=lb.find(x=>x.athlete_id===user.id)||{leaderboard_rank:'—',total_points:0,starts:0,wins:0,podiums:0};window.myHistory=history||[];
+  myTeam=null;myRoster=[];
+  if(members?.length){
+    const teamId=members[0].team_id;
+    const {data:t,error:te}=await db.from('tg_teams').select('id,team_name,heat_no,station_no,status,player_1,player_2').eq('id',teamId).single();if(te)throw te;myTeam=t;
+    const {data:roster,error:re}=await db.from('tg_team_members').select('athlete_id,member_role').eq('team_id',teamId);if(re)throw re;
+    const ids=(roster||[]).map(x=>x.athlete_id);if(ids.length){const {data:people,error:ppe}=await db.from('tg_athletes').select('id,display_name,handle,photo_url').in('id',ids);if(ppe)throw ppe;myRoster=people||[]}
+  }
+}
+
+function renderHub(){
+  const s=window.myLeaderboard;
+  authView.style.display='none';onboardView.style.display='none';hubView.style.display='block';
+  hubView.innerHTML=`
+    <div class="sectionhead"><div><div class="kicker">PLAYER HUB</div><h2>WELCOME, ${esc(me.display_name)}.</h2></div><div class="row-actions"><a class="btn dark" href="player.html?id=${encodeURIComponent(me.id)}">PUBLIC CARD</a><button id="logoutBtn" class="btn dark">LOGOUT</button></div></div>
+    <div class="player-grid">
+      <div>
+        <div class="player-card">
+          <div class="player-card-photo"><img src="${esc(me.photo_url)}" alt="${esc(me.display_name)}"></div>
+          <div class="player-card-body"><div class="player-card-rank">RANK #${s.leaderboard_rank}</div><div class="player-card-name">${esc(me.display_name)}</div><div class="player-card-handle">@${esc(me.handle)}</div><div class="player-card-meta"><span class="player-chip">${esc(me.gender.toUpperCase())}</span><span class="player-chip">${esc(me.division)}</span>${me.gym?`<span class="player-chip">${esc(me.gym)}</span>`:''}</div><div class="player-stats"><div class="player-stat"><span>PTS</span><strong>${s.total_points}</strong></div><div class="player-stat"><span>STARTS</span><strong>${s.starts}</strong></div><div class="player-stat"><span>WINS</span><strong>${s.wins}</strong></div><div class="player-stat"><span>PODIUMS</span><strong>${s.podiums}</strong></div></div></div>
+        </div>
+      </div>
+      <div id="gameHub"></div>
+    </div>
+    <section class="admin-block" style="margin-top:32px"><div class="sectionhead"><div><div class="kicker">GAME LOG</div><h2>YOUR RUN.</h2></div></div><div class="history-list" id="myHistoryList"></div></section>`;
+  logoutBtn.onclick=logout;
+  renderGameHub();renderHistory();
+}
+
+function renderGameHub(){
+  if(myTeam){
+    const mate=myRoster.find(x=>x.id!==user.id);
+    gameHub.innerHTML=`<div class="team-lock"><div class="team-lock-top"><div><div class="kicker">GAME #01 // LOCKED IN</div><h3>${esc(myTeam.team_name)}</h3><p class="muted">${esc(me.display_name)} × ${esc(mate?.display_name||'PARTNER')}</p></div><div class="slot-display">H${myTeam.heat_no} · S${myTeam.station_no}</div></div></div>`;
+    return;
+  }
+  const incoming=myInvites.filter(x=>x.invitee_id===user.id&&x.status==='pending');
+  const outgoing=myInvites.filter(x=>x.captain_id===user.id&&x.status==='pending');
+  gameHub.innerHTML=`
+    <div class="player-panel"><div class="kicker">GAME #01</div><h3>BUILD YOUR DUO.</h3><p class="muted">대표 선수가 팀 이름을 만들고 파트너를 초대합니다. 상대가 ACCEPT하면 참가 확정.</p>
+      <div style="margin-top:18px"><label>Team Name</label><input id="teamNameInput" maxlength="60" placeholder="YOUR TEAM NAME"><label style="margin-top:12px">Find Player</label><input id="playerSearch" type="search" placeholder="이름 / PLAYER ID / GYM 검색"><div id="playerSearchList" class="player-search-list" style="margin-top:10px"></div></div>
+    </div>
+    <div class="player-panel" style="margin-top:14px"><div class="kicker">INCOMING</div><h3>INVITES</h3><div class="invite-list" id="incomingList"></div></div>
+    <div class="player-panel" style="margin-top:14px"><div class="kicker">OUTGOING</div><h3>YOUR CALL</h3><div class="invite-list" id="outgoingList"></div></div>`;
+  playerSearch.oninput=renderPlayerSearch;renderPlayerSearch();
+  incomingList.innerHTML=incoming.map(inv=>inviteRow(inv,true)).join('')||'<div class="muted">NO INVITES.</div>';
+  outgoingList.innerHTML=outgoing.map(inv=>inviteRow(inv,false)).join('')||'<div class="muted">NO PENDING INVITE.</div>';
+}
+
+function person(id){return allPlayers.find(x=>x.id===id)||null}
+function inviteRow(inv,incoming){
+  const p=person(incoming?inv.captain_id:inv.invitee_id);
+  return `<div class="invite-row"><div class="mini-avatar">${p?.photo_url?`<img src="${esc(p.photo_url)}">`:''}</div><div><div class="row-title">${esc(inv.team_name)}</div><div class="row-sub">${incoming?'FROM':'TO'} ${esc(p?.display_name||'PLAYER')} · @${esc(p?.handle||'—')}</div></div><div class="row-actions">${incoming?`<button class="mini-btn hot" onclick="respondInvite('${inv.id}',true)">ACCEPT</button><button class="mini-btn" onclick="respondInvite('${inv.id}',false)">DECLINE</button>`:`<button class="mini-btn" onclick="cancelInvite('${inv.id}')">CANCEL</button>`}</div></div>`;
+}
+
+function renderPlayerSearch(){
+  const q=(playerSearch?.value||'').trim().toLowerCase();
+  const list=allPlayers.filter(x=>!q||[x.display_name,x.handle,x.gym].some(v=>String(v||'').toLowerCase().includes(q))).slice(0,12);
+  playerSearchList.innerHTML=list.map(p=>`<div class="player-search-row"><div class="mini-avatar"><img src="${esc(p.photo_url)}"></div><div><div class="row-title">${esc(p.display_name)}</div><div class="row-sub">@${esc(p.handle)}${p.gym?` · ${esc(p.gym)}`:''} · ${esc(p.division)}</div></div><div class="row-actions"><button class="mini-btn hot" onclick="sendInvite('${p.id}')">INVITE</button></div></div>`).join('')||'<div class="muted">PLAYER NOT FOUND.</div>';
+}
+
+window.sendInvite=async invitee=>{try{const team=teamNameInput.value.trim();if(!team)throw new Error('TEAM NAME을 먼저 입력해 주세요.');const r=await db.rpc('tg_send_team_invite',{p_event_slug:C.eventSlug,p_invitee_id:invitee,p_team_name:team});if(r.error)throw r.error;await refreshHub()}catch(x){alert(authError(x))}};
+window.respondInvite=async(id,accept)=>{try{const r=await db.rpc('tg_respond_team_invite',{p_invite_id:id,p_accept:accept});if(r.error)throw r.error;await refreshHub()}catch(x){alert(authError(x))}};
+window.cancelInvite=async id=>{try{const r=await db.rpc('tg_cancel_team_invite',{p_invite_id:id});if(r.error)throw r.error;await refreshHub()}catch(x){alert(authError(x))}};
+
+function renderHistory(){
+  myHistoryList.innerHTML=(window.myHistory||[]).map(x=>`<div class="history-row"><div class="mini-avatar"><div style="height:100%;display:grid;place-items:center;color:var(--arcade);font-family:var(--font-display)">#${x.place}</div></div><div><div class="row-title">${esc(x.event_title)} · ${esc(x.team_name)}</div><div class="row-sub">WITH ${esc(x.partner_name||'—')}</div></div><div class="row-actions"><span class="player-chip">${x.points} PTS</span></div></div>`).join('')||'<div class="card muted">아직 공식 경기 기록이 없습니다.</div>';
+}
+
+async function refreshHub(){await loadHubData();renderHub()}
+async function logout(){await db.auth.signOut();user=null;me=null;showAuth('login')}
+
+async function boot(){
+  const {data:{user:u}}=await db.auth.getUser();user=u||null;
+  if(!user){showAuth('login');return}
+  const {data:a,error}=await db.from('tg_athletes').select('*').eq('id',user.id).maybeSingle();if(error)throw error;
+  if(!a){showOnboarding();return}
+  await loadHubData();renderHub();
+}
+
+boot().catch(e=>showAuth('login',authError(e)));
+</script>
+</body>
+</html>
