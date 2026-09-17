@@ -8,29 +8,24 @@ function nav(active){
     ['HOME','index.html'],['GAME','event.html'],['TEAMS','teams.html'],
     ['FAN PICK','fanpick.html'],['LIVE','live.html'],['PLAYER','athlete.html']
   ];
-  return `<header class="nav"><div class="container navin"><a class="brand" href="index.html">TEAM GAMES</a><nav class="links">${p.map(([n,h])=>`<a class="${active===n?'active':''}" href="${h}">${n}</a>`).join('')}<a id="gameMasterNav" class="${active==='ADMIN'?'active':''}" href="admin.html" style="display:none;color:var(--arcade)">GAME MASTER</a></nav><a class="cta arcade-cta" href="athlete.html?join=1">ENTER GAME #01</a></div></header>`;
+  return `<header class="nav"><div class="container navin"><a class="brand" href="index.html">TEAM GAMES</a><nav class="links">${p.map(([n,h])=>`<a class="${active===n?'active':''}" href="${h}">${n}</a>`).join('')}</nav><a class="cta arcade-cta" href="athlete.html?join=1">ENTER GAME #01</a></div></header>`;
+}
+
+function adminNav(){
+  return `<header class="nav admin-only-nav"><div class="container navin admin-only-navin"><div class="brand admin-only-brand">GAME MASTER</div><div class="admin-only-badge">PRIVATE CONTROL ROOM</div></div></header>`;
 }
 
 function shell(active){
+  if(active==='ADMIN'){
+    document.querySelector('#nav').innerHTML=adminNav();
+    document.querySelector('#footer').innerHTML=`<footer class="footer admin-only-footer"><div class="container arcade-footer"><span>TEAM GAMES // GAME MASTER</span><span>PRIVATE CONTROL ROOM</span></div></footer>`;
+    return;
+  }
   document.querySelector('#nav').innerHTML=nav(active);
-  document.querySelector('#footer').innerHTML=`<footer class="footer"><div class="container arcade-footer"><span>TEAM GAMES // STAGE 01</span><span>OCT 31, 2026 · SEOUL</span><span>PLAY · PICK · WATCH</span><a id="gameMasterFooter" href="admin.html" style="display:none;color:var(--arcade);font-size:9px;letter-spacing:.12em">GAME MASTER</a></div></footer>`;
-  revealGameMaster();
+  document.querySelector('#footer').innerHTML=`<footer class="footer"><div class="container arcade-footer"><span>TEAM GAMES // STAGE 01</span><span>OCT 31, 2026 · SEOUL</span><span>PLAY · PICK · WATCH</span></div></footer>`;
 }
 
-async function revealGameMaster(){
-  try{
-    const {data:{session}}=await db.auth.getSession();
-    if(!session)return;
-    const {data,error}=await db.rpc('tg_is_game_master');
-    if(error||!data)return;
-    const n=document.getElementById('gameMasterNav');
-    const f=document.getElementById('gameMasterFooter');
-    if(n)n.style.display='inline-flex';
-    if(f)f.style.display='inline-flex';
-  }catch(_){ }
-}
-
-db.auth.onAuthStateChange(()=>{setTimeout(revealGameMaster,0)});
+function revealGameMaster(){/* admin is intentionally isolated from participant navigation */}
 
 function notice(id,msg,err=false){const e=document.getElementById(id);if(!e)return;e.textContent=msg;e.style.display='block';e.classList.toggle('err',err)}
 function token(){let t=localStorage.getItem('tg_device_token');if(!t){t=crypto.randomUUID();localStorage.setItem('tg_device_token',t)}return t}
