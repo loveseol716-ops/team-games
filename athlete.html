@@ -14,7 +14,10 @@
     <div class="container">
       <div class="arcade-eyebrow">PLAYER MODE // GAME #01</div>
       <h1>ENTER<br>THE GAME.</h1>
-      <p class="lead">계정을 만들고 PLAYER CARD를 완성한 뒤, 이번 GAME의 파트너를 고릅니다.</p>
+      <p class="lead">PLAYER ID를 만들고, 파트너를 초대하고, GAME #01에 들어갑니다.</p>
+      <div class="player-entry-steps">
+        <span><b>01</b> ACCOUNT</span><i>→</i><span><b>02</b> PLAYER CARD</span><i>→</i><span><b>03</b> PARTNER</span><i>→</i><span><b>04</b> LOCKED IN</span>
+      </div>
     </div>
   </section>
   <section class="section"><div class="container"><div id="authView" class="player-auth"></div><div id="onboardView" style="display:none"></div><div id="hubView" style="display:none"></div></div></section>
@@ -25,7 +28,8 @@
 <script src="app.js"></script>
 <script>
 shell('PLAYER');
-let user=null,me=null,currentEvent=null,allPlayers=[],myInvites=[],myTeam=null,myRoster=[],myStats=null,myHistory=[];
+const joinIntent=new URLSearchParams(location.search).get('join')==='1';
+let user=null,me=null,privateData=null,currentEvent=null,allPlayers=[],myInvites=[],myTeam=null,myRoster=[],myStats=null,myHistory=[];
 
 function friendly(e){
   const m=String(e?.message||e||'');
@@ -43,15 +47,16 @@ function friendly(e){
 
 function showAuth(mode='login',message=''){
   authView.style.display='block';onboardView.style.display='none';hubView.style.display='none';
-  authView.innerHTML=`<div class="card">
+  authView.innerHTML=`<div class="card player-auth-card">
+    <div class="entry-status-line"><span>${mode==='signup'?'STEP 01 / 04':'PLAYER ACCESS'}</span><b>${mode==='signup'?'CREATE ACCOUNT':'LOGIN'}</b></div>
     <div class="player-auth-tabs"><button id="loginTab" class="btn ${mode==='login'?'active':'dark'}" type="button">PLAYER LOGIN</button><button id="signupTab" class="btn ${mode==='signup'?'active':'dark'}" type="button">CREATE ACCOUNT</button></div>
-    <div class="kicker">${mode==='login'?'PLAYER LOGIN':'NEW PLAYER'}</div>
-    <h3>${mode==='login'?'WELCOME BACK.':'MAKE YOUR ACCOUNT.'}</h3>
-    <p class="muted">${mode==='login'?'이메일과 비밀번호로 로그인합니다.':'이메일 인증 없이 바로 계정을 만들고 PLAYER CARD 작성으로 넘어갑니다.'}</p>
+    <div class="kicker">${mode==='login'?'PLAYER LOGIN':'GAME #01 ENTRY'}</div>
+    <h3>${mode==='login'?'WELCOME BACK.':'START YOUR ENTRY.'}</h3>
+    <p class="muted">${mode==='login'?'로그인하면 바로 GAME #01 참가 상태로 이동합니다.':'이메일과 비밀번호만 만들면 바로 PLAYER CARD 작성으로 넘어갑니다.'}</p>
     <form id="authForm" class="player-form">
       <div class="full"><label>Email</label><input id="authEmail" type="email" autocomplete="email" required></div>
       <div class="full"><label>Password</label><input id="authPassword" type="password" minlength="8" maxlength="72" autocomplete="${mode==='login'?'current-password':'new-password'}" required></div>
-      <div class="full"><button id="authSubmit" class="btn arcade-primary" type="submit">${mode==='login'?'LOGIN':'CREATE & START'}</button><div id="authMsg" class="notice" ${message?'style="display:block"':''}>${esc(message)}</div></div>
+      <div class="full"><button id="authSubmit" class="btn arcade-primary entry-wide-btn" type="submit">${mode==='login'?'LOGIN & CONTINUE':'CREATE & CONTINUE'}</button><div id="authMsg" class="notice" ${message?'style="display:block"':''}>${esc(message)}</div></div>
     </form>
   </div>`;
   loginTab.onclick=()=>showAuth('login'); signupTab.onclick=()=>showAuth('signup');
@@ -67,13 +72,14 @@ function showAuth(mode='login',message=''){
       const login=await db.auth.signInWithPassword({email,password});
       if(login.error)throw login.error;
       await boot();
-    }catch(x){notice('authMsg',friendly(x),true)}finally{if(document.getElementById('authSubmit')){authSubmit.disabled=false;authSubmit.textContent=mode==='login'?'LOGIN':'CREATE & START'}}
+    }catch(x){notice('authMsg',friendly(x),true)}finally{if(document.getElementById('authSubmit')){authSubmit.disabled=false;authSubmit.textContent=mode==='login'?'LOGIN & CONTINUE':'CREATE & CONTINUE'}}
   };
 }
 
 function showOnboarding(){
   authView.style.display='none';hubView.style.display='none';onboardView.style.display='block';
-  onboardView.innerHTML=`<div class="sectionhead"><div><div class="kicker">STEP 2</div><h2>MAKE YOUR PLAYER CARD.</h2></div><button id="logoutSetup" class="btn dark">LOGOUT</button></div>
+  onboardView.innerHTML=`<div class="sectionhead"><div><div class="kicker">STEP 02 / 04</div><h2>MAKE YOUR PLAYER CARD.</h2></div><button id="logoutSetup" class="btn dark">LOGOUT</button></div>
+  <div class="entry-next-note">PLAYER CARD를 저장하면 바로 파트너 선택 화면으로 넘어갑니다.</div>
   <form id="profileForm" class="card player-form">
     <div><label>Player Name</label><input id="displayName" maxlength="50" placeholder="JAY SEOL" required></div>
     <div><label>Player ID</label><input id="handle" maxlength="24" pattern="[A-Za-z0-9._-]{2,24}" placeholder="jay.seol" required></div>
@@ -84,7 +90,7 @@ function showOnboarding(){
     <div class="full"><label>Phone</label><input id="phone" inputmode="tel" placeholder="010-0000-0000" required></div>
     <div class="full"><label>Player Photo</label><input id="playerPhoto" type="file" accept="image/jpeg,image/png,image/webp" required><div class="hint">GAME #01의 팀 라인업과 FAN PICK에 공개됩니다. 최대 5MB.</div></div>
     <div class="full"><label style="display:flex;gap:8px;align-items:flex-start"><input id="consent" type="checkbox" style="width:auto;margin-top:3px" required><span>TEAM GAMES 참가 운영을 위한 이름·연락처·사진 수집 및 선수 카드 공개에 동의합니다.</span></label></div>
-    <div class="full"><button id="saveProfileBtn" class="btn arcade-primary" type="submit">SAVE PLAYER CARD</button><div id="profileMsg" class="notice"></div></div>
+    <div class="full"><button id="saveProfileBtn" class="btn arcade-primary entry-wide-btn" type="submit">SAVE & PICK PARTNER →</button><div id="profileMsg" class="notice"></div></div>
   </form>`;
   logoutSetup.onclick=logout; profileForm.onsubmit=saveProfile;
 }
@@ -101,21 +107,22 @@ async function saveProfile(e){
     const a=await db.from('tg_athletes').upsert({id:user.id,display_name:displayName.value.trim(),handle:handle.value.trim(),photo_url,gender:gender.value,division:division.value,gym:gym.value.trim()||null,instagram:instagram.value.trim()||null,profile_public:true},{onConflict:'id'});if(a.error)throw a.error;
     const p=await db.from('tg_athlete_private').upsert({athlete_id:user.id,phone:phone.value.trim(),privacy_consent_at:new Date().toISOString()},{onConflict:'athlete_id'});if(p.error)throw p.error;
     await boot();
-  }catch(x){notice('profileMsg',friendly(x),true)}finally{if(document.getElementById('saveProfileBtn')){saveProfileBtn.disabled=false;saveProfileBtn.textContent='SAVE PLAYER CARD'}}
+  }catch(x){notice('profileMsg',friendly(x),true)}finally{if(document.getElementById('saveProfileBtn')){saveProfileBtn.disabled=false;saveProfileBtn.textContent='SAVE & PICK PARTNER →'}}
 }
 
 async function loadHub(){
   currentEvent=await event();
-  const [aq,sq,hq,iq,mq,pq]=await Promise.all([
+  const [aq,prq,sq,hq,iq,mq,pq]=await Promise.all([
     db.from('tg_athletes').select('*').eq('id',user.id).maybeSingle(),
+    db.from('tg_athlete_private').select('phone,privacy_consent_at').eq('athlete_id',user.id).maybeSingle(),
     db.rpc('tg_my_stats',{p_season_slug:'season-2026'}),
     db.rpc('tg_my_history'),
     db.from('tg_team_invites').select('*').eq('event_id',currentEvent.id).order('created_at',{ascending:false}),
     db.from('tg_team_members').select('team_id,athlete_id,member_role').eq('event_id',currentEvent.id).eq('athlete_id',user.id).eq('active',true),
     db.from('tg_athletes').select('id,display_name,handle,photo_url,gym,gender,division').eq('profile_public',true).order('display_name')
   ]);
-  for(const q of [aq,sq,hq,iq,mq,pq])if(q.error)throw q.error;
-  me=aq.data;myStats=sq.data?.[0]||{leaderboard_rank:'—',total_points:0,starts:0,wins:0,podiums:0};myHistory=hq.data||[];myInvites=iq.data||[];allPlayers=(pq.data||[]).filter(x=>x.id!==user.id);myTeam=null;myRoster=[];
+  for(const q of [aq,prq,sq,hq,iq,mq,pq])if(q.error)throw q.error;
+  me=aq.data;privateData=prq.data||{};myStats=sq.data?.[0]||{leaderboard_rank:'—',total_points:0,starts:0,wins:0,podiums:0};myHistory=hq.data||[];myInvites=iq.data||[];allPlayers=(pq.data||[]).filter(x=>x.id!==user.id);myTeam=null;myRoster=[];
   if(mq.data?.length){
     const teamId=mq.data[0].team_id;
     const [tq,rq]=await Promise.all([db.from('tg_teams').select('id,team_name,heat_no,station_no,status').eq('id',teamId).single(),db.from('tg_team_members').select('athlete_id,member_role').eq('team_id',teamId).eq('active',true)]);
@@ -126,7 +133,7 @@ async function loadHub(){
 
 function renderHub(){
   authView.style.display='none';onboardView.style.display='none';hubView.style.display='block';
-  hubView.innerHTML=`<div class="sectionhead"><div><div class="kicker">PLAYER HUB // PRIVATE</div><h2>${esc(me.display_name)}</h2></div><div class="row-actions"><a class="btn dark" href="player.html?id=${encodeURIComponent(me.id)}">GAME #01 CARD</a><button id="logoutBtn" class="btn dark">LOGOUT</button></div></div>
+  hubView.innerHTML=`<div class="sectionhead"><div><div class="kicker">PLAYER HUB // PRIVATE</div><h2>${esc(me.display_name)}</h2></div><div class="row-actions"><button id="editProfileBtn" class="btn dark">EDIT PROFILE</button><a class="btn dark" href="player.html?id=${encodeURIComponent(me.id)}">GAME #01 CARD</a><button id="logoutBtn" class="btn dark">LOGOUT</button></div></div>
   <div class="player-grid">
     <div>
       <div class="player-card"><div class="player-card-photo"><img src="${esc(me.photo_url)}" alt="${esc(me.display_name)}"></div><div class="player-card-body"><div class="player-card-rank">PRIVATE PLAYER DATA</div><div class="player-card-name">${esc(me.display_name)}</div><div class="player-card-handle">@${esc(me.handle)}</div><div class="player-card-meta"><span class="player-chip">${esc(me.gender.toUpperCase())}</span><span class="player-chip">${esc(me.division)}</span>${me.gym?`<span class="player-chip">${esc(me.gym)}</span>`:''}</div><div class="player-stats"><div class="player-stat"><span>MY RANK</span><strong>#${myStats.leaderboard_rank}</strong></div><div class="player-stat"><span>PTS</span><strong>${myStats.total_points}</strong></div><div class="player-stat"><span>STARTS</span><strong>${myStats.starts}</strong></div><div class="player-stat"><span>PODIUMS</span><strong>${myStats.podiums}</strong></div></div></div></div>
@@ -134,7 +141,47 @@ function renderHub(){
     <div id="gameHub"></div>
   </div>
   <section class="admin-block" style="margin-top:32px"><div class="sectionhead"><div><div class="kicker">PRIVATE RECORD</div><h2>MY GAME LOG</h2></div><p>본인에게만 표시됩니다.</p></div><div class="history-list" id="historyList"></div></section>`;
-  logoutBtn.onclick=logout;renderGameHub();renderHistory();
+  editProfileBtn.onclick=showSettings;logoutBtn.onclick=logout;renderGameHub();renderHistory();
+}
+
+function showSettings(){
+  hubView.innerHTML=`<div class="settings-shell">
+    <div class="sectionhead"><div><div class="kicker">PLAYER SETTINGS</div><h2>EDIT PROFILE.</h2></div><button id="closeSettings" class="btn dark">BACK</button></div>
+    <div class="settings-current"><img src="${esc(me.photo_url)}" alt="${esc(me.display_name)}"><div><b>${esc(me.display_name)}</b><span>@${esc(me.handle)}</span><small>${esc(user.email||'')}</small></div></div>
+    <form id="settingsForm" class="card player-form settings-form">
+      <div><label>Player Name</label><input id="setName" maxlength="50" value="${esc(me.display_name)}" required></div>
+      <div><label>Player ID</label><input id="setHandle" maxlength="24" pattern="[A-Za-z0-9._-]{2,24}" value="${esc(me.handle)}" required></div>
+      <div><label>Gender</label><select id="setGender"><option value="male" ${me.gender==='male'?'selected':''}>MALE</option><option value="female" ${me.gender==='female'?'selected':''}>FEMALE</option></select></div>
+      <div><label>Division</label><select id="setDivision"><option ${me.division==='OPEN'?'selected':''}>OPEN</option><option ${me.division==='PRO'?'selected':''}>PRO</option></select></div>
+      <div><label>Gym / Crew</label><input id="setGym" maxlength="60" value="${esc(me.gym||'')}"></div>
+      <div><label>Instagram</label><input id="setInstagram" maxlength="40" value="${esc(me.instagram||'')}"></div>
+      <div class="full"><label>Phone</label><input id="setPhone" inputmode="tel" value="${esc(privateData?.phone||'')}" required></div>
+      <div class="full"><label>Change Player Photo · Optional</label><input id="setPhoto" type="file" accept="image/jpeg,image/png,image/webp"><div class="hint">사진을 바꾸지 않으려면 비워두면 됩니다. 최대 5MB.</div></div>
+      <div class="full settings-divider"></div>
+      <div class="full"><label>New Password · Optional</label><input id="setPassword" type="password" minlength="8" maxlength="72" placeholder="변경할 때만 입력"><div class="hint">입력하지 않으면 기존 비밀번호가 유지됩니다.</div></div>
+      <div class="full"><button id="saveSettingsBtn" class="btn arcade-primary entry-wide-btn" type="submit">SAVE CHANGES</button><div id="settingsMsg" class="notice"></div></div>
+    </form>
+  </div>`;
+  closeSettings.onclick=renderHub;settingsForm.onsubmit=saveSettings;
+}
+
+async function saveSettings(e){
+  e.preventDefault();saveSettingsBtn.disabled=true;saveSettingsBtn.textContent='SAVING…';
+  try{
+    let photo_url=me.photo_url;
+    const file=setPhoto.files[0];
+    if(file){
+      if(file.size>5*1024*1024)throw new Error('사진은 5MB 이하로 업로드해 주세요.');
+      if(!['image/jpeg','image/png','image/webp'].includes(file.type))throw new Error('JPG, PNG, WEBP만 업로드할 수 있습니다.');
+      const ext=(file.name.split('.').pop()||'jpg').toLowerCase();const path=`${user.id}/profile.${ext}`;
+      const up=await db.storage.from('tg-athlete-photos').upload(path,file,{upsert:true,contentType:file.type});if(up.error)throw up.error;
+      photo_url=db.storage.from('tg-athlete-photos').getPublicUrl(path).data.publicUrl+`?v=${Date.now()}`;
+    }
+    const a=await db.from('tg_athletes').update({display_name:setName.value.trim(),handle:setHandle.value.trim(),photo_url,gender:setGender.value,division:setDivision.value,gym:setGym.value.trim()||null,instagram:setInstagram.value.trim()||null}).eq('id',user.id);if(a.error)throw a.error;
+    const p=await db.from('tg_athlete_private').upsert({athlete_id:user.id,phone:setPhone.value.trim(),privacy_consent_at:privateData?.privacy_consent_at||new Date().toISOString()},{onConflict:'athlete_id'});if(p.error)throw p.error;
+    if(setPassword.value){const pw=await db.auth.updateUser({password:setPassword.value});if(pw.error)throw pw.error}
+    await loadHub();renderHub();
+  }catch(x){notice('settingsMsg',friendly(x),true)}finally{if(document.getElementById('saveSettingsBtn')){saveSettingsBtn.disabled=false;saveSettingsBtn.textContent='SAVE CHANGES'}}
 }
 
 function renderHistory(){
@@ -150,10 +197,10 @@ function inviteRow(inv,incoming){
 function renderGameHub(){
   if(myTeam){
     const mate=myRoster.find(x=>x.id!==user.id);
-    gameHub.innerHTML=`<div class="team-lock"><div class="kicker">GAME #01 // LOCKED IN</div><div class="team-lock-top"><div><h3>${esc(myTeam.team_name)}</h3><p class="muted">${esc(me.display_name)} × ${esc(mate?.display_name||'PARTNER')}</p></div><div class="slot-display">H${myTeam.heat_no} · S${myTeam.station_no}</div></div></div>`;return;
+    gameHub.innerHTML=`<div class="entry-progress-card locked"><div class="entry-progress-label">STEP 04 / 04</div><strong>LOCKED IN</strong></div><div class="team-lock"><div class="kicker">GAME #01 // ENTRY COMPLETE</div><div class="team-lock-top"><div><h3>${esc(myTeam.team_name)}</h3><p class="muted">${esc(me.display_name)} × ${esc(mate?.display_name||'PARTNER')}</p></div><div class="slot-display">H${myTeam.heat_no} · S${myTeam.station_no}</div></div></div>`;return;
   }
   const incoming=myInvites.filter(x=>x.invitee_id===user.id&&x.status==='pending');const outgoing=myInvites.filter(x=>x.captain_id===user.id&&x.status==='pending');
-  gameHub.innerHTML=`<div class="player-panel"><div class="kicker">GAME #01</div><h3>CHOOSE YOUR PARTNER.</h3><p class="muted">한 명이 팀 이름을 정하고 다른 PLAYER에게 초대합니다. 상대가 ACCEPT하면 참가가 확정됩니다.</p><div style="margin-top:18px"><label>Team Name</label><input id="teamNameInput" maxlength="60" placeholder="YOUR TEAM NAME"><label style="margin-top:12px">Find Player</label><input id="playerSearch" type="search" placeholder="이름 / PLAYER ID / GYM"><div id="playerSearchList" class="player-search-list" style="margin-top:10px"></div></div></div><div class="player-panel" style="margin-top:14px"><div class="kicker">INCOMING</div><h3>INVITES</h3><div class="invite-list" id="incomingList"></div></div><div class="player-panel" style="margin-top:14px"><div class="kicker">OUTGOING</div><h3>YOUR INVITE</h3><div class="invite-list" id="outgoingList"></div></div>`;
+  gameHub.innerHTML=`<div class="entry-progress-card"><div class="entry-progress-label">STEP 03 / 04</div><strong>PICK YOUR PARTNER</strong><small>상대가 ACCEPT하면 참가가 자동 확정됩니다.</small></div><div class="player-panel"><div class="kicker">GAME #01 ENTRY</div><h3>CHOOSE YOUR PARTNER.</h3><p class="muted">팀 이름을 정하고 다른 PLAYER에게 초대하세요.</p><div style="margin-top:18px"><label>Team Name</label><input id="teamNameInput" maxlength="60" placeholder="YOUR TEAM NAME"><label style="margin-top:12px">Find Player</label><input id="playerSearch" type="search" placeholder="이름 / PLAYER ID / GYM"><div id="playerSearchList" class="player-search-list" style="margin-top:10px"></div></div></div><div class="player-panel" style="margin-top:14px"><div class="kicker">INCOMING</div><h3>INVITES</h3><div class="invite-list" id="incomingList"></div></div><div class="player-panel" style="margin-top:14px"><div class="kicker">OUTGOING</div><h3>YOUR INVITE</h3><div class="invite-list" id="outgoingList"></div></div>`;
   playerSearch.oninput=renderPlayerSearch;renderPlayerSearch();incomingList.innerHTML=incoming.map(x=>inviteRow(x,true)).join('')||'<div class="muted">NO INVITES.</div>';outgoingList.innerHTML=outgoing.map(x=>inviteRow(x,false)).join('')||'<div class="muted">NO PENDING INVITE.</div>';
 }
 
@@ -166,16 +213,16 @@ window.sendInvite=async id=>{try{const name=teamNameInput.value.trim();if(!name)
 window.respondInvite=async(id,accept)=>{try{const r=await db.rpc('tg_respond_team_invite',{p_invite_id:id,p_accept:accept});if(r.error)throw r.error;await loadHub();renderHub()}catch(e){alert(friendly(e))}};
 window.cancelInvite=async id=>{try{const r=await db.rpc('tg_cancel_team_invite',{p_invite_id:id});if(r.error)throw r.error;await loadHub();renderHub()}catch(e){alert(friendly(e))}};
 
-async function logout(){await db.auth.signOut();user=null;me=null;showAuth('login')}
+async function logout(){await db.auth.signOut();user=null;me=null;privateData=null;showAuth(joinIntent?'signup':'login')}
 async function boot(){
   const {data:{user:u}}=await db.auth.getUser();user=u||null;
-  if(!user){showAuth('login');return}
+  if(!user){showAuth(joinIntent?'signup':'login');return}
   const q=await db.from('tg_athletes').select('id').eq('id',user.id).maybeSingle();if(q.error)throw q.error;
   if(!q.data){showOnboarding();return}
   await loadHub();renderHub();
 }
 
-boot().catch(e=>showAuth('login',friendly(e)));
+boot().catch(e=>showAuth(joinIntent?'signup':'login',friendly(e)));
 </script>
 </body>
 </html>
