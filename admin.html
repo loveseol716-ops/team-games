@@ -1,1 +1,287 @@
-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ADMIN · TEAM GAMES</title><link rel="stylesheet" href="styles.css"></head><body><div id="nav"></div><main><section class="section"><div class="container"><div class="sectionhead"><div><div class="kicker">ADMIN</div><h2>EVENT CONTROL</h2></div></div><div id="loginBox" class="card formgrid"><div class="full"><label>Email</label><input id="email" type="email"></div><div class="full"><label>Password</label><input id="pass" type="password"></div><div class="full"><button id="login" class="btn">LOGIN</button><div id="adminMsg" class="notice"></div></div></div><div id="control" style="display:none"><div class="card"><table><thead><tr><th>TEAM</th><th>TIME</th><th>REPS</th><th>STATUS</th><th></th></tr></thead><tbody id="rows"></tbody></table></div></div></div></section></main><div id="footer"></div><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script src="app.js"></script><script>shell("ADMIN");login.onclick=async()=>{const {error}=await db.auth.signInWithPassword({email:email.value,password:pass.value});if(error)return notice('adminMsg',error.message,true);loginBox.style.display='none';control.style.display='block';load()};async function load(){const ts=await teams(),ev=await event(),r=await db.from('tg_results').select('*').eq('event_id',ev.id),m={};(r.data||[]).forEach(x=>m[x.team_id]=x);rows.innerHTML=ts.map(t=>{const x=m[t.id]||{};const tm=x.finish_seconds!=null?`${Math.floor(x.finish_seconds/60)}:${String(Math.floor(x.finish_seconds%60)).padStart(2,'0')}`:'';return `<tr><td>${t.team_name}</td><td><input id="time-${t.id}" value="${tm}" placeholder="07:42"></td><td><input id="reps-${t.id}" type="number" value="${x.reps_completed??''}"></td><td><select id="status-${t.id}"><option>Not Started</option><option>Running</option><option>Finished</option><option>Time Cap</option></select></td><td><button class="btn dark" onclick="save('${t.id}')">SAVE</button></td></tr>`}).join('')}window.save=async id=>{try{const ev=await event(),v=document.getElementById(`time-${id}`).value.trim(),p=v?v.split(':').map(Number):[],sec=p.length===2?p[0]*60+p[1]:null,reps=document.getElementById(`reps-${id}`).value,status=document.getElementById(`status-${id}`).value;const r=await db.from('tg_results').upsert({event_id:ev.id,team_id:id,finish_seconds:sec,reps_completed:reps?Number(reps):null,status,updated_at:new Date().toISOString()},{onConflict:'event_id,team_id'});if(r.error)throw r.error;await rank(ev.id);load()}catch(e){alert(e.message)}};async function rank(eventId){const q=await db.from('tg_results').select('id,status,finish_seconds,reps_completed').eq('event_id',eventId);if(q.error)throw q.error;const a=q.data.filter(x=>['Finished','Time Cap'].includes(x.status)).sort((x,y)=>{if(x.status!==y.status)return x.status==='Finished'?-1:1;return x.status==='Finished'?(x.finish_seconds??99999)-(y.finish_seconds??99999):(y.reps_completed??-1)-(x.reps_completed??-1)});for(let i=0;i<a.length;i++){const u=await db.from('tg_results').update({rank:i+1}).eq('id',a[i].id);if(u.error)throw u.error}}</script></body></html>
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ADMIN · TEAM GAMES</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="nav"></div>
+<main>
+  <section class="section admin-section">
+    <div class="container">
+      <div class="sectionhead admin-head">
+        <div>
+          <div class="kicker">ADMIN</div>
+          <h2>EVENT CONTROL</h2>
+        </div>
+        <div id="sessionTools" class="admin-session" style="display:none">
+          <span id="sessionEmail" class="muted"></span>
+          <button id="logoutBtn" class="btn dark" type="button">LOGOUT</button>
+        </div>
+      </div>
+
+      <div id="loginBox" class="card admin-login">
+        <div class="admin-login-copy">
+          <div class="kicker">PRIVATE ACCESS</div>
+          <div class="big">TEAM GAMES ADMIN</div>
+          <p class="muted">등록된 TEAM GAMES 관리자 계정으로 로그인하세요.</p>
+        </div>
+        <div class="formgrid">
+          <div class="full"><label>Email</label><input id="email" type="email" autocomplete="email"></div>
+          <div class="full"><label>Password</label><input id="pass" type="password" autocomplete="current-password"></div>
+          <div class="full"><button id="login" class="btn" type="button">LOGIN</button><div id="adminMsg" class="notice"></div></div>
+        </div>
+      </div>
+
+      <div id="control" style="display:none">
+        <div id="summary" class="admin-summary"></div>
+
+        <section class="admin-block">
+          <div class="admin-block-head">
+            <div>
+              <div class="kicker">REGISTRATION</div>
+              <h3>TEAM MANAGEMENT</h3>
+            </div>
+            <div class="admin-filters">
+              <input id="teamSearch" type="search" placeholder="팀명 / 선수 / 연락처 검색">
+              <select id="statusFilter">
+                <option value="all">ALL STATUS</option>
+                <option value="confirmed">APPROVED</option>
+                <option value="cancelled">CANCELLED</option>
+              </select>
+            </div>
+          </div>
+          <div id="teamAdminMsg" class="notice"></div>
+          <div id="adminTeams" class="admin-team-grid"></div>
+        </section>
+
+        <section class="admin-block">
+          <div class="admin-block-head">
+            <div>
+              <div class="kicker">LIVE CONTROL</div>
+              <h3>RESULTS</h3>
+            </div>
+            <p class="muted">승인된 팀만 경기 결과 입력 대상에 표시됩니다.</p>
+          </div>
+          <div class="card admin-results-wrap">
+            <div class="table-scroll">
+              <table>
+                <thead><tr><th>TEAM</th><th>HEAT</th><th>TIME</th><th>REPS</th><th>STATUS</th><th></th></tr></thead>
+                <tbody id="resultRows"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </section>
+</main>
+<div id="footer"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+<script>
+shell("ADMIN");
+
+let allAdminTeams=[];
+let currentEvent=null;
+
+const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+const fmtPhone=v=>String(v||'').replace(/\s+/g,' ').trim();
+const statusLabel=s=>s==='confirmed'?'APPROVED':'CANCELLED';
+
+function adminError(x){
+  const m=String(x?.message||x||'');
+  if(m.includes('ADMIN_ONLY')) return 'TEAM GAMES 관리자 권한이 없는 계정입니다.';
+  if(m.includes('DUPLICATE_PHONE')) return '다른 활성 팀에서 이미 사용 중인 연락처입니다.';
+  if(m.includes('SLOT_TAKEN')||m.includes('tg_teams_confirmed_slot_unique')) return '해당 Heat / Station은 이미 다른 승인 팀이 사용 중입니다.';
+  if(m.includes('INVALID_HEAT')) return 'Heat는 1~6 사이로 설정해 주세요.';
+  if(m.includes('INVALID_STATION')) return 'Station은 1 또는 2만 가능합니다.';
+  return m || '처리 중 오류가 발생했습니다.';
+}
+
+async function adminTeams(){
+  const q=await db.rpc('tg_admin_list_teams',{p_event_slug:C.eventSlug});
+  if(q.error) throw q.error;
+  return q.data||[];
+}
+
+async function enterAdmin(){
+  try{
+    currentEvent=await event();
+    allAdminTeams=await adminTeams();
+    const {data:{user}}=await db.auth.getUser();
+    loginBox.style.display='none';
+    control.style.display='block';
+    sessionTools.style.display='flex';
+    sessionEmail.textContent=user?.email||'ADMIN';
+    renderSummary();
+    renderTeamManagement();
+    await loadResults();
+  }catch(e){
+    control.style.display='none';
+    sessionTools.style.display='none';
+    loginBox.style.display='block';
+    notice('adminMsg',adminError(e),true);
+  }
+}
+
+function renderSummary(){
+  const approved=allAdminTeams.filter(t=>t.status==='confirmed').length;
+  const cancelled=allAdminTeams.filter(t=>t.status==='cancelled').length;
+  const max=currentEvent?.max_teams||12;
+  summary.innerHTML=`
+    <div class="admin-stat"><span>APPROVED</span><strong>${approved}</strong><small>/ ${max} TEAMS</small></div>
+    <div class="admin-stat"><span>CANCELLED</span><strong>${cancelled}</strong><small>TEAMS</small></div>
+    <div class="admin-stat"><span>OPEN SLOTS</span><strong>${Math.max(0,max-approved)}</strong><small>AVAILABLE</small></div>
+    <div class="admin-stat"><span>REGISTRATION</span><strong class="admin-stat-word ${currentEvent?.registration_open?'is-open':'is-closed'}">${currentEvent?.registration_open?'OPEN':'CLOSED'}</strong><small>TEAM GAMES #01</small></div>`;
+}
+
+function renderTeamManagement(){
+  const q=teamSearch.value.trim().toLowerCase();
+  const sf=statusFilter.value;
+  const list=allAdminTeams.filter(t=>{
+    if(sf!=='all'&&t.status!==sf) return false;
+    if(!q) return true;
+    return [t.team_name,t.player_1,t.player_2,t.phone].some(v=>String(v||'').toLowerCase().includes(q));
+  });
+
+  if(!list.length){
+    adminTeamsEl().innerHTML=`<div class="card admin-empty">조건에 맞는 팀이 없습니다.</div>`;
+    return;
+  }
+
+  adminTeamsEl().innerHTML=list.map(t=>`
+    <article class="admin-team-card ${t.status==='cancelled'?'is-cancelled':''}" data-team="${t.id}">
+      <div class="admin-team-photo">
+        ${t.photo_url?`<img src="${esc(t.photo_url)}" alt="${esc(t.team_name)}">`:'<div class="admin-photo-empty">NO PHOTO</div>'}
+        <div class="admin-status-badge ${t.status==='confirmed'?'approved':'cancelled'}">${statusLabel(t.status)}</div>
+      </div>
+      <div class="admin-team-body">
+        <div class="admin-team-title-row">
+          <div>
+            <div class="entry-label">TEAM</div>
+            <h4>${esc(t.team_name)}</h4>
+          </div>
+          <div class="admin-slot-mini">H${t.heat_no} · S${t.station_no}</div>
+        </div>
+        <div class="admin-contact"><a href="tel:${esc(fmtPhone(t.phone))}">${esc(fmtPhone(t.phone))}</a></div>
+        <div class="admin-edit-grid">
+          <div class="full"><label>Team Name</label><input id="team-${t.id}" value="${esc(t.team_name)}" maxlength="60"></div>
+          <div><label>Player 1</label><input id="p1-${t.id}" value="${esc(t.player_1)}" maxlength="50"></div>
+          <div><label>Player 2</label><input id="p2-${t.id}" value="${esc(t.player_2)}" maxlength="50"></div>
+          <div class="full"><label>대표 연락처</label><input id="phone-${t.id}" value="${esc(t.phone)}" inputmode="tel"></div>
+          <div><label>Heat</label><input id="heat-${t.id}" type="number" min="1" max="6" value="${t.heat_no}"></div>
+          <div><label>Station</label><select id="station-${t.id}"><option value="1" ${t.station_no===1?'selected':''}>1</option><option value="2" ${t.station_no===2?'selected':''}>2</option></select></div>
+          <div class="full"><label>승인 상태</label><select id="teamstatus-${t.id}"><option value="confirmed" ${t.status==='confirmed'?'selected':''}>APPROVED</option><option value="cancelled" ${t.status==='cancelled'?'selected':''}>CANCELLED</option></select></div>
+        </div>
+        <div class="admin-team-actions">
+          ${t.photo_url?`<a class="btn dark" href="${esc(t.photo_url)}" target="_blank" rel="noopener">VIEW PHOTO</a>`:''}
+          <button class="btn" type="button" onclick="saveTeam('${t.id}')">SAVE TEAM</button>
+        </div>
+      </div>
+    </article>`).join('');
+}
+
+function adminTeamsEl(){return document.getElementById('adminTeams')}
+
+window.saveTeam=async id=>{
+  const btn=document.querySelector(`[data-team="${id}"] .admin-team-actions button`);
+  const original=btn?.textContent||'SAVE TEAM';
+  try{
+    if(btn){btn.disabled=true;btn.textContent='SAVING…'}
+    const args={
+      p_team_id:id,
+      p_team_name:document.getElementById(`team-${id}`).value.trim(),
+      p_player_1:document.getElementById(`p1-${id}`).value.trim(),
+      p_player_2:document.getElementById(`p2-${id}`).value.trim(),
+      p_phone:document.getElementById(`phone-${id}`).value.trim(),
+      p_heat_no:Number(document.getElementById(`heat-${id}`).value),
+      p_station_no:Number(document.getElementById(`station-${id}`).value),
+      p_status:document.getElementById(`teamstatus-${id}`).value
+    };
+    const r=await db.rpc('tg_admin_update_team',args);
+    if(r.error) throw r.error;
+    notice('teamAdminMsg','팀 정보가 저장되었습니다.');
+    allAdminTeams=await adminTeams();
+    renderSummary();
+    renderTeamManagement();
+    await loadResults();
+  }catch(e){
+    notice('teamAdminMsg',adminError(e),true);
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent=original}
+  }
+};
+
+async function loadResults(){
+  const approved=allAdminTeams.filter(t=>t.status==='confirmed');
+  const r=await db.from('tg_results').select('*').eq('event_id',currentEvent.id);
+  if(r.error) throw r.error;
+  const map={};(r.data||[]).forEach(x=>map[x.team_id]=x);
+  resultRows.innerHTML=approved.map(t=>{
+    const x=map[t.id]||{};
+    const tm=x.finish_seconds!=null?`${Math.floor(x.finish_seconds/60)}:${String(Math.floor(x.finish_seconds%60)).padStart(2,'0')}`:'';
+    return `<tr>
+      <td><strong>${esc(t.team_name)}</strong><div class="table-sub">${esc(t.player_1)} × ${esc(t.player_2)}</div></td>
+      <td>H${t.heat_no} · S${t.station_no}</td>
+      <td><input id="time-${t.id}" value="${tm}" placeholder="07:42"></td>
+      <td><input id="reps-${t.id}" type="number" value="${x.reps_completed??''}"></td>
+      <td><select id="status-${t.id}"><option ${x.status==='Not Started'?'selected':''}>Not Started</option><option ${x.status==='Running'?'selected':''}>Running</option><option ${x.status==='Finished'?'selected':''}>Finished</option><option ${x.status==='Time Cap'?'selected':''}>Time Cap</option></select></td>
+      <td><button class="btn dark" type="button" onclick="saveResult('${t.id}')">SAVE</button></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="6" class="muted">승인된 팀이 없습니다.</td></tr>';
+}
+
+window.saveResult=async id=>{
+  try{
+    const v=document.getElementById(`time-${id}`).value.trim();
+    const p=v?v.split(':').map(Number):[];
+    const sec=p.length===2?p[0]*60+p[1]:null;
+    const reps=document.getElementById(`reps-${id}`).value;
+    const status=document.getElementById(`status-${id}`).value;
+    const r=await db.from('tg_results').upsert({event_id:currentEvent.id,team_id:id,finish_seconds:sec,reps_completed:reps?Number(reps):null,status,updated_at:new Date().toISOString()},{onConflict:'event_id,team_id'});
+    if(r.error) throw r.error;
+    await rank(currentEvent.id);
+    await loadResults();
+  }catch(e){alert(adminError(e))}
+};
+
+async function rank(eventId){
+  const q=await db.from('tg_results').select('id,status,finish_seconds,reps_completed').eq('event_id',eventId);
+  if(q.error) throw q.error;
+  const a=(q.data||[]).filter(x=>['Finished','Time Cap'].includes(x.status)).sort((x,y)=>{
+    if(x.status!==y.status)return x.status==='Finished'?-1:1;
+    return x.status==='Finished'?(x.finish_seconds??99999)-(y.finish_seconds??99999):(y.reps_completed??-1)-(x.reps_completed??-1)
+  });
+  for(let i=0;i<a.length;i++){
+    const u=await db.from('tg_results').update({rank:i+1}).eq('id',a[i].id);
+    if(u.error) throw u.error;
+  }
+}
+
+login.onclick=async()=>{
+  login.disabled=true;
+  login.textContent='LOGGING IN…';
+  try{
+    const {error}=await db.auth.signInWithPassword({email:email.value.trim(),password:pass.value});
+    if(error) throw error;
+    await enterAdmin();
+  }catch(e){notice('adminMsg',adminError(e),true)}
+  finally{login.disabled=false;login.textContent='LOGIN'}
+};
+
+logoutBtn.onclick=async()=>{await db.auth.signOut();location.reload()};
+teamSearch.oninput=renderTeamManagement;
+statusFilter.onchange=renderTeamManagement;
+pass.addEventListener('keydown',e=>{if(e.key==='Enter')login.click()});
+
+(async()=>{
+  const {data:{session}}=await db.auth.getSession();
+  if(session) await enterAdmin();
+})();
+</script>
+</body>
+</html>
