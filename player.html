@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>PLAYER · TEAM GAMES</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="athlete.css">
+</head>
+<body>
+<div id="nav"></div>
+<main>
+  <section class="section player-shell">
+    <div class="container">
+      <div id="profile"><div class="card muted">LOADING PLAYER…</div></div>
+    </div>
+  </section>
+</main>
+<div id="footer"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+<script>
+shell('RANKING');
+
+async function init(){
+  const id=new URLSearchParams(location.search).get('id');
+  if(!id){profile.innerHTML='<div class="card notice err" style="display:block">PLAYER NOT FOUND.</div>';return}
+  try{
+    const [{data:a,error},lb,{data:history,error:herr}]=await Promise.all([
+      db.from('tg_athletes').select('id,display_name,handle,photo_url,gym,instagram,gender,division').eq('id',id).single(),
+      leaderboard(),
+      db.rpc('tg_athlete_history',{p_athlete_id:id})
+    ]);
+    if(error)throw error;if(herr)throw herr;
+    const s=lb.find(x=>x.athlete_id===id)||{leaderboard_rank:'—',total_points:0,starts:0,wins:0,podiums:0};
+    const rows=(history||[]).map(x=>`
+      <div class="history-row">
+        <div class="mini-avatar"><div class="fallback" style="height:100%;display:grid;place-items:center;color:#777">#${x.place}</div></div>
+        <div><div class="row-title">${esc(x.event_title)} · ${esc(x.team_name)}</div><div class="row-sub">WITH ${esc(x.partner_name||'—')} · ${new Date(x.event_date).toLocaleDateString('ko-KR')}</div></div>
+        <div class="row-actions"><span class="player-chip">#${x.place}</span><span class="player-chip">${x.points} PTS</span></div>
+      </div>`).join('')||'<div class="card muted">아직 공식 경기 기록이 없습니다.</div>';
+    profile.innerHTML=`
+      <div class="public-player-head">
+        <div class="public-player-photo"><img src="${esc(a.photo_url)}" alt="${esc(a.display_name)}"></div>
+        <div class="public-player-copy">
+          <div class="arcade-eyebrow">PLAYER CARD // 2026 SEASON</div>
+          <h1>${esc(a.display_name)}</h1>
+          <div class="handle">@${esc(a.handle)}</div>
+          <div class="player-card-meta">
+            <span class="player-chip">${esc(a.gender.toUpperCase())}</span><span class="player-chip">${esc(a.division)}</span>${a.gym?`<span class="player-chip">${esc(a.gym)}</span>`:''}${a.instagram?`<a class="player-chip" href="https://instagram.com/${esc(a.instagram.replace('@',''))}" target="_blank" rel="noopener">${esc(a.instagram)}</a>`:''}
+          </div>
+          <div class="public-stats">
+            <div class="public-stat"><span>RANK</span><b>#${s.leaderboard_rank}</b></div>
+            <div class="public-stat"><span>POINTS</span><b>${s.total_points}</b></div>
+            <div class="public-stat"><span>STARTS</span><b>${s.starts}</b></div>
+            <div class="public-stat"><span>PODIUMS</span><b>${s.podiums}</b></div>
+          </div>
+        </div>
+      </div>
+      <section class="admin-block" style="margin-top:42px">
+        <div class="sectionhead"><div><div class="kicker">GAME LOG</div><h2>RUN IT BACK.</h2></div><p>${s.wins} WIN${Number(s.wins)===1?'':'S'} · ${s.podiums} PODIUMS</p></div>
+        <div class="history-list">${rows}</div>
+      </section>`;
+  }catch(e){profile.innerHTML=`<div class="card notice err" style="display:block">${esc(e.message)}</div>`}
+}
+init();
+</script>
+</body>
+</html>
