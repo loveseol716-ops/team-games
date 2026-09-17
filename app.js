@@ -5,7 +5,7 @@ function esc(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&l
 
 function nav(active){
   const p=[
-    ['HOME','index.html'],['GAME','event.html'],['RANKING','ranking.html'],['TEAMS','teams.html'],
+    ['HOME','index.html'],['GAME','event.html'],['TEAMS','teams.html'],
     ['FAN PICK','fanpick.html'],['LIVE','live.html'],['PLAYER','athlete.html']
   ];
   return `<header class="nav"><div class="container navin"><a class="brand" href="index.html">TEAM GAMES</a><nav class="links">${p.map(([n,h])=>`<a class="${active===n?'active':''}" href="${h}">${n}</a>`).join('')}</nav><a class="cta arcade-cta" href="fanpick.html">MAKE YOUR PICK</a></div></header>`;
@@ -13,7 +13,7 @@ function nav(active){
 
 function shell(active){
   document.querySelector('#nav').innerHTML=nav(active);
-  document.querySelector('#footer').innerHTML=`<footer class="footer"><div class="container arcade-footer"><span>TEAM GAMES // STAGE 01</span><span>OCT 31, 2026 · SEOUL</span><span>PLAY · PICK · CLIMB</span></div></footer>`;
+  document.querySelector('#footer').innerHTML=`<footer class="footer"><div class="container arcade-footer"><span>TEAM GAMES // STAGE 01</span><span>OCT 31, 2026 · SEOUL</span><span>PLAY · PICK · WATCH</span></div></footer>`;
 }
 
 function notice(id,msg,err=false){const e=document.getElementById(id);if(!e)return;e.textContent=msg;e.style.display='block';e.classList.toggle('err',err)}
@@ -21,7 +21,6 @@ function token(){let t=localStorage.getItem('tg_device_token');if(!t){t=crypto.r
 
 async function event(){const {data,error}=await db.from('tg_events').select('*').eq('slug',C.eventSlug).single();if(error)throw error;return data}
 async function teams(){const e=await event();const {data,error}=await db.from('tg_teams').select('id,event_id,team_name,player_1,player_2,photo_url,heat_no,station_no,status,created_at').eq('event_id',e.id).eq('status','confirmed').order('created_at');if(error)throw error;return data||[]}
-async function leaderboard(){const {data,error}=await db.rpc('tg_leaderboard',{p_season_slug:'season-2026'});if(error)throw error;return data||[]}
 
 async function rosterMap(teamIds){
   const out={};
