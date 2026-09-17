@@ -1,1 +1,141 @@
-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FAN PICK · TEAM GAMES</title><link rel="stylesheet" href="styles.css"></head><body><div id="nav"></div><main><section class="section"><div class="container"><div class="sectionhead"><div><div class="kicker">FAN PICK</div><h2>WHO YOU GOT?</h2></div><p>팀 사진과 이름만 보고 선택하세요.</p></div><div class="grid g2"><div class="card"><div class="kicker">WINNER PICK</div><div id="winner" class="pickgrid"></div><button id="saveWin" class="btn">SAVE WINNER PICK</button><div id="winMsg" class="notice"></div></div><div class="card"><div class="kicker">PERFECT PODIUM</div><div style="display:grid;gap:10px;margin:15px 0"><select id="p1"><option value="">1st Place</option></select><select id="p2"><option value="">2nd Place</option></select><select id="p3"><option value="">3rd Place</option></select></div><button id="savePod" class="btn">SAVE PODIUM PICK</button><div id="podMsg" class="notice"></div></div></div></div></section><section class="section"><div class="container"><div class="sectionhead"><div><div class="kicker">LIVE SENTIMENT</div><h2>FAN FAVORITES</h2></div></div><div id="bars" class="card"></div></div></section></main><div id="footer"></div><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script src="app.js"></script><script>shell("FAN PICK");let ts=[];async function bars(){const ev=await event(),q=await db.from('tg_pick_totals').select('team_id,winner_count').eq('event_id',ev.id);if(q.error)throw q.error;const m={};q.data.forEach(x=>m[x.team_id]=x.winner_count||0);const total=Object.values(m).reduce((a,b)=>a+b,0)||1;document.getElementById('bars').innerHTML=ts.map(t=>{const p=Math.round((m[t.id]||0)/total*100);return `<div class="barrow"><div class="bartop"><span>${t.team_name}</span><span>${p}%</span></div><div class="bar"><div style="width:${p}%"></div></div></div>`}).join('')}async function init(){ts=await teams();winner.innerHTML=ts.map((t,i)=>`<button class="pick" data-id="${t.id}">${String(i+1).padStart(2,'0')} · ${t.team_name}</button>`).join('');winner.querySelectorAll('.pick').forEach(b=>b.onclick=()=>{winner.querySelectorAll('.pick').forEach(x=>x.classList.remove('active'));b.classList.add('active');winner.dataset.selected=b.dataset.id});[p1,p2,p3].forEach(s=>s.innerHTML+=ts.map(t=>`<option value="${t.id}">${t.team_name}</option>`).join(''));await bars()}saveWin.onclick=async()=>{try{if(!winner.dataset.selected)throw new Error('팀을 선택해주세요.');const ev=await event(),r=await db.from('tg_winner_picks').insert({event_id:ev.id,team_id:winner.dataset.selected,voter_token:token()});if(r.error)throw r.error;notice('winMsg','Winner Pick 저장 완료.');bars()}catch(e){notice('winMsg',e.code==='23505'?'이미 참여했습니다.':e.message,true)}};savePod.onclick=async()=>{try{const ids=[p1.value,p2.value,p3.value];if(ids.some(x=>!x)||new Set(ids).size!==3)throw new Error('서로 다른 3팀을 선택해주세요.');const ev=await event(),r=await db.from('tg_podium_picks').insert({event_id:ev.id,first_team_id:ids[0],second_team_id:ids[1],third_team_id:ids[2],voter_token:token()});if(r.error)throw r.error;notice('podMsg','Perfect Podium 저장 완료.')}catch(e){notice('podMsg',e.code==='23505'?'이미 참여했습니다.':e.message,true)}};init();</script></body></html>
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>FAN PICK · TEAM GAMES</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="nav"></div>
+<main>
+  <section class="section fanpick-hero">
+    <div class="container">
+      <div class="arcade-eyebrow">SPECTATOR MODE // PLAYER SELECT</div>
+      <div class="fanpick-title-row">
+        <div>
+          <h1>SELECT<br>YOUR SIDE.</h1>
+          <p>팀 사진만 보고 고르면 된다. 설명 없음. 스펙 없음. 그냥 찍어.</p>
+        </div>
+        <div class="fanpick-rules-box">
+          <span>01</span><b>PICK THE WINNER</b>
+          <span>02</span><b>CALL THE PODIUM</b>
+          <small>FREE FAN PICK · PICKS CLOSE BEFORE GAME TIME</small>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section arcade-section">
+    <div class="container">
+      <div class="sectionhead">
+        <div><div class="arcade-eyebrow">WINNER PICK</div><h2>WHO TAKES IT?</h2></div>
+        <p>한 팀만 선택.</p>
+      </div>
+      <div id="winner" class="character-select"></div>
+      <div class="fanpick-submit-row">
+        <button id="saveWin" class="btn arcade-primary">LOCK WINNER PICK</button>
+        <div id="winMsg" class="notice"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section arcade-section podium-section">
+    <div class="container">
+      <div class="sectionhead">
+        <div><div class="arcade-eyebrow">PERFECT PODIUM</div><h2>CALL 1 · 2 · 3.</h2></div>
+        <p>순서까지 맞혀야 성공.</p>
+      </div>
+      <div class="podium-console">
+        <div class="podium-slot"><span>1ST</span><select id="p1"><option value="">SELECT TEAM</option></select></div>
+        <div class="podium-slot"><span>2ND</span><select id="p2"><option value="">SELECT TEAM</option></select></div>
+        <div class="podium-slot"><span>3RD</span><select id="p3"><option value="">SELECT TEAM</option></select></div>
+      </div>
+      <div class="fanpick-submit-row">
+        <button id="savePod" class="btn arcade-primary">LOCK PODIUM</button>
+        <div id="podMsg" class="notice"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section arcade-section">
+    <div class="container">
+      <div class="sectionhead">
+        <div><div class="arcade-eyebrow">CROWD METER</div><h2>WHO'S THE FAVORITE?</h2></div>
+        <p>지금 관중들이 고른 팀.</p>
+      </div>
+      <div id="bars" class="card arcade-board"></div>
+    </div>
+  </section>
+</main>
+<div id="footer"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+<script>
+shell('FAN PICK');
+let ts=[];
+
+async function bars(){
+  const ev=await event();
+  const q=await db.from('tg_pick_totals').select('team_id,winner_count').eq('event_id',ev.id);
+  if(q.error)throw q.error;
+  const m={};q.data.forEach(x=>m[x.team_id]=x.winner_count||0);
+  const total=Object.values(m).reduce((a,b)=>a+b,0)||1;
+  document.getElementById('bars').innerHTML=[...ts]
+    .sort((a,b)=>(m[b.id]||0)-(m[a.id]||0))
+    .map((t,i)=>{
+      const p=Math.round((m[t.id]||0)/total*100);
+      return `<div class="arcade-bar-row"><div class="arcade-bar-top"><span>${String(i+1).padStart(2,'0')} · ${t.team_name}</span><b>${p}%</b></div><div class="arcade-bar"><div style="width:${p}%"></div></div></div>`;
+    }).join('');
+}
+
+async function init(){
+  ts=await teams();
+  winner.innerHTML=ts.map((t,i)=>`
+    <button class="fighter-card" data-id="${t.id}" type="button">
+      <div class="fighter-no">P${String(i+1).padStart(2,'0')}</div>
+      <div class="fighter-photo">${t.photo_url?`<img src="${t.photo_url}" alt="${t.team_name}">`:'<span>NO PHOTO</span>'}</div>
+      <div class="fighter-copy">
+        <strong>${t.team_name}</strong>
+        <small>${t.player_1} × ${t.player_2}</small>
+      </div>
+      <div class="fighter-select">SELECT</div>
+    </button>`).join('');
+
+  winner.querySelectorAll('.fighter-card').forEach(b=>b.onclick=()=>{
+    winner.querySelectorAll('.fighter-card').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    winner.dataset.selected=b.dataset.id;
+  });
+
+  [p1,p2,p3].forEach(s=>s.innerHTML+=ts.map(t=>`<option value="${t.id}">${t.team_name}</option>`).join(''));
+  await bars();
+}
+
+saveWin.onclick=async()=>{
+  try{
+    if(!winner.dataset.selected)throw new Error('먼저 한 팀을 골라주세요.');
+    const ev=await event();
+    const r=await db.from('tg_winner_picks').insert({event_id:ev.id,team_id:winner.dataset.selected,voter_token:token()});
+    if(r.error)throw r.error;
+    notice('winMsg','PICK LOCKED. 경기 전까지 결과를 기다려주세요.');
+    bars();
+  }catch(e){notice('winMsg',e.code==='23505'?'이미 Winner Pick에 참여했습니다.':e.message,true)}
+};
+
+savePod.onclick=async()=>{
+  try{
+    const ids=[p1.value,p2.value,p3.value];
+    if(ids.some(x=>!x)||new Set(ids).size!==3)throw new Error('서로 다른 3팀을 선택해주세요.');
+    const ev=await event();
+    const r=await db.from('tg_podium_picks').insert({event_id:ev.id,first_team_id:ids[0],second_team_id:ids[1],third_team_id:ids[2],voter_token:token()});
+    if(r.error)throw r.error;
+    notice('podMsg','PODIUM LOCKED. 1·2·3 순서까지 저장됐습니다.');
+  }catch(e){notice('podMsg',e.code==='23505'?'이미 Perfect Podium에 참여했습니다.':e.message,true)}
+};
+
+init();
+</script>
+</body>
+</html>
