@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>GAME MASTER · TEAM GAMES</title>
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="admin-extra.css">
 </head>
 <body>
 <div id="nav"></div>
@@ -17,6 +18,7 @@
           <h2>CONTROL ROOM</h2>
         </div>
         <div id="sessionTools" class="admin-session" style="display:none">
+          <a class="btn dark gm-home-link" href="index.html">BACK TO GAME</a>
           <span id="sessionEmail" class="muted"></span>
           <button id="logoutBtn" class="btn dark" type="button">EXIT</button>
         </div>
@@ -32,7 +34,7 @@
           <div class="full"><label>Email</label><input id="email" type="email" autocomplete="email" placeholder="loveseol716@gmail.com"></div>
           <div class="full"><label>Password</label><input id="pass" type="password" autocomplete="current-password"></div>
           <div class="full">
-            <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <div class="admin-actions-row">
               <button id="login" class="btn arcade-primary" type="button">PRESS START</button>
               <button id="forgotPassword" class="btn dark" type="button">FORGOT PASSWORD</button>
             </div>
@@ -58,10 +60,27 @@
         <div id="summary" class="admin-summary"></div>
 
         <section class="admin-block">
+          <div class="card admin-add-card">
+            <div class="admin-add-head">
+              <div><div class="kicker">MANUAL ENTRY</div><h3>ADD TEAM</h3></div>
+              <p class="muted">등록된 PLAYER 2명을 선택해 GAME #01에 직접 추가.</p>
+            </div>
+            <div class="admin-add-grid">
+              <div class="field wide"><label>Team Name</label><input id="newTeamName" maxlength="60" placeholder="TEAM NAME"></div>
+              <div class="field"><label>Captain</label><select id="newCaptain"></select></div>
+              <div class="field"><label>Partner</label><select id="newPartner"></select></div>
+              <div class="add-button"><button id="addTeamBtn" class="btn arcade-primary" type="button">+ ADD TEAM</button></div>
+            </div>
+            <div class="admin-add-note">PLAYER 계정이 먼저 있어야 합니다. 이미 이번 GAME에 LOCKED IN 된 선수는 선택할 수 없습니다.</div>
+            <div id="addTeamMsg" class="notice"></div>
+          </div>
+        </section>
+
+        <section class="admin-block">
           <div class="admin-block-head">
             <div>
               <div class="kicker">ROSTER</div>
-              <h3>PLAYER SELECT</h3>
+              <h3>TEAM CONTROL</h3>
             </div>
             <div class="admin-filters">
               <input id="teamSearch" type="search" placeholder="팀명 / 선수 / 연락처 검색">
@@ -102,9 +121,11 @@
 <script src="config.js"></script>
 <script src="app.js"></script>
 <script>
-shell("ADMIN");
+shell('ADMIN');
 
+const $=id=>document.getElementById(id);
 let allAdminTeams=[];
+let adminAthletes=[];
 let currentEvent=null;
 
 const fmtPhone=v=>String(v||'').replace(/\s+/g,' ').trim();
@@ -119,32 +140,51 @@ function adminError(x){
   if(m.includes('SLOT_TAKEN')||m.includes('tg_teams_confirmed_slot_unique')) return '해당 Heat / Station은 이미 사용 중입니다.';
   if(m.includes('INVALID_HEAT')) return 'Heat는 1~6 사이로 설정해 주세요.';
   if(m.includes('INVALID_STATION')) return 'Station은 1 또는 2만 가능합니다.';
+  if(m.includes('INVALID_PLAYERS')) return '서로 다른 선수 2명을 선택해 주세요.';
+  if(m.includes('ATHLETE_ALREADY_LOCKED_IN')) return '선택한 선수 중 이미 이번 GAME에 참가 확정된 선수가 있습니다.';
+  if(m.includes('CAPTAIN_PHONE_REQUIRED')) return 'Captain PLAYER 프로필에 연락처가 필요합니다.';
+  if(m.includes('ATHLETE_PHOTO_REQUIRED')||m.includes('TEAM_PHOTO_REQUIRED')) return '선수 프로필 사진이 필요합니다.';
+  if(m.includes('REGISTRATION_FULL')) return '12팀이 모두 찼습니다.';
+  if(m.includes('TEAM_NAME_REQUIRED')) return '팀 이름을 입력해 주세요.';
+  if(m.includes('TEAM_NOT_FOUND')) return '팀을 찾을 수 없습니다. 새로고침 후 다시 시도해 주세요.';
   return m || '처리 중 오류가 발생했습니다.';
 }
 
 async function adminTeams(){
   const q=await db.rpc('tg_admin_list_teams',{p_event_slug:C.eventSlug});
-  if(q.error) throw q.error;
+  if(q.error)throw q.error;
   return q.data||[];
+}
+
+async function adminPlayers(){
+  const q=await db.rpc('tg_admin_list_athletes',{p_event_slug:C.eventSlug});
+  if(q.error)throw q.error;
+  return q.data||[];
+}
+
+async function refreshAdmin(){
+  [allAdminTeams,adminAthletes]=await Promise.all([adminTeams(),adminPlayers()]);
+  renderSummary();
+  renderAddTeam();
+  renderTeamManagement();
+  await loadResults();
 }
 
 async function enterAdmin(){
   try{
     currentEvent=await event();
-    allAdminTeams=await adminTeams();
     const {data:{user}}=await db.auth.getUser();
-    loginBox.style.display='none';
-    resetBox.style.display='none';
-    control.style.display='block';
-    sessionTools.style.display='flex';
-    sessionEmail.textContent=user?.email||'GAME MASTER';
-    renderSummary();
-    renderTeamManagement();
-    await loadResults();
+    await refreshAdmin();
+    $('loginBox').style.display='none';
+    $('resetBox').style.display='none';
+    $('control').style.display='block';
+    $('sessionTools').style.display='flex';
+    $('sessionEmail').textContent=user?.email||'GAME MASTER';
+    revealGameMaster();
   }catch(e){
-    control.style.display='none';
-    sessionTools.style.display='none';
-    loginBox.style.display='block';
+    $('control').style.display='none';
+    $('sessionTools').style.display='none';
+    $('loginBox').style.display='block';
     notice('adminMsg',adminError(e),true);
   }
 }
@@ -153,195 +193,204 @@ function renderSummary(){
   const approved=allAdminTeams.filter(t=>t.status==='confirmed').length;
   const cancelled=allAdminTeams.filter(t=>t.status==='cancelled').length;
   const max=currentEvent?.max_teams||12;
-  summary.innerHTML=`
+  $('summary').innerHTML=`
     <div class="admin-stat"><span>LOCKED IN</span><strong>${approved}</strong><small>/ ${max} TEAMS</small></div>
     <div class="admin-stat"><span>OUT</span><strong>${cancelled}</strong><small>TEAMS</small></div>
     <div class="admin-stat"><span>EMPTY SLOTS</span><strong>${Math.max(0,max-approved)}</strong><small>LEFT</small></div>
     <div class="admin-stat"><span>ENTRY</span><strong class="admin-stat-word ${currentEvent?.registration_open?'is-open':'is-closed'}">${currentEvent?.registration_open?'OPEN':'CLOSED'}</strong><small>STAGE 01</small></div>`;
 }
 
+function athleteOption(a){
+  const meta=[a.handle?`@${a.handle}`:'',a.gym||''].filter(Boolean).join(' · ');
+  return `<option value="${a.athlete_id}" ${a.locked_in?'disabled':''}>${esc(a.display_name)}${meta?` — ${esc(meta)}`:''}${a.locked_in?' · LOCKED IN':''}</option>`;
+}
+
+function renderAddTeam(){
+  const free=adminAthletes.filter(a=>!a.locked_in);
+  const base='<option value="">SELECT PLAYER</option>'+adminAthletes.map(athleteOption).join('');
+  $('newCaptain').innerHTML=base;
+  $('newPartner').innerHTML=base;
+  $('addTeamBtn').disabled=free.length<2;
+  if(free.length<2){
+    notice('addTeamMsg','현재 선택 가능한 PLAYER가 2명 미만입니다. 새 PLAYER가 프로필을 만든 뒤 추가할 수 있습니다.',false);
+  }else{
+    $('addTeamMsg').style.display='none';
+  }
+}
+
+$('newCaptain').addEventListener('change',()=>{
+  [...$('newPartner').options].forEach(o=>{if(o.value)o.disabled=adminAthletes.find(a=>a.athlete_id===o.value)?.locked_in||o.value===$('newCaptain').value});
+});
+$('newPartner').addEventListener('change',()=>{
+  [...$('newCaptain').options].forEach(o=>{if(o.value)o.disabled=adminAthletes.find(a=>a.athlete_id===o.value)?.locked_in||o.value===$('newPartner').value});
+});
+
+$('addTeamBtn').onclick=async()=>{
+  const teamName=$('newTeamName').value.trim();
+  const captain=$('newCaptain').value;
+  const partner=$('newPartner').value;
+  if(!teamName||!captain||!partner){notice('addTeamMsg','팀 이름과 PLAYER 2명을 모두 선택해 주세요.',true);return}
+  $('addTeamBtn').disabled=true;$('addTeamBtn').textContent='ADDING…';
+  try{
+    const r=await db.rpc('tg_admin_add_team',{p_event_slug:C.eventSlug,p_team_name:teamName,p_captain_id:captain,p_partner_id:partner});
+    if(r.error)throw r.error;
+    $('newTeamName').value='';
+    notice('addTeamMsg','TEAM ADDED.');
+    await refreshAdmin();
+  }catch(e){notice('addTeamMsg',adminError(e),true)}
+  finally{$('addTeamBtn').textContent='+ ADD TEAM';if(adminAthletes.filter(a=>!a.locked_in).length>=2)$('addTeamBtn').disabled=false}
+};
+
 function renderTeamManagement(){
-  const q=teamSearch.value.trim().toLowerCase();
-  const sf=statusFilter.value;
+  const q=$('teamSearch').value.trim().toLowerCase();
+  const sf=$('statusFilter').value;
   const list=allAdminTeams.filter(t=>{
-    if(sf!=='all'&&t.status!==sf) return false;
-    if(!q) return true;
+    if(sf!=='all'&&t.status!==sf)return false;
+    if(!q)return true;
     return [t.team_name,t.player_1,t.player_2,t.phone].some(v=>String(v||'').toLowerCase().includes(q));
   });
-
-  if(!list.length){
-    adminTeamsEl().innerHTML=`<div class="card admin-empty">NO PLAYERS FOUND.</div>`;
-    return;
-  }
-
-  adminTeamsEl().innerHTML=list.map(t=>`
+  if(!list.length){$('adminTeams').innerHTML='<div class="card admin-empty">NO TEAMS FOUND.</div>';return}
+  $('adminTeams').innerHTML=list.map(t=>`
     <article class="admin-team-card ${t.status==='cancelled'?'is-cancelled':''}" data-team="${t.id}">
       <div class="admin-team-photo">
         ${t.photo_url?`<img src="${esc(t.photo_url)}" alt="${esc(t.team_name)}">`:'<div class="admin-photo-empty">NO PHOTO</div>'}
         <div class="admin-status-badge ${t.status==='confirmed'?'approved':'cancelled'}">${statusLabel(t.status)}</div>
       </div>
       <div class="admin-team-body">
-        <div class="admin-team-title-row">
-          <div>
-            <div class="entry-label">TEAM</div>
-            <h4>${esc(t.team_name)}</h4>
-          </div>
-          <div class="admin-slot-mini">H${t.heat_no} · S${t.station_no}</div>
-        </div>
+        <div class="admin-team-title-row"><div><div class="entry-label">TEAM</div><h4>${esc(t.team_name)}</h4></div><div class="admin-slot-mini">H${t.heat_no} · S${t.station_no}</div></div>
         <div class="admin-contact"><a href="tel:${esc(fmtPhone(t.phone))}">${esc(fmtPhone(t.phone))}</a></div>
         <div class="admin-edit-grid">
           <div class="full"><label>Team Name</label><input id="team-${t.id}" value="${esc(t.team_name)}" maxlength="60"></div>
-          <div><label>Player 1</label><input id="p1-${t.id}" value="${esc(t.player_1)}" maxlength="50"></div>
-          <div><label>Player 2</label><input id="p2-${t.id}" value="${esc(t.player_2)}" maxlength="50"></div>
+          <div><label>Player 1</label><input value="${esc(t.player_1)}" disabled></div>
+          <div><label>Player 2</label><input value="${esc(t.player_2)}" disabled></div>
           <div class="full"><label>Contact</label><input id="phone-${t.id}" value="${esc(t.phone)}" inputmode="tel"></div>
           <div><label>Heat</label><input id="heat-${t.id}" type="number" min="1" max="6" value="${t.heat_no}"></div>
           <div><label>Station</label><select id="station-${t.id}"><option value="1" ${t.station_no===1?'selected':''}>1</option><option value="2" ${t.station_no===2?'selected':''}>2</option></select></div>
           <div class="full"><label>Roster Status</label><select id="teamstatus-${t.id}"><option value="confirmed" ${t.status==='confirmed'?'selected':''}>LOCKED IN</option><option value="cancelled" ${t.status==='cancelled'?'selected':''}>OUT</option></select></div>
         </div>
         <div class="admin-team-actions">
+          <button class="btn danger delete-spacer" type="button" onclick="deleteTeam('${t.id}')">DELETE TEAM</button>
           ${t.photo_url?`<a class="btn dark" href="${esc(t.photo_url)}" target="_blank" rel="noopener">OPEN PHOTO</a>`:''}
-          <button class="btn arcade-primary" type="button" onclick="saveTeam('${t.id}')">SAVE SLOT</button>
+          <button id="save-${t.id}" class="btn arcade-primary" type="button" onclick="saveTeam('${t.id}')">SAVE TEAM</button>
         </div>
       </div>
     </article>`).join('');
 }
 
-function adminTeamsEl(){return document.getElementById('adminTeams')}
-
 window.saveTeam=async id=>{
-  const btn=document.querySelector(`[data-team="${id}"] .admin-team-actions button`);
-  const original=btn?.textContent||'SAVE SLOT';
+  const t=allAdminTeams.find(x=>x.id===id);if(!t)return;
+  const btn=$(`save-${id}`);btn.disabled=true;btn.textContent='SAVING…';
   try{
-    if(btn){btn.disabled=true;btn.textContent='SAVING…'}
-    const args={
+    const r=await db.rpc('tg_admin_update_team',{
       p_team_id:id,
-      p_team_name:document.getElementById(`team-${id}`).value.trim(),
-      p_player_1:document.getElementById(`p1-${id}`).value.trim(),
-      p_player_2:document.getElementById(`p2-${id}`).value.trim(),
-      p_phone:document.getElementById(`phone-${id}`).value.trim(),
-      p_heat_no:Number(document.getElementById(`heat-${id}`).value),
-      p_station_no:Number(document.getElementById(`station-${id}`).value),
-      p_status:document.getElementById(`teamstatus-${id}`).value
-    };
-    const r=await db.rpc('tg_admin_update_team',args);
-    if(r.error) throw r.error;
-    notice('teamAdminMsg','SLOT SAVED.');
-    allAdminTeams=await adminTeams();
-    renderSummary();
-    renderTeamManagement();
-    await loadResults();
-  }catch(e){
-    notice('teamAdminMsg',adminError(e),true);
-  }finally{
-    if(btn){btn.disabled=false;btn.textContent=original}
-  }
+      p_team_name:$(`team-${id}`).value.trim(),
+      p_player_1:t.player_1,
+      p_player_2:t.player_2,
+      p_phone:$(`phone-${id}`).value.trim(),
+      p_heat_no:Number($(`heat-${id}`).value),
+      p_station_no:Number($(`station-${id}`).value),
+      p_status:$(`teamstatus-${id}`).value
+    });
+    if(r.error)throw r.error;
+    notice('teamAdminMsg','TEAM SAVED.');
+    await refreshAdmin();
+  }catch(e){notice('teamAdminMsg',adminError(e),true)}
+  finally{if(document.getElementById(`save-${id}`)){document.getElementById(`save-${id}`).disabled=false;document.getElementById(`save-${id}`).textContent='SAVE TEAM'}}
+};
+
+window.deleteTeam=async id=>{
+  const t=allAdminTeams.find(x=>x.id===id);if(!t)return;
+  const ok=confirm(`DELETE ${t.team_name}?\n\n팀, 경기 결과, 연결된 개인 포인트와 해당 팀이 포함된 FAN PICK 데이터가 삭제됩니다. 이 작업은 되돌릴 수 없습니다.`);
+  if(!ok)return;
+  try{
+    const r=await db.rpc('tg_admin_delete_team',{p_team_id:id});
+    if(r.error)throw r.error;
+    notice('teamAdminMsg',`${t.team_name} DELETED.`);
+    await refreshAdmin();
+  }catch(e){notice('teamAdminMsg',adminError(e),true)}
 };
 
 async function loadResults(){
   const approved=allAdminTeams.filter(t=>t.status==='confirmed');
   const r=await db.from('tg_results').select('*').eq('event_id',currentEvent.id);
-  if(r.error) throw r.error;
+  if(r.error)throw r.error;
   const map={};(r.data||[]).forEach(x=>map[x.team_id]=x);
-  resultRows.innerHTML=approved.map(t=>{
+  $('resultRows').innerHTML=approved.map(t=>{
     const x=map[t.id]||{};
     const tm=x.finish_seconds!=null?`${Math.floor(x.finish_seconds/60)}:${String(Math.floor(x.finish_seconds%60)).padStart(2,'0')}`:'';
-    return `<tr>
-      <td><strong>${esc(t.team_name)}</strong><div class="table-sub">${esc(t.player_1)} × ${esc(t.player_2)}</div></td>
-      <td>H${t.heat_no} · S${t.station_no}</td>
-      <td><input id="time-${t.id}" value="${tm}" placeholder="07:42"></td>
-      <td><input id="reps-${t.id}" type="number" value="${x.reps_completed??''}"></td>
-      <td><select id="status-${t.id}"><option ${x.status==='Not Started'?'selected':''}>Not Started</option><option ${x.status==='Running'?'selected':''}>Running</option><option ${x.status==='Finished'?'selected':''}>Finished</option><option ${x.status==='Time Cap'?'selected':''}>Time Cap</option></select></td>
-      <td><button class="btn dark" type="button" onclick="saveResult('${t.id}')">SAVE SCORE</button></td>
-    </tr>`;
-  }).join('') || '<tr><td colspan="6" class="muted">NO LOCKED-IN TEAMS.</td></tr>';
+    return `<tr><td><strong>${esc(t.team_name)}</strong><div class="table-sub">${esc(t.player_1)} × ${esc(t.player_2)}</div></td><td>H${t.heat_no} · S${t.station_no}</td><td><input id="time-${t.id}" value="${tm}" placeholder="07:42"></td><td><input id="reps-${t.id}" type="number" value="${x.reps_completed??''}"></td><td><select id="status-${t.id}"><option ${x.status==='Not Started'?'selected':''}>Not Started</option><option ${x.status==='Running'?'selected':''}>Running</option><option ${x.status==='Finished'?'selected':''}>Finished</option><option ${x.status==='Time Cap'?'selected':''}>Time Cap</option></select></td><td><button class="btn dark" type="button" onclick="saveResult('${t.id}')">SAVE SCORE</button></td></tr>`;
+  }).join('')||'<tr><td colspan="6" class="muted">NO LOCKED-IN TEAMS.</td></tr>';
 }
 
 window.saveResult=async id=>{
   try{
-    const v=document.getElementById(`time-${id}`).value.trim();
-    const p=v?v.split(':').map(Number):[];
-    const sec=p.length===2?p[0]*60+p[1]:null;
-    const reps=document.getElementById(`reps-${id}`).value;
-    const status=document.getElementById(`status-${id}`).value;
+    const v=$(`time-${id}`).value.trim();const p=v?v.split(':').map(Number):[];const sec=p.length===2?p[0]*60+p[1]:null;
+    const reps=$(`reps-${id}`).value;const status=$(`status-${id}`).value;
     const r=await db.from('tg_results').upsert({event_id:currentEvent.id,team_id:id,finish_seconds:sec,reps_completed:reps?Number(reps):null,status,updated_at:new Date().toISOString()},{onConflict:'event_id,team_id'});
-    if(r.error) throw r.error;
-    await rank(currentEvent.id);
-    await loadResults();
+    if(r.error)throw r.error;
+    await rank(currentEvent.id);await loadResults();
   }catch(e){alert(adminError(e))}
 };
 
 async function rank(eventId){
-  const q=await db.from('tg_results').select('id,status,finish_seconds,reps_completed').eq('event_id',eventId);
-  if(q.error) throw q.error;
-  const a=(q.data||[]).filter(x=>['Finished','Time Cap'].includes(x.status)).sort((x,y)=>{
+  const q=await db.from('tg_results').select('id,team_id,status,finish_seconds,reps_completed').eq('event_id',eventId);
+  if(q.error)throw q.error;
+  const approvedIds=new Set(allAdminTeams.filter(t=>t.status==='confirmed').map(t=>t.id));
+  await db.from('tg_results').update({rank:null}).eq('event_id',eventId);
+  const a=(q.data||[]).filter(x=>approvedIds.has(x.team_id)&&['Finished','Time Cap'].includes(x.status)).sort((x,y)=>{
     if(x.status!==y.status)return x.status==='Finished'?-1:1;
     return x.status==='Finished'?(x.finish_seconds??99999)-(y.finish_seconds??99999):(y.reps_completed??-1)-(x.reps_completed??-1)
   });
-  for(let i=0;i<a.length;i++){
-    const u=await db.from('tg_results').update({rank:i+1}).eq('id',a[i].id);
-    if(u.error) throw u.error;
-  }
+  for(let i=0;i<a.length;i++){const u=await db.from('tg_results').update({rank:i+1}).eq('id',a[i].id);if(u.error)throw u.error}
 }
 
-login.onclick=async()=>{
-  if(!email.value.trim()||!pass.value){notice('adminMsg','이메일과 비밀번호를 입력해 주세요.',true);return}
-  login.disabled=true;
-  login.textContent='CHECKING…';
-  notice('adminMsg','로그인 확인 중…');
+$('login').onclick=async()=>{
+  if(!$('email').value.trim()||!$('pass').value){notice('adminMsg','이메일과 비밀번호를 모두 입력해 주세요.',true);return}
+  $('login').disabled=true;$('login').textContent='CHECKING…';
   try{
-    const {error}=await db.auth.signInWithPassword({email:email.value.trim(),password:pass.value});
-    if(error) throw error;
-    notice('adminMsg','GAME MASTER 확인 완료.');
+    const {error}=await db.auth.signInWithPassword({email:$('email').value.trim(),password:$('pass').value});
+    if(error)throw error;
+    notice('adminMsg','LOGIN OK. OPENING CONTROL ROOM…');
     await enterAdmin();
   }catch(e){notice('adminMsg',adminError(e),true)}
-  finally{login.disabled=false;login.textContent='PRESS START'}
+  finally{$('login').disabled=false;$('login').textContent='PRESS START'}
 };
 
-forgotPassword.onclick=async()=>{
-  const target=email.value.trim()||'loveseol716@gmail.com';
-  email.value=target;
-  forgotPassword.disabled=true;
-  forgotPassword.textContent='SENDING…';
-  notice('adminMsg','비밀번호 재설정 메일을 보내는 중…');
+$('forgotPassword').onclick=async()=>{
+  const mail=$('email').value.trim();if(!mail){notice('adminMsg','먼저 관리자 이메일을 입력해 주세요.',true);return}
+  $('forgotPassword').disabled=true;$('forgotPassword').textContent='SENDING…';
   try{
-    const redirectTo=`${location.origin}${location.pathname}?reset=1`;
-    const {error}=await db.auth.resetPasswordForEmail(target,{redirectTo});
-    if(error)throw error;
-    notice('adminMsg',`${target} 로 재설정 메일을 보냈습니다. 메일의 링크를 눌러 새 비밀번호를 설정하세요.`);
+    const redirectTo=location.origin+location.pathname;
+    const {error}=await db.auth.resetPasswordForEmail(mail,{redirectTo});if(error)throw error;
+    notice('adminMsg',`${mail}로 비밀번호 재설정 메일을 보냈습니다. 메일의 링크를 눌러 돌아오세요.`);
   }catch(e){notice('adminMsg',adminError(e),true)}
-  finally{forgotPassword.disabled=false;forgotPassword.textContent='FORGOT PASSWORD'}
+  finally{$('forgotPassword').disabled=false;$('forgotPassword').textContent='FORGOT PASSWORD'}
 };
 
-saveNewPassword.onclick=async()=>{
-  const a=newPass.value,b=newPassConfirm.value;
-  if(a.length<8){notice('resetMsg','비밀번호는 8자 이상이어야 합니다.',true);return}
+$('saveNewPassword').onclick=async()=>{
+  const a=$('newPass').value,b=$('newPassConfirm').value;
+  if(a.length<8){notice('resetMsg','비밀번호는 8자 이상으로 설정해 주세요.',true);return}
   if(a!==b){notice('resetMsg','두 비밀번호가 일치하지 않습니다.',true);return}
-  saveNewPassword.disabled=true;
-  saveNewPassword.textContent='SAVING…';
-  try{
-    const {error}=await db.auth.updateUser({password:a});
-    if(error)throw error;
-    notice('resetMsg','비밀번호가 변경되었습니다. CONTROL ROOM으로 이동합니다.');
-    history.replaceState({},'',location.pathname);
-    await enterAdmin();
-  }catch(e){notice('resetMsg',adminError(e),true)}
-  finally{saveNewPassword.disabled=false;saveNewPassword.textContent='SAVE NEW PASSWORD'}
+  $('saveNewPassword').disabled=true;$('saveNewPassword').textContent='SAVING…';
+  try{const {error}=await db.auth.updateUser({password:a});if(error)throw error;notice('resetMsg','비밀번호가 변경되었습니다.');await enterAdmin()}
+  catch(e){notice('resetMsg',adminError(e),true)}
+  finally{$('saveNewPassword').disabled=false;$('saveNewPassword').textContent='SAVE NEW PASSWORD'}
 };
 
-logoutBtn.onclick=async()=>{await db.auth.signOut();location.reload()};
-teamSearch.oninput=renderTeamManagement;
-statusFilter.onchange=renderTeamManagement;
-pass.addEventListener('keydown',e=>{if(e.key==='Enter')login.click()});
+$('logoutBtn').onclick=async()=>{await db.auth.signOut();location.reload()};
+$('teamSearch').oninput=renderTeamManagement;
+$('statusFilter').onchange=renderTeamManagement;
+$('pass').addEventListener('keydown',e=>{if(e.key==='Enter')$('login').click()});
+
+db.auth.onAuthStateChange((evt)=>{
+  if(evt==='PASSWORD_RECOVERY'){
+    $('loginBox').style.display='none';$('control').style.display='none';$('resetBox').style.display='block';$('sessionTools').style.display='none';
+  }
+});
 
 (async()=>{
-  const isReset=new URLSearchParams(location.search).get('reset')==='1';
   const {data:{session}}=await db.auth.getSession();
-  if(isReset&&session){
-    loginBox.style.display='none';
-    resetBox.style.display='block';
-    return;
-  }
-  if(session) await enterAdmin();
+  if(session)await enterAdmin();
 })();
 </script>
 </body>
