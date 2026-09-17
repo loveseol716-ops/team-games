@@ -5,91 +5,39 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>TEAMS · TEAM GAMES</title>
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="athlete.css">
 </head>
 <body>
 <div id="nav"></div>
 <main>
+  <section class="player-hero">
+    <div class="container">
+      <div class="arcade-eyebrow">GAME #01 // LOCKED DUOS</div>
+      <h1>TEAM<br>LINE-UP.</h1>
+      <p class="lead">PLAYER ID를 만들고, 이번 GAME을 함께 뛸 파트너를 직접 고른다.</p>
+    </div>
+  </section>
+
   <section class="section">
     <div class="container">
-      <div class="sectionhead">
-        <div><div class="kicker">ATHLETES</div><h2>TEAM LINE-UP</h2></div>
-        <p>사진과 이름만 공개합니다.</p>
-      </div>
+      <div class="sectionhead"><div><div class="kicker">LOCKED IN</div><h2>12 TEAMS. 24 PLAYERS.</h2></div><p id="count">Loading…</p></div>
       <div id="teamGrid" class="teamgrid"></div>
     </div>
   </section>
 
   <section class="section">
     <div class="container">
-      <div class="sectionhead"><div><div class="kicker">HEATS</div><h2>START LIST</h2></div></div>
+      <div class="sectionhead"><div><div class="kicker">START LIST</div><h2>HEAD TO HEAD.</h2></div><p>2 TEAMS · 2 STATIONS · 6 HEATS</p></div>
       <div id="heatGrid" class="heatgrid"></div>
     </div>
   </section>
 
   <section class="section" id="register">
     <div class="container">
-      <div class="sectionhead">
-        <div><div class="kicker">ENTRY</div><h2>REGISTER YOUR TEAM</h2></div>
-        <p id="count">Loading…</p>
+      <div class="team-entry-console">
+        <div><div class="arcade-eyebrow">WANT IN?</div><h3>CREATE PLAYER. PICK PARTNER.</h3><p>대표 선수가 팀을 만들고 파트너를 초대합니다. 상대가 ACCEPT하면 Heat / Station이 자동 확정됩니다.</p></div>
+        <a class="btn arcade-primary" href="athlete.html">ENTER PLAYER MODE</a>
       </div>
-
-      <div id="soldout" class="card soldout" style="display:none">
-        <div class="kicker">SOLD OUT · WAITLIST</div>
-        <div class="big">12 / 12 TEAMS</div>
-        <p class="muted">현재 참가 신청은 마감되었습니다. WAITLIST 안내는 추후 업데이트됩니다.</p>
-      </div>
-
-      <div id="successCard" class="entry-success" style="display:none" aria-live="polite">
-        <div class="entry-success-top">
-          <div>
-            <div class="kicker">ENTRY CONFIRMED</div>
-            <div class="entry-check">✓</div>
-          </div>
-          <div class="entry-edition">TEAM GAMES #01</div>
-        </div>
-
-        <div class="entry-success-body">
-          <div class="entry-label">REGISTERED TEAM</div>
-          <h3 id="successTeam">TEAM NAME</h3>
-
-          <div class="entry-slot-grid">
-            <div class="entry-slot">
-              <span>HEAT</span>
-              <strong id="successHeat">—</strong>
-            </div>
-            <div class="entry-slot">
-              <span>STATION</span>
-              <strong id="successStation">—</strong>
-            </div>
-          </div>
-
-          <div class="entry-guide">
-            <div class="entry-guide-title">ENTRY INFO</div>
-            <p>접수가 정상적으로 완료되었습니다.</p>
-            <p>팀 사진과 선수 이름은 TEAM LINE-UP에 공개됩니다.</p>
-            <p>경기 관련 최종 안내는 대표 연락처로 전달됩니다.</p>
-          </div>
-
-          <div class="entry-event-meta">OCT 31, 2026 · SEOUL · TEAM OF 2</div>
-          <a class="btn entry-back" href="#top" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">VIEW TEAM LINE-UP</a>
-        </div>
-      </div>
-
-      <form id="form" class="card formgrid">
-        <div><label>Team Name</label><input name="team_name" maxlength="60" required></div>
-        <div><label>대표 연락처</label><input name="phone" inputmode="tel" autocomplete="tel" placeholder="010-0000-0000" required></div>
-        <div><label>Player 1</label><input name="player_1" maxlength="50" required></div>
-        <div><label>Player 2</label><input name="player_2" maxlength="50" required></div>
-        <div class="full">
-          <label>Team Photo · Required</label>
-          <input name="photo" type="file" accept="image/jpeg,image/png,image/webp" required>
-          <div class="hint">JPG / PNG / WEBP · 최대 5MB</div>
-        </div>
-        <div class="full">
-          <button id="submitBtn" class="btn" type="submit">REGISTER TEAM</button>
-          <div id="msg" class="notice"></div>
-        </div>
-      </form>
     </div>
   </section>
 </main>
@@ -98,113 +46,33 @@
 <script src="config.js"></script>
 <script src="app.js"></script>
 <script>
-shell("TEAMS");
-const MAX_TEAMS=12;
-let submitting=false;
+shell('TEAMS');
 
-function esc(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
-
-function friendlyError(x){
-  const m=String(x?.message||x||'');
-  if(m.includes('DUPLICATE_PHONE')||x?.code==='23505') return '이미 신청된 연락처입니다. 기존 신청 내용을 확인해 주세요.';
-  if(m.includes('REGISTRATION_FULL')) return '12팀 모집이 마감되었습니다. SOLD OUT 상태입니다.';
-  if(m.includes('REGISTRATION_CLOSED')) return '현재 참가 신청이 닫혀 있습니다.';
-  if(m.includes('TEAM_PHOTO_REQUIRED')) return '팀 사진을 반드시 첨부해 주세요.';
-  if(m.includes('INVALID_PHONE')) return '대표 연락처를 다시 확인해 주세요.';
-  return m || '신청 중 오류가 발생했습니다. 다시 시도해 주세요.';
-}
-
-function setSoldOut(isSoldOut){
-  soldout.style.display=isSoldOut?'block':'none';
-  if(successCard.style.display!=='block') form.style.display=isSoldOut?'none':'grid';
-}
-
-function showSuccess(teamName,heat,station){
-  successTeam.textContent=teamName;
-  successHeat.textContent=heat;
-  successStation.textContent=station;
-  msg.style.display='none';
-  form.style.display='none';
-  soldout.style.display='none';
-  successCard.style.display='block';
-  successCard.scrollIntoView({behavior:'smooth',block:'center'});
-}
-
-async function render(){
-  const ts=await teams();
-  const ev=await event();
-  const limit=ev.max_teams||MAX_TEAMS;
-  const isSoldOut=ts.length>=limit || !ev.registration_open;
-  count.textContent=isSoldOut?`${ts.length} / ${limit} Teams Registered · SOLD OUT`:`${ts.length} / ${limit} Teams Registered`;
-  setSoldOut(isSoldOut);
-
-  teamGrid.innerHTML=ts.map((t,i)=>`<article class="card"><div class="num">TEAM ${String(i+1).padStart(2,'0')}</div><div class="photo">${t.photo_url?`<img src="${esc(t.photo_url)}" alt="${esc(t.team_name)}">`:'TEAM PHOTO'}</div><div class="teamname">${esc(t.team_name)}</div><div>${esc(t.player_1)} × ${esc(t.player_2)}</div><div class="teammeta">HEAT ${t.heat_no} · STATION ${t.station_no}</div></article>`).join('');
-
-  const h={};
-  ts.forEach(t=>(h[t.heat_no]??=[]).push(t));
-  heatGrid.innerHTML=Object.entries(h).map(([n,a])=>`<div class="card heat"><div><div class="num">HEAT ${n}</div><strong>${esc(a[0]?.team_name||'TBD')}</strong></div><div class="vs">VS</div><div style="text-align:right"><div class="num">STATION 2</div><strong>${esc(a[1]?.team_name||'TBD')}</strong></div></div>`).join('');
-}
-
-form.onsubmit=async e=>{
-  e.preventDefault();
-  if(submitting) return;
-  submitting=true;
-  submitBtn.disabled=true;
-  submitBtn.textContent='CHECKING…';
-
-  try{
-    const ev=await event();
-    const current=await teams();
-    const limit=ev.max_teams||MAX_TEAMS;
-    if(!ev.registration_open) throw new Error('REGISTRATION_CLOSED');
-    if(current.length>=limit){await render();throw new Error('REGISTRATION_FULL');}
-
-    const f=new FormData(form);
-    const teamName=f.get('team_name').trim();
-    const phone=f.get('phone').trim();
-    const duplicate=await db.rpc('tg_check_phone',{p_event_slug:C.eventSlug,p_phone:phone});
-    if(duplicate.error) throw duplicate.error;
-    if(duplicate.data) throw new Error('DUPLICATE_PHONE');
-
-    const file=f.get('photo');
-    if(!file || !file.size) throw new Error('TEAM_PHOTO_REQUIRED');
-    if(file.size>5*1024*1024) throw new Error('팀 사진은 5MB 이하로 업로드해 주세요.');
-    if(!['image/jpeg','image/png','image/webp'].includes(file.type)) throw new Error('팀 사진은 JPG, PNG, WEBP 형식만 가능합니다.');
-
-    const ext=(file.name.split('.').pop()||'jpg').toLowerCase();
-    const uploadedPath=`${C.eventSlug}/${crypto.randomUUID()}.${ext}`;
-    submitBtn.textContent='UPLOADING PHOTO…';
-    const up=await db.storage.from('tg-team-photos').upload(uploadedPath,file,{upsert:false});
-    if(up.error) throw up.error;
-    const photo_url=db.storage.from('tg-team-photos').getPublicUrl(uploadedPath).data.publicUrl;
-
-    submitBtn.textContent='REGISTERING…';
-    const r=await db.from('tg_teams').insert({
-      event_id:ev.id,
-      team_name:teamName,
-      player_1:f.get('player_1').trim(),
-      player_2:f.get('player_2').trim(),
-      phone,
-      photo_url,
-      status:'confirmed'
-    }).select('heat_no,station_no').single();
-    if(r.error) throw r.error;
-
-    form.reset();
-    await render();
-    showSuccess(teamName,r.data.heat_no,r.data.station_no);
-  }catch(x){
-    successCard.style.display='none';
-    notice('msg',friendlyError(x),true);
-    await render().catch(()=>{});
-  }finally{
-    submitting=false;
-    submitBtn.disabled=false;
-    submitBtn.textContent='REGISTER TEAM';
+function duo(t,roster){
+  if(roster?.length){
+    return `<div class="duo-photo">${roster.slice(0,2).map(p=>`<div><a href="player.html?id=${encodeURIComponent(p.id)}"><img src="${esc(p.photo_url)}" alt="${esc(p.display_name)}"><span class="duo-label">@${esc(p.handle)}</span></a></div>`).join('')}</div>`;
   }
-};
+  return `<div class="photo">${t.photo_url?`<img src="${esc(t.photo_url)}" alt="${esc(t.team_name)}">`:'TEAM PHOTO'}</div>`;
+}
 
-render();
+async function init(){
+  try{
+    const ts=await teams();const ev=await event();const rm=await rosterMap(ts.map(t=>t.id));
+    count.textContent=`${ts.length} / ${ev.max_teams} TEAMS LOCKED`;
+    teamGrid.innerHTML=ts.map((t,i)=>{
+      const r=rm[t.id]||[];
+      const names=r.length?r.map(x=>x.display_name).join(' × '):`${t.player_1} × ${t.player_2}`;
+      return `<article class="card"><div class="num">TEAM ${String(i+1).padStart(2,'0')} · H${t.heat_no} S${t.station_no}</div>${duo(t,r)}<div class="teamname">${esc(t.team_name)}</div><div>${esc(names)}</div><div class="teammeta">HEAT ${t.heat_no} · STATION ${t.station_no}</div></article>`;
+    }).join('')||'<div class="card"><div class="kicker">NO TEAM LOCKED YET</div><h3>FIRST DUO GETS THE FIRST SLOT.</h3></div>';
+
+    const h={};ts.forEach(t=>(h[t.heat_no]??=[]).push(t));
+    heatGrid.innerHTML=Array.from({length:6},(_,i)=>i+1).map(n=>{
+      const a=(h[n]||[]).sort((x,y)=>x.station_no-y.station_no);
+      return `<div class="card heat"><div><div class="num">HEAT ${n} · S1</div><strong>${esc(a.find(x=>x.station_no===1)?.team_name||'TBD')}</strong></div><div class="vs">VS</div><div style="text-align:right"><div class="num">S2</div><strong>${esc(a.find(x=>x.station_no===2)?.team_name||'TBD')}</strong></div></div>`;
+    }).join('');
+  }catch(e){teamGrid.innerHTML=`<div class="card notice err" style="display:block">${esc(e.message)}</div>`}
+}
+init();
 </script>
 </body>
 </html>
