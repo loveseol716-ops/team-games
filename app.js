@@ -13,7 +13,7 @@ function nav(active){
 
 function shell(active){
   document.querySelector('#nav').innerHTML=nav(active);
-  document.querySelector('#footer').innerHTML=`<footer class="footer"><div class="container arcade-footer"><span>TEAM GAMES // STAGE 01</span><span>OCT 31, 2026 · SEOUL</span><span>PLAY · PICK · WATCH</span></div></footer>`;
+  document.querySelector('#footer').innerHTML=`<footer class="footer"><div class="container arcade-footer"><span>TEAM GAMES // STAGE 01</span><span>OCT 31, 2026 · SEOUL</span><span>PLAY · PICK · WATCH</span><a href="admin.html" style="opacity:.42;font-size:9px;letter-spacing:.12em">GAME MASTER</a></div></footer>`;
 }
 
 function notice(id,msg,err=false){const e=document.getElementById(id);if(!e)return;e.textContent=msg;e.style.display='block';e.classList.toggle('err',err)}
