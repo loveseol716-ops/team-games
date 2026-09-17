@@ -8,7 +8,7 @@ function nav(active){
     ['HOME','index.html'],['GAME','event.html'],['TEAMS','teams.html'],
     ['FAN PICK','fanpick.html'],['LIVE','live.html'],['PLAYER','athlete.html']
   ];
-  return `<header class="nav"><div class="container navin"><a class="brand" href="index.html">TEAM GAMES</a><nav class="links">${p.map(([n,h])=>`<a class="${active===n?'active':''}" href="${h}">${n}</a>`).join('')}</nav><a class="cta arcade-cta" href="fanpick.html">MAKE YOUR PICK</a></div></header>`;
+  return `<header class="nav"><div class="container navin"><a class="brand" href="index.html">TEAM GAMES</a><nav class="links">${p.map(([n,h])=>`<a class="${active===n?'active':''}" href="${h}">${n}</a>`).join('')}</nav><a class="cta arcade-cta" href="athlete.html?join=1">ENTER GAME #01</a></div></header>`;
 }
 
 function shell(active){
