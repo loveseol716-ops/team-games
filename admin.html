@@ -29,9 +29,28 @@
           <p class="muted">운영자만 입장 가능.</p>
         </div>
         <div class="formgrid">
-          <div class="full"><label>Email</label><input id="email" type="email" autocomplete="email"></div>
+          <div class="full"><label>Email</label><input id="email" type="email" autocomplete="email" placeholder="loveseol716@gmail.com"></div>
           <div class="full"><label>Password</label><input id="pass" type="password" autocomplete="current-password"></div>
-          <div class="full"><button id="login" class="btn arcade-primary" type="button">PRESS START</button><div id="adminMsg" class="notice"></div></div>
+          <div class="full">
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button id="login" class="btn arcade-primary" type="button">PRESS START</button>
+              <button id="forgotPassword" class="btn dark" type="button">FORGOT PASSWORD</button>
+            </div>
+            <div id="adminMsg" class="notice"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="resetBox" class="card admin-login" style="display:none">
+        <div class="admin-login-copy">
+          <div class="kicker">NEW PASSWORD</div>
+          <div class="big">RESET GAME MASTER KEY</div>
+          <p class="muted">새 비밀번호를 8자 이상 입력하세요.</p>
+        </div>
+        <div class="formgrid">
+          <div class="full"><label>New Password</label><input id="newPass" type="password" minlength="8" maxlength="72" autocomplete="new-password"></div>
+          <div class="full"><label>Confirm Password</label><input id="newPassConfirm" type="password" minlength="8" maxlength="72" autocomplete="new-password"></div>
+          <div class="full"><button id="saveNewPassword" class="btn arcade-primary" type="button">SAVE NEW PASSWORD</button><div id="resetMsg" class="notice"></div></div>
         </div>
       </div>
 
@@ -88,13 +107,14 @@ shell("ADMIN");
 let allAdminTeams=[];
 let currentEvent=null;
 
-const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 const fmtPhone=v=>String(v||'').replace(/\s+/g,' ').trim();
 const statusLabel=s=>s==='confirmed'?'LOCKED IN':'OUT';
 
 function adminError(x){
   const m=String(x?.message||x||'');
   if(m.includes('ADMIN_ONLY')) return 'GAME MASTER 권한이 없는 계정입니다.';
+  if(m.includes('Invalid login credentials')) return '이메일 또는 비밀번호가 맞지 않습니다.';
+  if(m.includes('Email rate limit exceeded')) return '재설정 메일 요청이 너무 많습니다. 잠시 뒤 다시 시도해 주세요.';
   if(m.includes('DUPLICATE_PHONE')) return '다른 활성 팀에서 이미 사용 중인 연락처입니다.';
   if(m.includes('SLOT_TAKEN')||m.includes('tg_teams_confirmed_slot_unique')) return '해당 Heat / Station은 이미 사용 중입니다.';
   if(m.includes('INVALID_HEAT')) return 'Heat는 1~6 사이로 설정해 주세요.';
@@ -114,6 +134,7 @@ async function enterAdmin(){
     allAdminTeams=await adminTeams();
     const {data:{user}}=await db.auth.getUser();
     loginBox.style.display='none';
+    resetBox.style.display='none';
     control.style.display='block';
     sessionTools.style.display='flex';
     sessionEmail.textContent=user?.email||'GAME MASTER';
@@ -263,14 +284,48 @@ async function rank(eventId){
 }
 
 login.onclick=async()=>{
+  if(!email.value.trim()||!pass.value){notice('adminMsg','이메일과 비밀번호를 입력해 주세요.',true);return}
   login.disabled=true;
-  login.textContent='LOADING…';
+  login.textContent='CHECKING…';
+  notice('adminMsg','로그인 확인 중…');
   try{
     const {error}=await db.auth.signInWithPassword({email:email.value.trim(),password:pass.value});
     if(error) throw error;
+    notice('adminMsg','GAME MASTER 확인 완료.');
     await enterAdmin();
   }catch(e){notice('adminMsg',adminError(e),true)}
   finally{login.disabled=false;login.textContent='PRESS START'}
+};
+
+forgotPassword.onclick=async()=>{
+  const target=email.value.trim()||'loveseol716@gmail.com';
+  email.value=target;
+  forgotPassword.disabled=true;
+  forgotPassword.textContent='SENDING…';
+  notice('adminMsg','비밀번호 재설정 메일을 보내는 중…');
+  try{
+    const redirectTo=`${location.origin}${location.pathname}?reset=1`;
+    const {error}=await db.auth.resetPasswordForEmail(target,{redirectTo});
+    if(error)throw error;
+    notice('adminMsg',`${target} 로 재설정 메일을 보냈습니다. 메일의 링크를 눌러 새 비밀번호를 설정하세요.`);
+  }catch(e){notice('adminMsg',adminError(e),true)}
+  finally{forgotPassword.disabled=false;forgotPassword.textContent='FORGOT PASSWORD'}
+};
+
+saveNewPassword.onclick=async()=>{
+  const a=newPass.value,b=newPassConfirm.value;
+  if(a.length<8){notice('resetMsg','비밀번호는 8자 이상이어야 합니다.',true);return}
+  if(a!==b){notice('resetMsg','두 비밀번호가 일치하지 않습니다.',true);return}
+  saveNewPassword.disabled=true;
+  saveNewPassword.textContent='SAVING…';
+  try{
+    const {error}=await db.auth.updateUser({password:a});
+    if(error)throw error;
+    notice('resetMsg','비밀번호가 변경되었습니다. CONTROL ROOM으로 이동합니다.');
+    history.replaceState({},'',location.pathname);
+    await enterAdmin();
+  }catch(e){notice('resetMsg',adminError(e),true)}
+  finally{saveNewPassword.disabled=false;saveNewPassword.textContent='SAVE NEW PASSWORD'}
 };
 
 logoutBtn.onclick=async()=>{await db.auth.signOut();location.reload()};
@@ -279,7 +334,13 @@ statusFilter.onchange=renderTeamManagement;
 pass.addEventListener('keydown',e=>{if(e.key==='Enter')login.click()});
 
 (async()=>{
+  const isReset=new URLSearchParams(location.search).get('reset')==='1';
   const {data:{session}}=await db.auth.getSession();
+  if(isReset&&session){
+    loginBox.style.display='none';
+    resetBox.style.display='block';
+    return;
+  }
   if(session) await enterAdmin();
 })();
 </script>
