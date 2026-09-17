@@ -1,1 +1,155 @@
-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TEAMS · TEAM GAMES</title><link rel="stylesheet" href="styles.css"></head><body><div id="nav"></div><main><section class="section"><div class="container"><div class="sectionhead"><div><div class="kicker">ATHLETES</div><h2>TEAM LINE-UP</h2></div><p>사진과 이름만 공개합니다.</p></div><div id="teamGrid" class="teamgrid"></div></div></section><section class="section"><div class="container"><div class="sectionhead"><div><div class="kicker">HEATS</div><h2>START LIST</h2></div></div><div id="heatGrid" class="heatgrid"></div></div></section><section class="section" id="register"><div class="container"><div class="sectionhead"><div><div class="kicker">ENTRY</div><h2>REGISTER YOUR TEAM</h2></div><p id="count">Loading…</p></div><form id="form" class="card formgrid"><div><label>Team Name</label><input name="team_name" required></div><div><label>대표 연락처</label><input name="phone" required></div><div><label>Player 1</label><input name="player_1" required></div><div><label>Player 2</label><input name="player_2" required></div><div class="full"><label>Team Photo</label><input name="photo" type="file" accept="image/jpeg,image/png,image/webp"></div><div class="full"><button class="btn">REGISTER TEAM</button><div id="msg" class="notice"></div></div></form></div></section></main><div id="footer"></div><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script src="app.js"></script><script>shell("TEAMS");async function render(){const ts=await teams();count.textContent=`${ts.length} / 12 Teams Registered`;teamGrid.innerHTML=ts.map((t,i)=>`<article class="card"><div class="num">TEAM ${String(i+1).padStart(2,'0')}</div><div class="photo">${t.photo_url?`<img src="${t.photo_url}">`:'TEAM PHOTO'}</div><div class="teamname">${t.team_name}</div><div>${t.player_1} × ${t.player_2}</div><div class="teammeta">HEAT ${t.heat_no} · STATION ${t.station_no}</div></article>`).join('');const h={};ts.forEach(t=>(h[t.heat_no]??=[]).push(t));heatGrid.innerHTML=Object.entries(h).map(([n,a])=>`<div class="card heat"><div><div class="num">HEAT ${n}</div><strong>${a[0]?.team_name||'TBD'}</strong></div><div class="vs">VS</div><div style="text-align:right"><div class="num">STATION 2</div><strong>${a[1]?.team_name||'TBD'}</strong></div></div>`).join('')}form.onsubmit=async e=>{e.preventDefault();try{const ev=await event();const f=new FormData(form);let photo_url=null,file=f.get('photo');if(file?.size){const ext=(file.name.split('.').pop()||'jpg').toLowerCase();const path=`${C.eventSlug}/${crypto.randomUUID()}.${ext}`;const up=await db.storage.from('tg-team-photos').upload(path,file);if(up.error)throw up.error;photo_url=db.storage.from('tg-team-photos').getPublicUrl(path).data.publicUrl}const r=await db.from('tg_teams').insert({event_id:ev.id,team_name:f.get('team_name').trim(),player_1:f.get('player_1').trim(),player_2:f.get('player_2').trim(),phone:f.get('phone').trim(),photo_url,status:'confirmed'}).select('heat_no,station_no').single();if(r.error)throw r.error;form.reset();notice('msg',`신청 완료 · HEAT ${r.data.heat_no} / STATION ${r.data.station_no}`);render()}catch(x){notice('msg',x.message,true)}};render();</script></body></html>
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>TEAMS · TEAM GAMES</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="nav"></div>
+<main>
+  <section class="section">
+    <div class="container">
+      <div class="sectionhead">
+        <div><div class="kicker">ATHLETES</div><h2>TEAM LINE-UP</h2></div>
+        <p>사진과 이름만 공개합니다.</p>
+      </div>
+      <div id="teamGrid" class="teamgrid"></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="sectionhead"><div><div class="kicker">HEATS</div><h2>START LIST</h2></div></div>
+      <div id="heatGrid" class="heatgrid"></div>
+    </div>
+  </section>
+
+  <section class="section" id="register">
+    <div class="container">
+      <div class="sectionhead">
+        <div><div class="kicker">ENTRY</div><h2>REGISTER YOUR TEAM</h2></div>
+        <p id="count">Loading…</p>
+      </div>
+
+      <div id="soldout" class="card soldout" style="display:none">
+        <div class="kicker">SOLD OUT · WAITLIST</div>
+        <div class="big">12 / 12 TEAMS</div>
+        <p class="muted">현재 참가 신청은 마감되었습니다. WAITLIST 안내는 추후 업데이트됩니다.</p>
+      </div>
+
+      <form id="form" class="card formgrid">
+        <div><label>Team Name</label><input name="team_name" maxlength="60" required></div>
+        <div><label>대표 연락처</label><input name="phone" inputmode="tel" autocomplete="tel" placeholder="010-0000-0000" required></div>
+        <div><label>Player 1</label><input name="player_1" maxlength="50" required></div>
+        <div><label>Player 2</label><input name="player_2" maxlength="50" required></div>
+        <div class="full">
+          <label>Team Photo · Required</label>
+          <input name="photo" type="file" accept="image/jpeg,image/png,image/webp" required>
+          <div class="hint">JPG / PNG / WEBP · 최대 5MB</div>
+        </div>
+        <div class="full">
+          <button id="submitBtn" class="btn" type="submit">REGISTER TEAM</button>
+          <div id="msg" class="notice"></div>
+        </div>
+      </form>
+    </div>
+  </section>
+</main>
+<div id="footer"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+<script>
+shell("TEAMS");
+const MAX_TEAMS=12;
+let submitting=false;
+
+function friendlyError(x){
+  const m=String(x?.message||x||'');
+  if(m.includes('DUPLICATE_PHONE')||x?.code==='23505') return '이미 신청된 연락처입니다. 기존 신청 내용을 확인해 주세요.';
+  if(m.includes('REGISTRATION_FULL')) return '12팀 모집이 마감되었습니다. SOLD OUT 상태입니다.';
+  if(m.includes('REGISTRATION_CLOSED')) return '현재 참가 신청이 닫혀 있습니다.';
+  if(m.includes('TEAM_PHOTO_REQUIRED')) return '팀 사진을 반드시 첨부해 주세요.';
+  if(m.includes('INVALID_PHONE')) return '대표 연락처를 다시 확인해 주세요.';
+  return m || '신청 중 오류가 발생했습니다. 다시 시도해 주세요.';
+}
+
+function setSoldOut(isSoldOut){
+  soldout.style.display=isSoldOut?'block':'none';
+  form.style.display=isSoldOut?'none':'grid';
+}
+
+async function render(){
+  const ts=await teams();
+  const ev=await event();
+  const limit=ev.max_teams||MAX_TEAMS;
+  const isSoldOut=ts.length>=limit || !ev.registration_open;
+  count.textContent=isSoldOut?`${ts.length} / ${limit} Teams Registered · SOLD OUT`:`${ts.length} / ${limit} Teams Registered`;
+  setSoldOut(isSoldOut);
+
+  teamGrid.innerHTML=ts.map((t,i)=>`<article class="card"><div class="num">TEAM ${String(i+1).padStart(2,'0')}</div><div class="photo">${t.photo_url?`<img src="${t.photo_url}" alt="${t.team_name}">`:'TEAM PHOTO'}</div><div class="teamname">${t.team_name}</div><div>${t.player_1} × ${t.player_2}</div><div class="teammeta">HEAT ${t.heat_no} · STATION ${t.station_no}</div></article>`).join('');
+
+  const h={};
+  ts.forEach(t=>(h[t.heat_no]??=[]).push(t));
+  heatGrid.innerHTML=Object.entries(h).map(([n,a])=>`<div class="card heat"><div><div class="num">HEAT ${n}</div><strong>${a[0]?.team_name||'TBD'}</strong></div><div class="vs">VS</div><div style="text-align:right"><div class="num">STATION 2</div><strong>${a[1]?.team_name||'TBD'}</strong></div></div>`).join('');
+}
+
+form.onsubmit=async e=>{
+  e.preventDefault();
+  if(submitting) return;
+  submitting=true;
+  submitBtn.disabled=true;
+  submitBtn.textContent='CHECKING…';
+  let uploadedPath=null;
+
+  try{
+    const ev=await event();
+    const current=await teams();
+    const limit=ev.max_teams||MAX_TEAMS;
+    if(!ev.registration_open) throw new Error('REGISTRATION_CLOSED');
+    if(current.length>=limit){await render();throw new Error('REGISTRATION_FULL');}
+
+    const f=new FormData(form);
+    const file=f.get('photo');
+    if(!file || !file.size) throw new Error('TEAM_PHOTO_REQUIRED');
+    if(file.size>5*1024*1024) throw new Error('팀 사진은 5MB 이하로 업로드해 주세요.');
+    if(!['image/jpeg','image/png','image/webp'].includes(file.type)) throw new Error('팀 사진은 JPG, PNG, WEBP 형식만 가능합니다.');
+
+    const ext=(file.name.split('.').pop()||'jpg').toLowerCase();
+    uploadedPath=`${C.eventSlug}/${crypto.randomUUID()}.${ext}`;
+    submitBtn.textContent='UPLOADING PHOTO…';
+    const up=await db.storage.from('tg-team-photos').upload(uploadedPath,file,{upsert:false});
+    if(up.error) throw up.error;
+    const photo_url=db.storage.from('tg-team-photos').getPublicUrl(uploadedPath).data.publicUrl;
+
+    submitBtn.textContent='REGISTERING…';
+    const r=await db.from('tg_teams').insert({
+      event_id:ev.id,
+      team_name:f.get('team_name').trim(),
+      player_1:f.get('player_1').trim(),
+      player_2:f.get('player_2').trim(),
+      phone:f.get('phone').trim(),
+      photo_url,
+      status:'confirmed'
+    }).select('heat_no,station_no').single();
+    if(r.error) throw r.error;
+
+    form.reset();
+    notice('msg',`신청 완료 · HEAT ${r.data.heat_no} / STATION ${r.data.station_no}`);
+    await render();
+  }catch(x){
+    notice('msg',friendlyError(x),true);
+    await render().catch(()=>{});
+  }finally{
+    submitting=false;
+    submitBtn.disabled=false;
+    submitBtn.textContent='REGISTER TEAM';
+  }
+};
+
+render();
+</script>
+</body>
+</html>
