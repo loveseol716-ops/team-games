@@ -1,1 +1,103 @@
-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TEAM GAMES</title><link rel="stylesheet" href="styles.css"></head><body><div id="nav"></div><main><section class="hero"><div class="container"><div class="kicker">EDITION #01 · OCT 31, 2026</div><h1>TEAM<br>GAMES</h1><p class="lead">Two athletes. One game. Eight minutes.<br>12 teams. 2 stations. One winner.</p><div class="meta"><span class="pill">24 ATHLETES</span><span class="pill">12 TEAMS</span><span class="pill">1 GAME</span><span class="pill">PRIZE · TBA</span></div><div id="countdown" class="countdown"></div></div></section><section class="section"><div class="container"><div class="sectionhead"><div><div class="kicker">THE FORMAT</div><h2>ONE GAME. NO EXCUSES.</h2></div><p>한 번의 게임으로 끝나는 짧고 강한 더블 팀 이벤트.</p></div><div class="grid g3"><div class="card"><div class="num">01</div><h3>TEAM OF 2</h3><p class="muted">두 명이 하나의 팀으로 출전.</p></div><div class="card"><div class="num">02</div><h3>HEAD TO HEAD</h3><p class="muted">두 팀이 같은 Heat에서 동시에 시작.</p></div><div class="card"><div class="num">03</div><h3>FAN PICK</h3><p class="muted">관중도 우승팀과 포디움을 예측.</p></div></div></div></section></main><div id="footer"></div><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script src="app.js"></script><script>shell("HOME");countdown();</script></body></html>
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>TEAM GAMES</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="nav"></div>
+<main>
+  <section class="hero arcade-hero">
+    <div class="container arcade-hero-grid">
+      <div class="arcade-hero-copy">
+        <div class="arcade-eyebrow">TEAM GAMES // STAGE 01</div>
+        <h1>TEAM<br>GAMES</h1>
+        <p class="arcade-lead">2 PLAYERS. 1 GAME. 8 MINUTES.</p>
+        <p class="lead">12 teams enter. One team leaves on top.</p>
+        <div class="meta arcade-meta">
+          <span class="pill">24 PLAYERS</span>
+          <span class="pill">12 TEAMS</span>
+          <span class="pill">6 HEATS</span>
+          <span class="pill">OCT 31</span>
+        </div>
+        <div id="countdown" class="countdown"></div>
+      </div>
+
+      <aside class="spectator-console">
+        <div class="console-topline"><span>● LIVE CROWD MODE</span><span>PLAYER: YOU</span></div>
+        <div class="console-screen">
+          <div class="console-label">[ SPECTATOR MODE ]</div>
+          <h2>YOU KNOW<br>NOTHING.<br><span>PICK YOUR TEAM.</span></h2>
+          <p>출전하지 않아도 게임에는 들어올 수 있다.<br>우승팀을 찍거나, 1·2·3위를 정확히 맞혀라.</p>
+          <div class="console-actions">
+            <a class="btn arcade-primary" href="fanpick.html">▶ MAKE YOUR PICK</a>
+            <a class="btn dark arcade-secondary" href="teams.html">VIEW FIGHTERS</a>
+          </div>
+          <div class="console-rules">FREE FAN PICK · NO PURCHASE · PICKS CLOSE BEFORE GAME TIME</div>
+        </div>
+        <div class="crowd-meter">
+          <div class="crowd-meter-title">CROWD FAVORITES // NOW</div>
+          <div id="homeCrowd" class="crowd-mini"><div class="muted">LOADING PICKS...</div></div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section arcade-section">
+    <div class="container">
+      <div class="sectionhead">
+        <div><div class="arcade-eyebrow">HOW TO PLAY</div><h2>CHOOSE YOUR MODE.</h2></div>
+        <p>선수도, 관중도 각자 방식으로 게임에 들어온다.</p>
+      </div>
+      <div class="grid g3 arcade-mode-grid">
+        <a class="card arcade-mode-card" href="teams.html#register">
+          <div class="arcade-card-no">P1</div>
+          <h3>ENTER THE GAME</h3>
+          <p class="muted">2인 1팀으로 출전. 12팀이 차면 ENTRY CLOSED.</p>
+          <span class="arcade-link">REGISTER TEAM →</span>
+        </a>
+        <a class="card arcade-mode-card is-hot" href="fanpick.html">
+          <div class="arcade-card-no">P2</div>
+          <h3>PICK A SIDE</h3>
+          <p class="muted">사진만 보고 우승팀을 골라라. 감으로 가도 된다.</p>
+          <span class="arcade-link">MAKE YOUR PICK →</span>
+        </a>
+        <a class="card arcade-mode-card" href="live.html">
+          <div class="arcade-card-no">LIVE</div>
+          <h3>WATCH THE BOARD</h3>
+          <p class="muted">경기가 시작되면 순위와 기록이 여기서 움직인다.</p>
+          <span class="arcade-link">OPEN SCOREBOARD →</span>
+        </a>
+      </div>
+    </div>
+  </section>
+</main>
+<div id="footer"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+<script>
+shell('HOME');
+countdown();
+
+(async()=>{
+  try{
+    const ts=await teams();
+    if(!ts.length){homeCrowd.innerHTML='<div class="muted">NO TEAMS YET.</div>';return;}
+    const ev=await event();
+    const q=await db.from('tg_pick_totals').select('team_id,winner_count').eq('event_id',ev.id);
+    if(q.error) throw q.error;
+    const count={};(q.data||[]).forEach(x=>count[x.team_id]=x.winner_count||0);
+    const total=Object.values(count).reduce((a,b)=>a+b,0)||0;
+    const ranked=[...ts].sort((a,b)=>(count[b.id]||0)-(count[a.id]||0)).slice(0,3);
+    homeCrowd.innerHTML=ranked.map((t,i)=>{
+      const pct=total?Math.round((count[t.id]||0)/total*100):0;
+      return `<div class="crowd-mini-row"><span>${String(i+1).padStart(2,'0')} ${t.team_name}</span><b>${pct}%</b></div>`;
+    }).join('');
+  }catch(e){homeCrowd.innerHTML='<div class="muted">PICKS OPEN SOON.</div>'}
+})();
+</script>
+</body>
+</html>
