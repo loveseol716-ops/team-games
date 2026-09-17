@@ -16,40 +16,33 @@
         <div class="arcade-eyebrow">TEAM GAMES // STAGE 01</div>
         <h1>TEAM<br>GAMES</h1>
         <p class="arcade-lead">2 PLAYERS. 1 GAME. 8 MINUTES.</p>
-        <p class="lead">12 teams enter. Every player leaves with a record.</p>
+        <p class="lead">12 teams. 6 heats. One game decides the board.</p>
         <div class="meta arcade-meta"><span class="pill">24 PLAYERS</span><span class="pill">12 TEAMS</span><span class="pill">6 HEATS</span><span class="pill">OCT 31</span></div>
         <div id="countdown" class="countdown"></div>
       </div>
 
       <aside class="spectator-console">
-        <div class="console-topline"><span>● LIVE CROWD MODE</span><span>PLAYER: YOU</span></div>
+        <div class="console-topline"><span>● CROWD MODE</span><span>PLAYER: YOU</span></div>
         <div class="console-screen">
           <div class="console-label">[ SPECTATOR MODE ]</div>
           <h2>YOU KNOW<br>NOTHING.<br><span>PICK YOUR TEAM.</span></h2>
-          <p>출전하지 않아도 게임에는 들어올 수 있다.<br>우승팀을 찍거나, 1·2·3위를 정확히 맞혀라.</p>
-          <div class="console-actions"><a class="btn arcade-primary" href="fanpick.html">▶ MAKE YOUR PICK</a><a class="btn dark arcade-secondary" href="teams.html">VIEW FIGHTERS</a></div>
-          <div class="console-rules">FREE FAN PICK · NO PURCHASE · PICKS CLOSE BEFORE GAME TIME</div>
+          <p>출전하지 않아도 게임에는 들어올 수 있다.<br>우승팀을 찍거나 1·2·3위를 정확히 맞혀라.</p>
+          <div class="console-actions"><a class="btn arcade-primary" href="fanpick.html">▶ MAKE YOUR PICK</a><a class="btn dark arcade-secondary" href="teams.html">VIEW TEAMS</a></div>
+          <div class="console-rules">FREE FAN PICK · PICKS CLOSE BEFORE GAME TIME</div>
         </div>
-        <div class="crowd-meter"><div class="crowd-meter-title">CROWD FAVORITES // NOW</div><div id="homeCrowd" class="crowd-mini"><div class="muted">LOADING PICKS...</div></div></div>
+        <div class="crowd-meter"><div class="crowd-meter-title">CROWD FAVORITES // GAME #01</div><div id="homeCrowd" class="crowd-mini"><div class="muted">LOADING PICKS...</div></div></div>
       </aside>
     </div>
   </section>
 
   <section class="section arcade-section">
     <div class="container">
-      <div class="sectionhead"><div><div class="arcade-eyebrow">HOW TO PLAY</div><h2>CHOOSE YOUR MODE.</h2></div><p>선수도, 관중도 각자 방식으로 게임에 들어온다.</p></div>
+      <div class="sectionhead"><div><div class="arcade-eyebrow">GAME #01</div><h2>CHOOSE YOUR MODE.</h2></div><p>이번 게임에 들어오는 두 가지 방법.</p></div>
       <div class="grid g3 arcade-mode-grid">
-        <a class="card arcade-mode-card" href="athlete.html"><div class="arcade-card-no">P1</div><h3>BUILD YOUR PLAYER</h3><p class="muted">PLAYER ID를 만들고 이번 GAME의 파트너를 직접 고른다.</p><span class="arcade-link">ENTER PLAYER MODE →</span></a>
-        <a class="card arcade-mode-card is-hot" href="fanpick.html"><div class="arcade-card-no">P2</div><h3>PICK A SIDE</h3><p class="muted">사진만 보고 우승팀을 골라라. 감으로 가도 된다.</p><span class="arcade-link">MAKE YOUR PICK →</span></a>
-        <a class="card arcade-mode-card" href="live.html"><div class="arcade-card-no">LIVE</div><h3>WATCH THE BOARD</h3><p class="muted">경기가 시작되면 순위와 기록이 여기서 움직인다.</p><span class="arcade-link">OPEN SCOREBOARD →</span></a>
+        <a class="card arcade-mode-card" href="athlete.html"><div class="arcade-card-no">PLAYER</div><h3>ENTER GAME #01</h3><p class="muted">PLAYER 계정을 만들고 이번 게임의 파트너를 정한다.</p><span class="arcade-link">PLAYER MODE →</span></a>
+        <a class="card arcade-mode-card is-hot" href="fanpick.html"><div class="arcade-card-no">CROWD</div><h3>PICK A SIDE</h3><p class="muted">출전팀을 보고 이번 게임의 우승팀을 고른다.</p><span class="arcade-link">MAKE YOUR PICK →</span></a>
+        <a class="card arcade-mode-card" href="live.html"><div class="arcade-card-no">LIVE</div><h3>WATCH THE BOARD</h3><p class="muted">GAME #01이 시작되면 순위와 기록이 여기서 움직인다.</p><span class="arcade-link">OPEN SCOREBOARD →</span></a>
       </div>
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="container">
-      <div class="sectionhead"><div><div class="arcade-eyebrow">2026 SEASON</div><h2>WHO'S ON TOP?</h2></div><a class="btn dark" href="ranking.html">FULL RANKING →</a></div>
-      <div id="homeRanking" class="rank-board"><div class="card muted">LOADING PLAYER BOARD…</div></div>
     </div>
   </section>
 </main>
@@ -57,22 +50,15 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script src="app.js"></script>
 <script>
 shell('HOME');countdown();
-
 (async()=>{
   try{
     const ts=await teams();
-    if(!ts.length){homeCrowd.innerHTML='<div class="muted">NO TEAMS YET.</div>'}else{
-      const ev=await event();const q=await db.from('tg_pick_totals').select('team_id,winner_count').eq('event_id',ev.id);if(q.error)throw q.error;
-      const count={};(q.data||[]).forEach(x=>count[x.team_id]=x.winner_count||0);const total=Object.values(count).reduce((a,b)=>a+b,0)||0;
-      const ranked=[...ts].sort((a,b)=>(count[b.id]||0)-(count[a.id]||0)).slice(0,3);
-      homeCrowd.innerHTML=ranked.map((t,i)=>`<div class="crowd-mini-row"><span>${String(i+1).padStart(2,'0')} ${esc(t.team_name)}</span><b>${total?Math.round((count[t.id]||0)/total*100):0}%</b></div>`).join('');
-    }
+    if(!ts.length){homeCrowd.innerHTML='<div class="muted">NO TEAMS YET.</div>';return}
+    const ev=await event();const q=await db.from('tg_pick_totals').select('team_id,winner_count').eq('event_id',ev.id);if(q.error)throw q.error;
+    const count={};(q.data||[]).forEach(x=>count[x.team_id]=x.winner_count||0);const total=Object.values(count).reduce((a,b)=>a+b,0)||0;
+    const ranked=[...ts].sort((a,b)=>(count[b.id]||0)-(count[a.id]||0)).slice(0,3);
+    homeCrowd.innerHTML=ranked.map((t,i)=>`<div class="crowd-mini-row"><span>${String(i+1).padStart(2,'0')} ${esc(t.team_name)}</span><b>${total?Math.round((count[t.id]||0)/total*100):0}%</b></div>`).join('');
   }catch(e){homeCrowd.innerHTML='<div class="muted">PICKS OPEN SOON.</div>'}
-
-  try{
-    const lb=(await leaderboard()).slice(0,5);
-    homeRanking.innerHTML=lb.length?lb.map(x=>`<a class="rank-row ${Number(x.leaderboard_rank)<=3?'top3':''}" href="player.html?id=${encodeURIComponent(x.athlete_id)}"><div class="rank-no">#${String(x.leaderboard_rank).padStart(2,'0')}</div><div class="rank-avatar"><img src="${esc(x.photo_url)}" alt="${esc(x.display_name)}"></div><div class="rank-name"><strong>${esc(x.display_name)}</strong><small>@${esc(x.handle)}${x.gym?` · ${esc(x.gym)}`:''}</small></div><div class="rank-metric rank-points"><span>PTS</span><b>${x.total_points}</b></div><div class="rank-metric"><span>STARTS</span><b>${x.starts}</b></div><div class="rank-metric"><span>WINS</span><b>${x.wins}</b></div><div class="rank-metric"><span>PODIUMS</span><b>${x.podiums}</b></div></a>`).join(''):'<div class="card"><div class="kicker">PLAYER BOARD</div><h3>NO SCORE YET.</h3><p class="muted">PLAYER ID를 만들면 시즌 보드가 시작됩니다.</p><a class="btn arcade-primary" href="athlete.html">CREATE PLAYER</a></div>';
-  }catch(e){homeRanking.innerHTML='<div class="card muted">PLAYER BOARD OPENS SOON.</div>'}
 })();
 </script>
 </body>
