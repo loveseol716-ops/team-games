@@ -6,23 +6,24 @@
   <title>FAN PICK · TEAM GAMES</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="athlete.css">
+  <link rel="stylesheet" href="arcade-pages.css">
 </head>
-<body>
+<body class="tg-arcade-page fanpick-arcade">
 <div id="nav"></div>
 <main>
-  <section class="section fanpick-hero">
+  <section class="section fanpick-hero arcade-page-hero fanpick-betting-hero">
     <div class="container">
-      <div class="arcade-eyebrow">SPECTATOR MODE // PLAYER SELECT</div>
+      <div class="arcade-eyebrow">BETTING BOARD // FREE FAN PICK</div>
       <div class="fanpick-title-row">
-        <div><h1>SELECT<br>YOUR SIDE.</h1><p>얼굴과 이름만 보고 고르면 된다. 설명 없음. 스펙 없음. 그냥 찍어.</p></div>
-        <div class="fanpick-rules-box"><span>01</span><b>PICK THE WINNER</b><span>02</span><b>CALL THE PODIUM</b><small>FREE FAN PICK · PICKS CLOSE BEFORE GAME TIME</small></div>
+        <div><h1>PICK<br>YOUR SIDE.</h1><p>돈은 걸지 않는다. 대신 감은 걸어라. 얼굴과 이름만 보고 고른다.</p><div class="arcade-page-chips"><span>FREE PICK</span><span>WINNER</span><span>PERFECT PODIUM</span></div></div>
+        <div class="fanpick-rules-box betting-rules"><span>01</span><b>PICK THE WINNER</b><span>02</span><b>CALL THE PODIUM</b><small>NO MONEY · JUST YOUR PICK · PICKS CLOSE BEFORE GAME TIME</small></div>
       </div>
     </div>
   </section>
 
-  <section class="section arcade-section"><div class="container"><div class="sectionhead"><div><div class="arcade-eyebrow">WINNER PICK</div><h2>WHO TAKES IT?</h2></div><p>한 팀만 선택.</p></div><div id="winner" class="character-select"></div><div class="fanpick-submit-row"><button id="saveWin" class="btn arcade-primary">LOCK WINNER PICK</button><div id="winMsg" class="notice"></div></div></div></section>
-  <section class="section arcade-section podium-section"><div class="container"><div class="sectionhead"><div><div class="arcade-eyebrow">PERFECT PODIUM</div><h2>CALL 1 · 2 · 3.</h2></div><p>순서까지 맞혀야 성공.</p></div><div class="podium-console"><div class="podium-slot"><span>1ST</span><select id="p1"><option value="">SELECT TEAM</option></select></div><div class="podium-slot"><span>2ND</span><select id="p2"><option value="">SELECT TEAM</option></select></div><div class="podium-slot"><span>3RD</span><select id="p3"><option value="">SELECT TEAM</option></select></div></div><div class="fanpick-submit-row"><button id="savePod" class="btn arcade-primary">LOCK PODIUM</button><div id="podMsg" class="notice"></div></div></div></section>
-  <section class="section arcade-section"><div class="container"><div class="sectionhead"><div><div class="arcade-eyebrow">CROWD METER</div><h2>WHO'S THE FAVORITE?</h2></div><p>지금 관중들이 고른 팀.</p></div><div id="bars" class="card arcade-board"></div></div></section>
+  <section class="section arcade-section arcade-deck-section"><div class="container"><div class="sectionhead"><div><div class="arcade-eyebrow">WINNER PICK</div><h2>WHO TAKES IT?</h2></div><p>한 팀만 선택.</p></div><div id="winner" class="character-select betting-character-select"></div><div class="fanpick-submit-row betting-submit-row"><button id="saveWin" class="btn arcade-primary">LOCK WINNER PICK</button><div id="winMsg" class="notice"></div></div></div></section>
+  <section class="section arcade-section podium-section arcade-deck-section"><div class="container"><div class="sectionhead"><div><div class="arcade-eyebrow">PERFECT PODIUM</div><h2>CALL 1 · 2 · 3.</h2></div><p>순서까지 맞혀야 성공.</p></div><div class="podium-console betting-podium-console"><div class="podium-slot"><span>1ST</span><select id="p1"><option value="">SELECT TEAM</option></select></div><div class="podium-slot"><span>2ND</span><select id="p2"><option value="">SELECT TEAM</option></select></div><div class="podium-slot"><span>3RD</span><select id="p3"><option value="">SELECT TEAM</option></select></div></div><div class="fanpick-submit-row"><button id="savePod" class="btn arcade-primary">LOCK PODIUM</button><div id="podMsg" class="notice"></div></div></div></section>
+  <section class="section arcade-section arcade-deck-section crowd-board-section"><div class="container"><div class="sectionhead arcade-sectionhead"><div><div class="arcade-eyebrow">CROWD METER // LIVE ODDS FEEL</div><h2>WHO'S THE FAVORITE?</h2></div><p>지금 관중들이 고른 팀. 실제 배당이나 금전 베팅은 아닙니다.</p></div><div id="bars" class="card arcade-board betting-board"></div></div></section>
 </main>
 <div id="footer"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script src="app.js"></script>
