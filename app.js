@@ -31,7 +31,7 @@ function notice(id,msg,err=false){const e=document.getElementById(id);if(!e)retu
 function token(){let t=localStorage.getItem('tg_device_token');if(!t){t=crypto.randomUUID();localStorage.setItem('tg_device_token',t)}return t}
 
 async function event(){const {data,error}=await db.from('tg_events').select('*').eq('slug',C.eventSlug).single();if(error)throw error;return data}
-async function teams(){const e=await event();const {data,error}=await db.from('tg_teams').select('id,event_id,team_name,player_1,player_2,photo_url,heat_no,station_no,status,created_at').eq('event_id',e.id).eq('status','confirmed').order('created_at');if(error)throw error;return data||[]}
+async function teams(){const e=await event();const {data,error}=await db.from('tg_teams').select('id,event_id,team_name,player_1,player_2,photo_url,heat_no,station_no,status,division,category,pricing_tier,amount_due,created_at').eq('event_id',e.id).eq('status','confirmed').order('created_at');if(error)throw error;return data||[]}
 
 async function rosterMap(teamIds){
   const out={};
