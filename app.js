@@ -107,6 +107,27 @@ async function arcRequireLogin(target){
 window.arcRequireLogin=arcRequireLogin;
 window.safeNextUrl=safeNextUrl;
 
+async function arcBeginGameEntry(next='athlete.html'){
+  const target=safeNextUrl(next,'athlete.html');
+  const user=await currentUser();
+  if(!user){
+    location.href='account.html?mode=login&next='+encodeURIComponent('player-profile.html?next='+encodeURIComponent(target));
+    return false;
+  }
+  const boot=await db.rpc('arc_account_bootstrap',{p_display_name:null});
+  if(boot.error)throw boot.error;
+  const profile=await db.rpc('arc_player_profile');
+  if(profile.error)throw profile.error;
+  const row=profile.data?.[0];
+  if(!row?.profile_complete){
+    location.href='player-profile.html?next='+encodeURIComponent(target);
+    return false;
+  }
+  location.href=target;
+  return true;
+}
+window.arcBeginGameEntry=arcBeginGameEntry;
+
 function countdown(){
   const el=document.getElementById('countdown');if(!el)return;
   const target=new Date(C.eventDateISO);
