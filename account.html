@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="ARC GAMES ACCOUNT — Create your ARC ID, manage PLAY POINT and prepare for upcoming games.">
+  <meta property="og:site_name" content="ARC GAMES">
+  <meta property="og:title" content="ARC GAMES — ACCOUNT">
+  <meta property="og:description" content="Create your ARC ID and get ready for GAME #01.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://arcgames.kr/account.html">
+  <meta property="og:image" content="https://arcgames.kr/favicon.png">
+  <meta name="twitter:card" content="summary">
+  <meta name="theme-color" content="#050508">
+  <title>ACCOUNT · ARC GAMES</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="arcade-pages.css?v=20260918-7">
+</head>
+<body class="tg-arcade-page arc-account-page">
+<div id="nav"></div>
+<main>
+  <section class="arcade-page-hero arc-account-hero">
+    <div class="container arc-account-layout">
+      <div class="arc-account-copy">
+        <div class="arcade-eyebrow">ARC ACCOUNT // ACCESS REQUIRED</div>
+        <h1>YOUR ARC<br>ID STARTS HERE.</h1>
+        <p class="lead">참가신청과 FAN PICK은 ARC ACCOUNT 로그인 후 이용할 수 있습니다.</p>
+        <div class="arcade-page-chips"><span>ENTER GAME</span><span>FAN PICK</span><span>PLAY POINT</span><span>MY PAGE</span></div>
+      </div>
+      <div class="arc-auth-shell">
+        <div class="arc-auth-tabs">
+          <button id="signupTab" class="btn arcade-primary" type="button">CREATE ACCOUNT</button>
+          <button id="loginTab" class="btn dark" type="button">LOGIN</button>
+        </div>
+        <div id="authCard"></div>
+      </div>
+    </div>
+  </section>
+</main>
+<div id="footer"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+<script>
+shell('ACCOUNT');
+const params=new URLSearchParams(location.search);
+const next=safeNextUrl(params.get('next'),'my.html');
+let mode=params.get('mode')==='login'?'login':'signup';
+
+function authError(e){
+  const m=String(e?.message||e||'');
+  if(m.includes('EMAIL_EXISTS')||m.toLowerCase().includes('already registered'))return '이미 가입된 이메일입니다. LOGIN을 이용해 주세요.';
+  if(m.includes('INVALID_EMAIL'))return '이메일 형식을 확인해 주세요.';
+  if(m.includes('INVALID_PASSWORD'))return '비밀번호는 8자 이상 입력해 주세요.';
+  if(m.includes('Invalid login credentials'))return '이메일 또는 비밀번호가 맞지 않습니다.';
+  if(m.includes('ORIGIN_NOT_ALLOWED'))return '현재 도메인에서 회원가입을 사용할 수 없습니다.';
+  return m||'처리 중 오류가 발생했습니다.';
+}
+
+function renderAuth(){
+  signupTab.className='btn '+(mode==='signup'?'arcade-primary':'dark');
+  loginTab.className='btn '+(mode==='login'?'arcade-primary':'dark');
+  authCard.innerHTML=`
+    <div class="arc-auth-status"><span>${mode==='signup'?'NEW PLAYER':'RETURNING PLAYER'}</span><b>${mode==='signup'?'10,000 P WELCOME CREDIT':'ACCESS YOUR ARC ID'}</b></div>
+    <form id="arcAuthForm" class="arc-auth-form">
+      ${mode==='signup'?'<label>NICKNAME<input id="nickname" maxlength="30" placeholder="YOUR NAME" required></label>':''}
+      <label>EMAIL<input id="email" type="email" autocomplete="email" required></label>
+      <label>PASSWORD<input id="password" type="password" minlength="8" maxlength="72" autocomplete="${mode==='signup'?'new-password':'current-password'}" required></label>
+      <input id="website" class="arc-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <button id="submitAuth" class="btn arcade-primary" type="submit">${mode==='signup'?'CREATE ARC ACCOUNT →':'LOGIN →'}</button>
+      <div id="authMsg" class="notice"></div>
+    </form>
+    <div class="arc-auth-note">가입 즉시 ARC ACCOUNT가 생성되고 FAN PICK용 PLAY POINT 10,000P가 지급됩니다.</div>`;
+  arcAuthForm.onsubmit=submit;
+}
+
+async function submit(e){
+  e.preventDefault();
+  submitAuth.disabled=true;submitAuth.textContent='LOADING…';
+  try{
+    const mail=email.value.trim().toLowerCase(),pw=password.value;
+    let name=null;
+    if(mode==='signup'){
+      name=nickname.value.trim();
+      const r=await db.functions.invoke('tg-athlete-signup',{body:{email:mail,password:pw,website:website.value}});
+      if(r.error)throw r.error;
+      if(!r.data?.ok)throw new Error(r.data?.error||'SIGNUP_FAILED');
+    }
+    const login=await db.auth.signInWithPassword({email:mail,password:pw});
+    if(login.error)throw login.error;
+    const boot=await db.rpc('arc_account_bootstrap',{p_display_name:name});
+    if(boot.error)throw boot.error;
+    location.href=next;
+  }catch(err){
+    notice('authMsg',authError(err),true);
+    submitAuth.disabled=false;
+    submitAuth.textContent=mode==='signup'?'CREATE ARC ACCOUNT →':'LOGIN →';
+  }
+}
+
+signupTab.onclick=()=>{mode='signup';renderAuth()};
+loginTab.onclick=()=>{mode='login';renderAuth()};
+
+(async()=>{
+  const user=await currentUser();
+  if(user){
+    const boot=await db.rpc('arc_account_bootstrap',{p_display_name:null});
+    if(!boot.error)location.href=next;
+  }
+})();
+renderAuth();
+</script>
+</body>
+</html>
