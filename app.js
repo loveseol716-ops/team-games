@@ -41,7 +41,35 @@ function shell(active){
     return;
   }
   document.querySelector('#nav').innerHTML=nav(active);
-  document.querySelector('#footer').innerHTML=`<footer class="footer"><div class="container arcade-footer"><span>ARC GAMES // STAGE 01</span><span>EVENT #01 · COMING SOON</span><span>TEAM OF 2 · 24 TEAMS</span></div></footer>`;
+  document.querySelector('#footer').innerHTML=`
+    <footer class="footer arc-legal-footer">
+      <div class="container">
+        <div class="arc-footer-top">
+          <div class="arc-footer-brand">
+            <b>ARC GAMES</b>
+            <span>OPERATED BY BIRD COMPANY LLC</span>
+          </div>
+          <nav class="arc-footer-links" aria-label="legal">
+            <a href="terms.html">이용약관</a>
+            <a href="privacy.html">개인정보처리방침</a>
+            <a href="refund.html">환불·취소정책</a>
+          </nav>
+        </div>
+        <div class="arc-business-info">
+          <span>상호명: 버드컴퍼니 유한회사</span>
+          <span>대표자: 설재현</span>
+          <span>사업자등록번호: 539-81-03765</span>
+          <span>통신판매업신고번호: 2025-서울구로-1975</span>
+          <span>사업자 주소: 서울 구로구 디지털로26길 43, R동 1102-A31호</span>
+          <span>운영 장소: 서울특별시 강남구 언주로146길 9, 지하1층(논현동)</span>
+          <span>문의: lovesol716@gmail.com / 010-9206-4927</span>
+        </div>
+        <div class="arc-footer-bottom">
+          <span>© 2026 ARC GAMES. ALL RIGHTS RESERVED.</span>
+          <span>PLAY POINT HAS NO CASH VALUE.</span>
+        </div>
+      </div>
+    </footer>`;
   syncArcAccountNav();
 }
 
