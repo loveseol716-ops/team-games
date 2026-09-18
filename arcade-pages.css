@@ -892,3 +892,34 @@
   .arc-account-copy h1{font-size:clamp(50px,16vw,72px)!important}
   .arc-auth-tabs,.arc-stat-row{grid-template-columns:1fr}
 }
+
+/* PLAYER PROFILE */
+.arc-player-profile-hero{min-height:calc(100vh - 68px);display:flex;align-items:center}
+.arc-player-profile-layout{display:grid;grid-template-columns:1fr .9fr;gap:34px;align-items:center}
+.arc-player-profile-layout h1{font-size:clamp(58px,7.5vw,102px)!important;line-height:.86!important}
+.arc-player-form-card{border:1px solid rgba(45,226,255,.22);background:linear-gradient(180deg,rgba(45,226,255,.035),#08090d);padding:14px}
+.arc-profile-step{display:flex;justify-content:space-between;gap:12px;padding:11px 12px;border:1px solid #292d36;background:#07080c}
+.arc-profile-step span{font-family:var(--font-display);font-size:8px;color:var(--tg-pink)}
+.arc-profile-step b{font-size:8px;color:var(--tg-lime)}
+.arc-player-form{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px;border:1px solid #292d36;border-top:0;background:#090a0f}
+.arc-player-form label{display:grid;gap:6px;font-size:8px;color:#747b86;letter-spacing:.07em}
+.arc-player-form label em{font-style:normal;color:var(--tg-pink)}
+.arc-player-form label>span{color:#525864}
+.arc-player-form input,.arc-player-form select{width:100%;min-height:44px;padding:11px 12px;border:1px solid #30343e;background:#07080c;color:#fff;outline:none}
+.arc-player-form input:focus,.arc-player-form select:focus{border-color:var(--tg-blue);box-shadow:0 0 0 1px rgba(45,226,255,.12)}
+.arc-player-form .arc-consent{grid-column:1/-1;display:flex;grid-template-columns:auto 1fr;align-items:flex-start;gap:9px;padding:11px;border:1px solid #2b2f38;background:#07080c}
+.arc-player-form .arc-consent input{width:16px;height:16px;min-height:0;margin-top:1px}
+.arc-player-form .arc-consent span{font-size:9px;line-height:1.5;color:#969da8}
+.arc-player-form button{grid-column:1/-1;min-height:48px}
+.arc-player-form .notice{grid-column:1/-1}
+.arc-profile-note{margin-top:8px;padding:11px 12px;border-left:3px solid var(--tg-blue);background:rgba(45,226,255,.035);font-size:9px;color:#6f7680;line-height:1.55}
+
+@media(max-width:850px){
+  .arc-player-profile-layout{grid-template-columns:1fr}
+  .arc-player-profile-hero{min-height:auto;padding-top:80px;padding-bottom:60px}
+}
+@media(max-width:600px){
+  .arc-player-profile-layout h1{font-size:clamp(48px,15vw,70px)!important}
+  .arc-player-form{grid-template-columns:1fr}
+  .arc-player-form .arc-consent,.arc-player-form button,.arc-player-form .notice{grid-column:1}
+}
