@@ -56,7 +56,7 @@ shell('ACCOUNT');
 
 const params=new URLSearchParams(location.search);
 const storedNext=safeNextUrl(sessionStorage.getItem('arc_oauth_next'),'my.html');
-const next=safeNextUrl(params.get('next'),params.get('oauth')==='1'?storedNext:'my.html');
+const next=safeNextUrl(params.get('next')||sessionStorage.getItem('arc_oauth_next'),'my.html');
 let mode=params.get('mode')==='login'?'login':'signup';
 
 const byId=id=>document.getElementById(id);
@@ -138,7 +138,7 @@ async function socialLogin(provider,button){
     sessionStorage.setItem('arc_oauth_next',next);
     const {error}=await db.auth.signInWithOAuth({
       provider,
-      options:{redirectTo:location.origin+'/account.html?oauth=1'}
+      options:{redirectTo:location.origin+'/account.html'}
     });
     if(error)throw error;
   }catch(err){
