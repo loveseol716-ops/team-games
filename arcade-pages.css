@@ -882,7 +882,7 @@
 .arc-access-list b{font-size:9px}.arc-access-list span{font-size:8px;color:var(--tg-lime)}
 .arc-settings-card{display:grid;gap:9px}
 .arc-settings-card .btn{width:100%}
-.nav .arcade-cta[data-auth="in"]{border-color:rgba(201,255,71,.42);color:var(--tg-lime)}
+.nav .arcade-cta[data-auth="in"]{border-color:rgba(201,255,71,.42);background:var(--tg-lime,#c9ff47);color:#050505!important;text-shadow:none;white-space:nowrap;min-width:108px;text-align:center}
 
 @media(max-width:850px){
   .arc-account-layout,.arc-my-grid{grid-template-columns:1fr}
@@ -997,4 +997,46 @@ radial-gradient(circle at 88% 8%,rgba(45,226,255,.05),transparent 25%),
 @media(max-width:600px){
   .arc-social-grid{grid-template-columns:1fr}
   .arc-social-btn{justify-content:flex-start;padding-left:16px}
+}
+
+/* FINAL UI POLISH // 2026-09-19 */
+.fanpick-arcade .coming-soon-hero h1{
+  font-size:clamp(58px,9vw,112px)!important;
+  line-height:.94!important;
+  letter-spacing:-.025em!important;
+  margin:14px 0 26px!important;
+  max-width:1050px;
+}
+.fanpick-arcade .coming-soon-hero .lead{
+  margin-top:0;
+}
+.fanpick-arcade .arcade-page-chips{
+  margin-top:26px;
+}
+.fanpick-arcade .game-hero-actions{
+  margin-top:28px!important;
+  clear:both;
+}
+
+.player-arcade .coming-soon-hero h1{
+  line-height:.91!important;
+  margin-bottom:28px!important;
+}
+.player-arcade .arcade-page-chips{
+  margin-top:28px;
+}
+.player-arcade .game-hero-actions{
+  margin-top:38px!important;
+  clear:both;
+}
+
+@media(max-width:650px){
+  .fanpick-arcade .coming-soon-hero h1{
+    font-size:clamp(48px,15vw,70px)!important;
+    line-height:.96!important;
+  }
+  .fanpick-arcade .game-hero-actions,
+  .player-arcade .game-hero-actions{
+    margin-top:30px!important;
+  }
 }
