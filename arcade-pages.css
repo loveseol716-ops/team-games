@@ -743,3 +743,29 @@
   }
   .rulebook-hero .rulebook-title span{line-height:.94}
 }
+
+/* HARD FIX // RULEBOOK TITLE BLOCKS */
+.rulebook-hero .rulebook-title-wrap{
+  margin:12px 0 18px;
+  max-width:980px;
+}
+.rulebook-hero .rulebook-title-line{
+  display:block;
+  width:100%;
+  font-family:var(--font-display);
+  font-size:clamp(68px,8vw,104px);
+  line-height:.86;
+  letter-spacing:-.035em;
+  color:#fff;
+  text-shadow:-4px 0 0 rgba(255,59,212,.25),4px 0 0 rgba(45,226,255,.22),0 0 24px rgba(255,255,255,.04);
+}
+.rulebook-hero .rulebook-title-line + .rulebook-title-line{
+  margin-top:10px;
+}
+@media(max-width:900px){
+  .rulebook-hero .rulebook-title-line{font-size:clamp(58px,11vw,88px);line-height:.9}
+}
+@media(max-width:650px){
+  .rulebook-hero .rulebook-title-line{font-size:clamp(46px,15vw,70px);line-height:.92}
+  .rulebook-hero .rulebook-title-line + .rulebook-title-line{margin-top:6px}
+}
