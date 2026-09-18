@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>PREDICTION FLOOR · TEAM GAMES</title>
+  <title>PREDICTION FLOOR · ARC GAMES</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="athlete.css">
   <link rel="stylesheet" href="arcade-pages.css">
@@ -20,8 +20,8 @@
           <h1>PLACE<br>YOUR PICK.</h1>
           <p>6개 마켓. 각 마켓에서 우승팀 하나를 고르고 PLAY POINT를 건다.</p>
           <div class="arcade-page-chips">
-            <span>OPEN · MM</span><span>OPEN · WW</span><span>OPEN · MIXED</span>
-            <span>PRO · MM</span><span>PRO · WW</span><span>PRO · MIXED</span>
+            <span>BEGINNER · MM</span><span>BEGINNER · WW</span><span>BEGINNER · MIXED</span>
+            <span>ATHLETE · MM</span><span>ATHLETE · WW</span><span>ATHLETE · MIXED</span>
           </div>
         </div>
         <div class="fanpick-rules-box betting-rules prediction-rulebox">
@@ -122,7 +122,7 @@ function renderFanAccount(){
           <div class="arcade-eyebrow">INSERT COIN // FAN ACCOUNT</div>
           <h2>START WITH<br><span>10,000 P.</span></h2>
           <p>무료 FAN ACCOUNT를 만들면 PLAY POINT 10,000P가 자동 지급됩니다.</p>
-          <div class="prediction-no-value">PLAY POINT는 TEAM GAMES 내부 게임 점수이며 현금·상품·할인과 교환되지 않습니다.</div>
+          <div class="prediction-no-value">PLAY POINT는 ARC GAMES 내부 게임 점수이며 현금·상품·할인과 교환되지 않습니다.</div>
         </div>
         <div id="fanAuthCard" class="card prediction-auth-card"></div>
       </div>`;
@@ -286,7 +286,7 @@ function renderMarkets(){
     return `
       <article class="prediction-market-card ${m.division==='PRO'?'pro-market':'open-market'}" data-market-card="${m.market_id}">
         <div class="prediction-market-head">
-          <div><span>MARKET ${String(idx+1).padStart(2,'0')}</span><h3>${m.division} · ${categoryName[m.category]}</h3></div>
+          <div><span>MARKET ${String(idx+1).padStart(2,'0')}</span><h3>${divisionLabel(m.division)} · ${categoryName[m.category]}</h3></div>
           <div class="prediction-market-meta"><span>${m.market_status.toUpperCase()}</span><b>POOL ${pnum(m.total_stake)}</b></div>
         </div>
         <div class="prediction-team-list">${teams}</div>
