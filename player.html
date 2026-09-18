@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>PLAYER · TEAM GAMES</title>
+  <title>PLAYER · ARC GAMES</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="athlete.css">
   <link rel="stylesheet" href="arcade-pages.css">
@@ -35,7 +35,7 @@ async function init(){
     const {data:members,error:merr}=await db.from('tg_team_members').select('team_id,athlete_id').eq('event_id',ev.id).eq('athlete_id',id).eq('active',true);
     if(merr)throw merr;
 
-    let gameBlock=`<div class="player-panel"><div class="kicker">GAME #01</div><h3>NOT LOCKED IN.</h3><p class="muted">아직 이번 GAME의 파트너가 확정되지 않았습니다.</p></div>`;
+    let gameBlock=`<div class="player-panel"><div class="kicker">GAME #01</div><h3>NOT LOCKED IN.</h3><p class="muted">아직 이번 GAME의 팀이 확정되지 않았습니다.</p></div>`;
 
     if(members?.length){
       const teamId=members[0].team_id;
@@ -44,17 +44,19 @@ async function init(){
         db.from('tg_team_members').select('athlete_id').eq('team_id',teamId).eq('active',true)
       ]);
       if(te)throw te;if(re)throw re;
-      const partnerId=(roster||[]).map(x=>x.athlete_id).find(x=>x!==id);
-      let partner=null;
-      if(partnerId){
-        const q=await db.from('tg_athletes').select('id,display_name,handle,photo_url').eq('id',partnerId).single();
-        if(q.error)throw q.error;partner=q.data;
+      const rosterIds=(roster||[]).map(x=>x.athlete_id);
+      let rosterNames=[a.display_name];
+      if(rosterIds.length){
+        const q=await db.from('tg_athletes').select('id,display_name').in('id',rosterIds);
+        if(q.error)throw q.error;
+        const byId=Object.fromEntries((q.data||[]).map(x=>[x.id,x.display_name]));
+        rosterNames=rosterIds.map(x=>byId[x]).filter(Boolean);
       }
       gameBlock=`
         <div class="team-lock">
           <div class="kicker">GAME #01 // LOCKED IN</div>
           <div class="team-lock-top">
-            <div><h3>${esc(t.team_name)}</h3><p class="muted">${esc(a.display_name)} × ${esc(partner?.display_name||'PARTNER')}</p></div>
+            <div><h3>${esc(t.team_name)}</h3><p class="muted">${esc(rosterNames.join(' × ')||a.display_name)}</p></div>
             <div class="slot-display">H${t.heat_no} · S${t.station_no}</div>
           </div>
         </div>`;
@@ -69,14 +71,14 @@ async function init(){
           <div class="handle">@${esc(a.handle)}</div>
           <div class="player-card-meta">
             <span class="player-chip">${esc(a.gender.toUpperCase())}</span>
-            <span class="player-chip">${esc(a.division)}</span>
+            <span class="player-chip">${esc(divisionLabel(a.division))}</span>
             ${a.gym?`<span class="player-chip">${esc(a.gym)}</span>`:''}
             ${a.instagram?`<a class="player-chip" href="https://instagram.com/${encodeURIComponent(a.instagram.replace('@',''))}" target="_blank" rel="noopener">${esc(a.instagram)}</a>`:''}
           </div>
         </div>
       </div>
       <section class="admin-block" style="margin-top:36px">
-        <div class="sectionhead"><div><div class="kicker">CURRENT GAME</div><h2>GAME #01</h2></div><p>OCT 31, 2026 · TEAM OF 2</p></div>
+        <div class="sectionhead"><div><div class="kicker">CURRENT GAME</div><h2>GAME #01</h2></div><p>OCT 31, 2026 · TEAM OF 3</p></div>
         ${gameBlock}
       </section>`;
   }catch(e){profile.innerHTML=`<div class="card notice err" style="display:block">${esc(e.message)}</div>`}
