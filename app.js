@@ -27,7 +27,7 @@ function nav(active){
     ['HOME','index.html'],['GAME','event.html'],['TEAMS','teams.html'],
     ['FAN PICK','fanpick.html'],['LIVE','live.html'],['PLAYER','athlete.html']
   ];
-  return `<header class="nav"><div class="container navin"><a class="brand" href="index.html">ARC GAMES</a><nav class="links">${p.map(([n,h])=>`<a class="${active===n?'active':''}" href="${h}">${n}</a>`).join('')}</nav><a class="cta arcade-cta" href="event.html">EVENT SOON</a></div></header>`;
+  return `<header class="nav"><div class="container navin"><a class="brand" href="index.html">ARC GAMES</a><nav class="links">${p.map(([n,h])=>`<a class="${active===n?'active':''}" href="${h}">${n}</a>`).join('')}</nav><a id="arcAccountNav" class="cta arcade-cta ${active==='ACCOUNT'?'active':''}" href="account.html">LOGIN</a></div></header>`;
 }
 
 function adminNav(){
@@ -42,6 +42,7 @@ function shell(active){
   }
   document.querySelector('#nav').innerHTML=nav(active);
   document.querySelector('#footer').innerHTML=`<footer class="footer"><div class="container arcade-footer"><span>ARC GAMES // STAGE 01</span><span>EVENT #01 · COMING SOON</span><span>TEAM OF 2 · 24 TEAMS</span></div></footer>`;
+  syncArcAccountNav();
 }
 
 function revealGameMaster(){/* admin is intentionally isolated from participant navigation */}
@@ -68,6 +69,43 @@ async function rosterMap(teamIds){
 }
 
 async function currentUser(){const {data:{user}}=await db.auth.getUser();return user||null}
+
+async function syncArcAccountNav(){
+  const el=document.getElementById('arcAccountNav');
+  if(!el)return;
+  try{
+    const user=await currentUser();
+    if(user){
+      el.textContent='MY PAGE';
+      el.href='my.html';
+      el.dataset.auth='in';
+    }else{
+      el.textContent='LOGIN';
+      el.href='account.html';
+      el.dataset.auth='out';
+    }
+  }catch(_){
+    el.textContent='LOGIN';
+    el.href='account.html';
+  }
+}
+
+function safeNextUrl(raw,fallback='my.html'){
+  const v=String(raw||'').trim();
+  if(!v)return fallback;
+  if(/^https?:/i.test(v)||v.startsWith('//')||v.includes('..'))return fallback;
+  return v;
+}
+
+async function arcRequireLogin(target){
+  const user=await currentUser();
+  if(user)return true;
+  location.href='account.html?next='+encodeURIComponent(safeNextUrl(target||location.pathname.split('/').pop()||'index.html'));
+  return false;
+}
+
+window.arcRequireLogin=arcRequireLogin;
+window.safeNextUrl=safeNextUrl;
 
 function countdown(){
   const el=document.getElementById('countdown');if(!el)return;
