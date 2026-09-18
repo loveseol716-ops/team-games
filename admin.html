@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>GAME MASTER · TEAM GAMES</title>
+  <title>GAME MASTER · ARC GAMES</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="admin-extra.css">
 </head>
@@ -227,7 +227,7 @@ function adminError(x){
   if(m.includes('CAPTAIN_PHONE_REQUIRED')) return 'Captain PLAYER 프로필에 연락처가 필요합니다.';
   if(m.includes('ATHLETE_PHOTO_REQUIRED')||m.includes('TEAM_PHOTO_REQUIRED')) return '선수 프로필 사진이 필요합니다.';
   if(m.includes('REGISTRATION_FULL')) return '전체 참가 정원이 모두 찼습니다.';
-  if(m.includes('CATEGORY_FULL')) return '해당 OPEN/PRO · 팀 구성 정원이 모두 찼습니다.';
+  if(m.includes('CATEGORY_FULL')) return '해당 BEGINNER/ATHLETE · 팀 구성 정원이 모두 찼습니다.';
   if(m.includes('PAYMENT_NOT_PENDING')) return '현재 입금 확인 대기 상태가 아닙니다.';
   if(m.includes('MARKET_STILL_OPEN')) return 'GAME 시작 전에는 예측 마켓을 정산할 수 없습니다.';
   if(m.includes('MARKET_ALREADY_SETTLED')) return '이미 정산이 완료된 마켓입니다.';
@@ -351,7 +351,7 @@ function renderTeamManagement(){
     const slot=t.status==='confirmed'?`H${t.heat_no} · S${t.station_no}`:'SLOT AFTER PAYMENT';
     const paymentInfo=(t.amount_due||t.pricing_tier)?`
       <div class="admin-payment-box ${check?'needs-check':''}">
-        <div><span>ENTRY</span><b>${esc(t.division||'—')} · ${categoryLabel(t.category)}</b></div>
+        <div><span>ENTRY</span><b>${esc(divisionLabel(t.division))} · ${categoryLabel(t.category)}</b></div>
         <div><span>PRICE</span><b>${formatWon(t.amount_due)}</b><small>${t.pricing_tier==='early_bird'?'EARLY BIRD':'REGULAR'}</small></div>
         <div><span>DEPOSITOR</span><b>${esc(t.depositor_name||'—')}</b><small>${t.payment_reported_at?'신고 '+formatDate(t.payment_reported_at):'입금 신고 전'}</small></div>
         <div><span>PAYMENT</span><b>${t.payment_status==='paid'?'PAID':check?'CHECK NOW':'WAITING'}</b><small>${t.paid_at?'확인 '+formatDate(t.paid_at):t.payment_deadline?'마감 '+formatDate(t.payment_deadline):''}</small></div>
@@ -595,7 +595,7 @@ async function loadPredictionControl(){
     return `
       <article class="prediction-admin-card ${settled?'is-settled':''}">
         <div class="prediction-admin-head">
-          <div><span>${m.division}</span><h4>${predictionCategory(m.category)}</h4></div>
+          <div><span>${divisionLabel(m.division)}</span><h4>${predictionCategory(m.category)}</h4></div>
           <b>${settled?'SETTLED':stillOpen?'OPEN':'LOCKED'}</b>
         </div>
         <div class="prediction-admin-stats">
