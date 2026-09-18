@@ -769,3 +769,49 @@
   .rulebook-hero .rulebook-title-line{font-size:clamp(46px,15vw,70px);line-height:.92}
   .rulebook-hero .rulebook-title-line + .rulebook-title-line{margin-top:6px}
 }
+
+/* RULEBOOK HERO META + CTA SPACING FIX */
+.rulebook-hero .arcade-page-chips{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:24px;
+  margin-bottom:0;
+  position:relative;
+  z-index:3;
+}
+.rulebook-hero .arcade-page-chips span{
+  display:inline-flex;
+  align-items:center;
+  min-height:34px;
+  padding:0 12px;
+  line-height:1.2;
+}
+.rulebook-hero .game-hero-actions{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:12px;
+  margin-top:24px;
+  position:relative;
+  z-index:3;
+  clear:both;
+}
+.rulebook-hero .game-hero-actions .btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:56px;
+  margin:0;
+  padding:0 22px;
+  line-height:1;
+}
+@media(max-width:650px){
+  .rulebook-hero .arcade-page-chips{margin-top:20px;gap:6px}
+  .rulebook-hero .game-hero-actions{
+    display:grid;
+    grid-template-columns:1fr;
+    margin-top:20px;
+  }
+  .rulebook-hero .game-hero-actions .btn{width:100%}
+}
