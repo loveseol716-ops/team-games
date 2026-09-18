@@ -41,3 +41,67 @@
 .prediction-admin-winner b{display:block;margin-top:5px;font-size:14px}
 @media(max-width:1000px){.prediction-admin-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:650px){.prediction-admin-grid{grid-template-columns:1fr}.prediction-admin-settle{grid-template-columns:1fr}}
+
+/* FAN WALLET CONTROL */
+.fan-wallet-admin-block{margin-top:18px}
+.fan-wallet-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:16px 0}
+.fan-wallet-summary>div{border:1px solid #2b2d36;background:#090a0f;padding:14px;min-height:100px}
+.fan-wallet-summary span{display:block;font-size:8px;color:#666d77;letter-spacing:.09em}
+.fan-wallet-summary b{display:block;margin-top:7px;font-family:var(--font-display);font-size:22px;font-weight:400;color:#fff}
+.fan-wallet-summary>div:nth-child(2) b{color:#c9ff47}
+.fan-wallet-summary>div:nth-child(3) b{color:#ff3bd4}
+.fan-wallet-summary>div:nth-child(4) b{color:#2de2ff}
+.fan-wallet-summary small{display:block;margin-top:5px;color:#5f6570;font-size:8px}
+.fan-wallet-toolbar{display:grid;grid-template-columns:1fr 190px;gap:8px;margin-bottom:10px}
+.fan-wallet-table-wrap{padding:0;overflow:hidden}
+.fan-wallet-table{min-width:980px}
+.fan-wallet-table td{vertical-align:middle}
+.fan-wallet-table tr.is-selected{background:rgba(255,59,212,.04)}
+.wallet-table-balance{font-family:var(--font-display);font-weight:400;color:#c9ff47}
+.wallet-positive{color:#2de2ff}
+.wallet-negative{color:#ff829f}
+.wallet-row-actions{display:flex;gap:5px;justify-content:flex-end}
+.fan-wallet-editor{
+  margin-top:10px;border:1px solid rgba(255,59,212,.28);
+  background:linear-gradient(90deg,rgba(255,59,212,.05),#090a0f 45%,rgba(45,226,255,.035));
+  padding:16px;
+}
+.fan-wallet-editor-head{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;padding-bottom:12px;border-bottom:1px solid #25272f}
+.fan-wallet-editor-head span{font-family:var(--font-display);font-size:7px;color:#ff3bd4}
+.fan-wallet-editor-head h4{font-size:20px;margin:5px 0 0}
+.fan-wallet-editor-head small{display:block;margin-top:4px;color:#747b85}
+.fan-wallet-editor-grid{display:grid;grid-template-columns:220px 1fr auto;gap:8px;align-items:end;margin-top:14px}
+.fan-wallet-editor-grid label{font-size:9px;color:#777e88}
+.fan-wallet-editor-grid .action .btn{white-space:nowrap}
+.fan-wallet-editor-note{margin-top:10px;color:#666d77;font-size:9px}
+.fan-adjustment-history-head{display:flex;justify-content:space-between;gap:18px;align-items:end;margin-top:28px;margin-bottom:10px}
+.fan-adjustment-history-head h4{font-size:20px;margin:5px 0 0}
+.fan-adjustment-history{display:grid;gap:6px}
+.fan-adjustment-row{
+  display:grid;grid-template-columns:1.1fr .65fr 1fr 1.5fr 1fr;gap:10px;align-items:center;
+  padding:11px 12px;border:1px solid #272932;background:#08090d;
+}
+.fan-adjustment-row>div{min-width:0}
+.fan-adjustment-row strong{display:block;font-size:12px}
+.fan-adjustment-row span{display:block;font-size:7px;color:#5f6570;letter-spacing:.07em}
+.fan-adjustment-row b{display:block;margin-top:3px;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fan-adjustment-row small{display:block;margin-top:3px;color:#666d77;font-size:8px}
+.fan-adjustment-note b{white-space:normal}
+@media(max-width:1000px){
+  .fan-wallet-summary{grid-template-columns:repeat(2,1fr)}
+  .fan-wallet-editor-grid{grid-template-columns:1fr 1fr}
+  .fan-wallet-editor-grid .action{grid-column:1/-1}
+  .fan-wallet-editor-grid .action .btn{width:100%}
+  .fan-adjustment-row{grid-template-columns:1fr 1fr}
+  .fan-adjustment-note{grid-column:1/-1}
+}
+@media(max-width:650px){
+  .fan-wallet-summary{grid-template-columns:1fr 1fr}
+  .fan-wallet-toolbar{grid-template-columns:1fr}
+  .fan-wallet-editor-head{flex-direction:column}
+  .fan-wallet-editor-grid{grid-template-columns:1fr}
+  .fan-wallet-editor-grid .action{grid-column:auto}
+  .fan-adjustment-history-head{align-items:flex-start;flex-direction:column}
+  .fan-adjustment-row{grid-template-columns:1fr}
+  .fan-adjustment-note{grid-column:auto}
+}
