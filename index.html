@@ -183,13 +183,14 @@ function renderCapacityRows(rows){
     renderCapacityRows(cap.data||[]);
 
     if(!ts.length){homeCrowd.innerHTML='<div class="muted">NO TEAMS YET.</div>';return}
-    const q=await db.from('tg_pick_totals').select('team_id,winner_count').eq('event_id',ev.id);
+    const q=await db.rpc('tg_prediction_board',{p_event_slug:C.eventSlug});
     if(q.error)throw q.error;
-    const count={};(q.data||[]).forEach(x=>count[x.team_id]=x.winner_count||0);
-    const total=Object.values(count).reduce((a,b)=>a+b,0)||0;
-    const ranked=[...ts].sort((a,b)=>(count[b.id]||0)-(count[a.id]||0)).slice(0,3);
+    const rows=(q.data||[]).filter(x=>x.team_id);
+    const stake={};rows.forEach(x=>stake[x.team_id]=Number(x.team_stake||0));
+    const total=Object.values(stake).reduce((a,b)=>a+b,0)||0;
+    const ranked=[...ts].sort((a,b)=>(stake[b.id]||0)-(stake[a.id]||0)).slice(0,3);
     homeCrowd.innerHTML=ranked.map((t,i)=>{
-      const pct=total?Math.round((count[t.id]||0)/total*100):0;
+      const pct=total?Math.round((stake[t.id]||0)/total*100):0;
       return `<div class="tg-crowd-row"><span><em>0${i+1}</em>${esc(t.team_name)}</span><div class="crowd-bar"><i style="width:${pct}%"></i></div><b>${pct}%</b></div>`;
     }).join('');
   }catch(e){
