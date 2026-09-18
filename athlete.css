@@ -1,4 +1,4 @@
-/* TEAM GAMES // ATHLETE SYSTEM */
+/* ARC GAMES // ATHLETE SYSTEM */
 .player-shell{padding-top:88px}.player-hero{padding:72px 0 42px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#090b08,#070707)}
 .player-hero h1{font-size:clamp(56px,9vw,104px);line-height:.9;margin:10px 0 14px;letter-spacing:-.035em}.player-hero .lead{max-width:720px}
 .player-grid{display:grid;grid-template-columns:320px 1fr;gap:18px}.player-panel{border:1px solid var(--line);background:#0e0e0e;border-radius:10px;padding:20px}.player-panel h3{font-size:22px;margin:4px 0 16px}
