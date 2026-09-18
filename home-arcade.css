@@ -321,3 +321,30 @@
   .tg-led-track{animation:none}
   .tg-game-btn,.tg-mode-card{transition:none}
 }
+
+/* ARC GAMES // PUBLIC COMING SOON */
+.tg-coming-soon-lock{
+  display:grid;
+  grid-template-columns:auto auto 1fr;
+  align-items:center;
+  gap:12px;
+  width:max-content;
+  max-width:100%;
+  margin-top:26px;
+  padding:12px 14px;
+  border:1px solid rgba(255,228,92,.22);
+  background:linear-gradient(90deg,rgba(255,228,92,.055),rgba(143,92,255,.03));
+}
+.tg-coming-soon-lock span{font-family:var(--font-display);font-size:9px;color:var(--neon-yellow)}
+.tg-coming-soon-lock strong{font-size:14px;color:#fff}
+.tg-coming-soon-lock small{font-size:9px;color:#727780;white-space:nowrap}
+.tg-public-format{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.tg-public-format>div{padding:10px;border:1px solid #252832;background:#090a0e}
+.tg-public-format span{display:block;font-size:7px;color:#646a74;letter-spacing:.08em}
+.tg-public-format b{display:block;margin-top:5px;font-family:var(--font-display);font-size:16px;font-weight:400;color:var(--neon-lime)}
+.public-format-grid .tg-mode-card{pointer-events:none}
+@media(max-width:700px){
+  .tg-coming-soon-lock{grid-template-columns:1fr;width:100%}
+  .tg-coming-soon-lock small{white-space:normal}
+  .tg-public-format{grid-template-columns:1fr 1fr}
+}
