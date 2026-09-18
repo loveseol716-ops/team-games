@@ -15,6 +15,31 @@
   png.href='favicon.png?v=arcgames-20260918';
   head.appendChild(png);
 })();
+
+// ARC PARTNERS STRIP
+(()=>{
+  const style=document.createElement('style');
+  style.textContent=`
+    .arc-partners-strip{border-top:1px solid rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.07);background:#030405;padding:34px 0}
+    .arc-partners-inner{display:grid;grid-template-columns:190px 1fr;gap:34px;align-items:center}
+    .arc-partners-label{display:grid;gap:5px}
+    .arc-partners-label span{font-family:var(--font-display);font-size:8px;letter-spacing:.12em;color:#666d77}
+    .arc-partners-label strong{font-family:var(--font-display);font-size:15px;font-weight:400;color:#fff}
+    .arc-partners-logos{display:flex;align-items:center;gap:46px;flex-wrap:wrap;min-height:72px}
+    .arc-partner-item{display:grid;place-items:center;min-width:150px;min-height:66px;padding:10px 16px;opacity:.92;transition:opacity .15s ease,transform .15s ease}
+    .arc-partner-item:hover{opacity:1;transform:translateY(-2px)}
+    .arc-partner-item img{display:block;max-width:180px;max-height:52px;width:auto;height:auto;object-fit:contain}
+    @media(max-width:720px){
+      .arc-partners-strip{padding:28px 0}
+      .arc-partners-inner{grid-template-columns:1fr;gap:18px}
+      .arc-partners-logos{gap:20px}
+      .arc-partner-item{min-width:120px;justify-content:start;padding-left:0}
+      .arc-partner-item img{max-width:160px}
+    }
+  `;
+  document.head.appendChild(style);
+})();
+
 const C=window.TG_CONFIG;
 const db=window.supabase.createClient(C.supabaseUrl,C.supabaseAnonKey);
 
@@ -42,6 +67,19 @@ function shell(active){
   }
   document.querySelector('#nav').innerHTML=nav(active);
   document.querySelector('#footer').innerHTML=`
+    <section class="arc-partners-strip" aria-label="official partners">
+      <div class="container arc-partners-inner">
+        <div class="arc-partners-label">
+          <span>ARC GAMES</span>
+          <strong>OFFICIAL PARTNERS</strong>
+        </div>
+        <div class="arc-partners-logos">
+          <a class="arc-partner-item" href="https://www.instagram.com/welwelwel.official/" target="_blank" rel="noopener noreferrer" aria-label="WELWELWEL Instagram">
+            <img src="wel-logo.svg" alt="WEL">
+          </a>
+        </div>
+      </div>
+    </section>
     <footer class="footer arc-legal-footer">
       <div class="container">
         <div class="arc-footer-top">
