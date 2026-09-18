@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="ARC GAMES MY PAGE — Manage your ARC ID, manage PLAY POINT and prepare for upcoming games.">
+  <meta name="description" content="ARC GAMES MY PAGE — ARC ID, PLAY POINT, PLAYER PROFILE.">
   <meta property="og:site_name" content="ARC GAMES">
-  <meta property="og:title" content="ARC GAMES — ACCOUNT">
-  <meta property="og:description" content="Create your ARC ID and get ready for GAME #01.">
+  <meta property="og:title" content="ARC GAMES — MY PAGE">
+  <meta property="og:description" content="Manage your ARC ID, PLAY POINT and game entry profile.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://arcgames.kr/my.html">
   <meta property="og:image" content="https://arcgames.kr/favicon.png">
@@ -14,25 +14,76 @@
   <meta name="theme-color" content="#050508">
   <title>MY PAGE · ARC GAMES</title>
   <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="arcade-pages.css?v=20260918-7">
+  <link rel="stylesheet" href="arcade-pages.css?v=20260918-9">
 </head>
 <body class="tg-arcade-page arc-my-page">
 <div id="nav"></div>
-<main>
-  <section class="arcade-page-hero arc-my-hero">
-    <div class="container">
-      <div class="arcade-eyebrow">ARC ACCOUNT // PLAYER TERMINAL</div>
-      <h1>MY<br>PAGE.</h1>
-      <p class="lead">ARC ID, PLAY POINT, 참가 준비 상태를 한 곳에서 관리합니다.</p>
-    </div>
-  </section>
 
-  <section class="section arcade-deck-section">
+<main>
+  <section class="arc-my-dashboard">
     <div class="container">
-      <div id="myPageState" class="arc-my-grid"><div class="card muted">LOADING ARC ID...</div></div>
+      <div class="arc-my-head">
+        <div>
+          <div class="arcade-eyebrow">ARC ACCOUNT // PLAYER TERMINAL</div>
+          <h1>MY PAGE.</h1>
+          <p>ARC ID, PLAY POINT, 참가 준비 상태를 한 곳에서 관리합니다.</p>
+        </div>
+        <div class="arc-my-head-status">
+          <span>ACCOUNT STATUS</span>
+          <b><i></i> ONLINE</b>
+        </div>
+      </div>
+
+      <div id="myPageError" class="notice err arc-my-error"></div>
+
+      <div class="arc-my-grid">
+        <article class="arc-my-panel arc-id-card">
+          <div class="arc-panel-label">ARC ID</div>
+          <div class="arc-panel-main">
+            <h2 id="arcDisplayName">LOADING...</h2>
+            <p id="arcEmail">CHECKING ACCOUNT</p>
+          </div>
+          <div class="arc-id-status"><i></i> ACCOUNT ACTIVE</div>
+        </article>
+
+        <article class="arc-my-panel arc-wallet-card">
+          <div class="arc-panel-label">PLAY POINT WALLET</div>
+          <h2 id="arcBalance">— P</h2>
+          <div class="arc-stat-row">
+            <div><span>TOTAL BET</span><b id="arcTotalBet">— P</b></div>
+            <div><span>WINS</span><b id="arcWins">—</b></div>
+          </div>
+          <div class="arc-stat-row">
+            <div><span>HIT RATE</span><b id="arcHitRate">—%</b></div>
+            <div><span>NET WIN</span><b id="arcNetWin">— P</b></div>
+          </div>
+        </article>
+
+        <article class="arc-my-panel arc-access-card">
+          <div class="arc-panel-label">GAME ACCESS</div>
+          <h3 id="arcPlayerState">CHECKING PLAYER PROFILE...</h3>
+          <p id="arcPlayerCopy">참가신청 시 필요한 PLAYER PROFILE 상태를 확인합니다.</p>
+          <div class="arc-access-list">
+            <div><b>FAN PICK</b><span>LOGIN READY</span></div>
+            <div><b>GAME ENTRY</b><span id="arcEntryState">COMING SOON</span></div>
+          </div>
+          <a id="arcProfileButton" class="btn arcade-primary arc-my-action" href="player-profile.html">PLAYER PROFILE</a>
+        </article>
+
+        <article class="arc-my-panel arc-settings-card">
+          <div class="arc-panel-label">ACCOUNT SETTINGS</div>
+          <label>NICKNAME
+            <input id="editNickname" maxlength="30" placeholder="YOUR ARC ID">
+          </label>
+          <button id="saveNickname" class="btn arcade-primary" type="button">SAVE NICKNAME</button>
+          <button id="logoutAccount" class="btn dark" type="button">LOGOUT</button>
+          <div id="settingsMsg" class="notice"></div>
+        </article>
+      </div>
     </div>
   </section>
 </main>
+
 <div id="footer"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
@@ -40,64 +91,78 @@
 <script>
 shell('ACCOUNT');
 
+const el=id=>document.getElementById(id);
 const fmtP=v=>Number(v||0).toLocaleString('en-US')+' P';
 const signed=v=>(Number(v||0)>0?'+':'')+Number(v||0).toLocaleString('en-US')+' P';
 
 async function loadMy(){
   const user=await currentUser();
-  if(!user){location.href='account.html?mode=login&next=my.html';return}
+  if(!user){
+    location.href='account.html?mode=login&next=my.html';
+    return;
+  }
+
   const boot=await db.rpc('arc_account_bootstrap',{p_display_name:null});
   if(boot.error)throw boot.error;
+
   const q=await db.rpc('arc_my_account');
   if(q.error)throw q.error;
-  renderMy(q.data?.[0]);
+
+  const a=q.data?.[0];
+  if(!a)throw new Error('ACCOUNT_DATA_NOT_FOUND');
+
+  el('arcDisplayName').textContent=a.display_name||'ARC PLAYER';
+  el('arcEmail').textContent=a.email||'SOCIAL LOGIN ACCOUNT';
+  el('arcBalance').textContent=fmtP(a.balance);
+  el('arcTotalBet').textContent=fmtP(a.total_staked);
+  el('arcWins').textContent=(a.wins||0)+' / '+(a.settled_bets||0);
+  el('arcHitRate').textContent=Number(a.hit_rate||0).toFixed(1)+'%';
+  el('arcNetWin').textContent=signed(a.net_win);
+  el('editNickname').value=a.display_name||'';
+
+  if(a.athlete_ready){
+    el('arcPlayerState').textContent='PLAYER PROFILE READY';
+    el('arcPlayerCopy').textContent='참가신청이 열리면 바로 팀 신청 단계로 이동할 수 있습니다.';
+    el('arcProfileButton').textContent='EDIT PLAYER PROFILE';
+  }else{
+    el('arcPlayerState').textContent='PLAYER PROFILE NOT SET';
+    el('arcPlayerCopy').textContent='참가신청 시 이름, 성별, 전화번호, 인스타, 소속짐을 한 번 입력합니다.';
+    el('arcProfileButton').textContent='SET PLAYER PROFILE →';
+  }
+
+  const ev=await db.from('tg_events').select('registration_open').eq('slug',C.eventSlug).maybeSingle();
+  if(!ev.error&&ev.data?.registration_open)el('arcEntryState').textContent='OPEN';
 }
 
-function renderMy(a){
-  if(!a){myPageState.innerHTML='<div class="card notice err" style="display:block">ACCOUNT LOAD FAILED.</div>';return}
-  myPageState.innerHTML=`
-    <article class="arc-id-card">
-      <span>ARC ID</span>
-      <h2>${esc(a.display_name)}</h2>
-      <p>${esc(a.email)}</p>
-      <div class="arc-id-status"><i></i> ACCOUNT ACTIVE</div>
-    </article>
+el('saveNickname').onclick=async()=>{
+  const name=el('editNickname').value.trim();
+  if(!name){notice('settingsMsg','닉네임을 입력해 주세요.',true);return}
 
-    <article class="arc-wallet-card">
-      <span>PLAY POINT WALLET</span>
-      <h2>${fmtP(a.balance)}</h2>
-      <div class="arc-stat-row"><div><span>TOTAL BET</span><b>${fmtP(a.total_staked)}</b></div><div><span>WINS</span><b>${a.wins||0} / ${a.settled_bets||0}</b></div></div>
-      <div class="arc-stat-row"><div><span>HIT RATE</span><b>${Number(a.hit_rate||0).toFixed(1)}%</b></div><div><span>NET WIN</span><b>${signed(a.net_win)}</b></div></div>
-    </article>
-
-    <article class="arc-access-card">
-      <span>GAME ACCESS</span>
-      <h3>${a.athlete_ready?'PLAYER PROFILE READY':'PLAYER PROFILE NOT SET'}</h3>
-      <p>참가신청 오픈 시 추가 선수 프로필을 입력한 뒤 팀을 만들 수 있습니다.</p>
-      <div class="arc-access-list"><div><b>FAN PICK</b><span>LOGIN READY</span></div><div><b>GAME ENTRY</b><span>COMING SOON</span></div></div>
-    </article>
-
-    <article class="arc-settings-card">
-      <span>ACCOUNT SETTINGS</span>
-      <label>NICKNAME<input id="editNickname" maxlength="30" value="${esc(a.display_name)}"></label>
-      <button id="saveNickname" class="btn arcade-primary" type="button">SAVE NICKNAME</button>
-      <button id="logoutAccount" class="btn dark" type="button">LOGOUT</button>
-      <div id="settingsMsg" class="notice"></div>
-    </article>
-  `;
-
-  saveNickname.onclick=async()=>{
-    const name=editNickname.value.trim();
-    if(!name){notice('settingsMsg','닉네임을 입력해 주세요.',true);return}
-    saveNickname.disabled=true;
+  el('saveNickname').disabled=true;
+  try{
     const q=await db.rpc('arc_update_profile',{p_display_name:name});
-    if(q.error){notice('settingsMsg',q.error.message,true);saveNickname.disabled=false;return}
+    if(q.error)throw q.error;
     notice('settingsMsg','NICKNAME UPDATED.');
     await loadMy();
-  };
-  logoutAccount.onclick=async()=>{await db.auth.signOut();location.href='index.html'};
-}
-loadMy().catch(e=>{myPageState.innerHTML=`<div class="card notice err" style="display:block">${esc(e.message||e)}</div>`});
+  }catch(e){
+    notice('settingsMsg',e.message||String(e),true);
+  }finally{
+    el('saveNickname').disabled=false;
+  }
+};
+
+el('logoutAccount').onclick=async()=>{
+  await db.auth.signOut();
+  location.href='index.html';
+};
+
+loadMy().catch(e=>{
+  const box=el('myPageError');
+  box.textContent='MY PAGE를 불러오지 못했습니다. 새로고침 후에도 계속되면 다시 로그인해 주세요. ('+(e.message||e)+')';
+  box.style.display='block';
+  el('arcDisplayName').textContent='ARC ACCOUNT';
+  el('arcEmail').textContent='LOAD ERROR';
+});
 </script>
 </body>
 </html>
