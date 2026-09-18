@@ -85,6 +85,8 @@
               <input id="teamSearch" type="search" placeholder="팀명 / 선수 / 연락처 검색">
               <select id="statusFilter">
                 <option value="all">ALL TEAMS</option>
+                <option value="payment_check">PAYMENT CHECK</option>
+                <option value="pending_payment">WAITING PAYMENT</option>
                 <option value="confirmed">LOCKED IN</option>
                 <option value="cancelled">OUT</option>
               </select>
@@ -128,7 +130,11 @@ let adminAthletes=[];
 let currentEvent=null;
 
 const fmtPhone=v=>String(v||'').replace(/\s+/g,' ').trim();
-const statusLabel=s=>s==='confirmed'?'LOCKED IN':'OUT';
+const formatWon=v=>`${Number(v||0).toLocaleString('ko-KR')}원`;
+const formatDate=v=>v?new Date(v).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'—';
+const categoryLabel=v=>v==='MM'?'MEN / MEN':v==='WW'?'WOMEN / WOMEN':v==='MIXED'?'MIXED':'—';
+const statusLabel=t=>t.status==='confirmed'?'LOCKED IN':t.status==='pending_payment'?(t.payment_status==='payment_check'?'PAYMENT CHECK':'WAITING PAYMENT'):'OUT';
+const statusClass=t=>t.status==='confirmed'?'approved':t.status==='pending_payment'?'pending':'cancelled';
 
 function adminError(x){
   const m=String(x?.message||x||'');
@@ -143,7 +149,9 @@ function adminError(x){
   if(m.includes('ATHLETE_ALREADY_LOCKED_IN')) return '선택한 선수 중 이미 이번 GAME에 참가 확정된 선수가 있습니다.';
   if(m.includes('CAPTAIN_PHONE_REQUIRED')) return 'Captain PLAYER 프로필에 연락처가 필요합니다.';
   if(m.includes('ATHLETE_PHOTO_REQUIRED')||m.includes('TEAM_PHOTO_REQUIRED')) return '선수 프로필 사진이 필요합니다.';
-  if(m.includes('REGISTRATION_FULL')) return '12팀이 모두 찼습니다.';
+  if(m.includes('REGISTRATION_FULL')) return '전체 참가 정원이 모두 찼습니다.';
+  if(m.includes('CATEGORY_FULL')) return '해당 OPEN/PRO · 팀 구성 정원이 모두 찼습니다.';
+  if(m.includes('PAYMENT_NOT_PENDING')) return '현재 입금 확인 대기 상태가 아닙니다.';
   if(m.includes('TEAM_NAME_REQUIRED')) return '팀 이름을 입력해 주세요.';
   if(m.includes('TEAM_NOT_FOUND')) return '팀을 찾을 수 없습니다. 새로고침 후 다시 시도해 주세요.';
   return m || '처리 중 오류가 발생했습니다.';
@@ -190,12 +198,13 @@ async function enterAdmin(){
 
 function renderSummary(){
   const approved=allAdminTeams.filter(t=>t.status==='confirmed').length;
-  const cancelled=allAdminTeams.filter(t=>t.status==='cancelled').length;
-  const max=currentEvent?.max_teams||12;
+  const paymentCheck=allAdminTeams.filter(t=>t.status==='pending_payment'&&t.payment_status==='payment_check').length;
+  const waiting=allAdminTeams.filter(t=>t.status==='pending_payment'&&t.payment_status!=='payment_check').length;
+  const max=currentEvent?.max_teams||24;
   $('summary').innerHTML=`
     <div class="admin-stat"><span>LOCKED IN</span><strong>${approved}</strong><small>/ ${max} TEAMS</small></div>
-    <div class="admin-stat"><span>OUT</span><strong>${cancelled}</strong><small>TEAMS</small></div>
-    <div class="admin-stat"><span>EMPTY SLOTS</span><strong>${Math.max(0,max-approved)}</strong><small>LEFT</small></div>
+    <div class="admin-stat admin-stat-alert"><span>PAYMENT CHECK</span><strong>${paymentCheck}</strong><small>TO CONFIRM</small></div>
+    <div class="admin-stat"><span>WAITING BANK</span><strong>${waiting}</strong><small>TEAMS</small></div>
     <div class="admin-stat"><span>ENTRY</span><strong class="admin-stat-word ${currentEvent?.registration_open?'is-open':'is-closed'}">${currentEvent?.registration_open?'OPEN':'CLOSED'}</strong><small>STAGE 01</small></div>`;
 }
 
@@ -244,36 +253,51 @@ function renderTeamManagement(){
   const q=$('teamSearch').value.trim().toLowerCase();
   const sf=$('statusFilter').value;
   const list=allAdminTeams.filter(t=>{
-    if(sf!=='all'&&t.status!==sf)return false;
+    if(sf==='payment_check'&&!(t.status==='pending_payment'&&t.payment_status==='payment_check'))return false;
+    if(sf!=='all'&&sf!=='payment_check'&&t.status!==sf)return false;
     if(!q)return true;
-    return [t.team_name,t.player_1,t.player_2,t.phone].some(v=>String(v||'').toLowerCase().includes(q));
+    return [t.team_name,t.player_1,t.player_2,t.phone,t.depositor_name,t.division,t.category].some(v=>String(v||'').toLowerCase().includes(q));
   });
   if(!list.length){$('adminTeams').innerHTML='<div class="card admin-empty">NO TEAMS FOUND.</div>';return}
-  $('adminTeams').innerHTML=list.map(t=>`
-    <article class="admin-team-card ${t.status==='cancelled'?'is-cancelled':''}" data-team="${t.id}">
+  $('adminTeams').innerHTML=list.map(t=>{
+    const pending=t.status==='pending_payment';
+    const check=pending&&t.payment_status==='payment_check';
+    const slot=t.status==='confirmed'?`H${t.heat_no} · S${t.station_no}`:'SLOT AFTER PAYMENT';
+    const paymentInfo=(t.amount_due||t.pricing_tier)?`
+      <div class="admin-payment-box ${check?'needs-check':''}">
+        <div><span>ENTRY</span><b>${esc(t.division||'—')} · ${categoryLabel(t.category)}</b></div>
+        <div><span>PRICE</span><b>${formatWon(t.amount_due)}</b><small>${t.pricing_tier==='early_bird'?'EARLY BIRD':'REGULAR'}</small></div>
+        <div><span>DEPOSITOR</span><b>${esc(t.depositor_name||'—')}</b><small>${t.payment_reported_at?'신고 '+formatDate(t.payment_reported_at):'입금 신고 전'}</small></div>
+        <div><span>PAYMENT</span><b>${t.payment_status==='paid'?'PAID':check?'CHECK NOW':'WAITING'}</b><small>${t.paid_at?'확인 '+formatDate(t.paid_at):t.payment_deadline?'마감 '+formatDate(t.payment_deadline):''}</small></div>
+      </div>`:''; 
+    return `
+    <article class="admin-team-card ${t.status==='cancelled'?'is-cancelled':''} ${check?'is-payment-check':''}" data-team="${t.id}">
       <div class="admin-team-photo">
         ${t.photo_url?`<img src="${esc(t.photo_url)}" alt="${esc(t.team_name)}">`:'<div class="admin-photo-empty">NO PHOTO</div>'}
-        <div class="admin-status-badge ${t.status==='confirmed'?'approved':'cancelled'}">${statusLabel(t.status)}</div>
+        <div class="admin-status-badge ${statusClass(t)}">${statusLabel(t)}</div>
       </div>
       <div class="admin-team-body">
-        <div class="admin-team-title-row"><div><div class="entry-label">TEAM</div><h4>${esc(t.team_name)}</h4></div><div class="admin-slot-mini">H${t.heat_no} · S${t.station_no}</div></div>
+        <div class="admin-team-title-row"><div><div class="entry-label">TEAM</div><h4>${esc(t.team_name)}</h4></div><div class="admin-slot-mini">${slot}</div></div>
         <div class="admin-contact"><a href="tel:${esc(fmtPhone(t.phone))}">${esc(fmtPhone(t.phone))}</a></div>
+        ${paymentInfo}
         <div class="admin-edit-grid">
-          <div class="full"><label>Team Name</label><input id="team-${t.id}" value="${esc(t.team_name)}" maxlength="60"></div>
+          <div class="full"><label>Team Name</label><input id="team-${t.id}" value="${esc(t.team_name)}" maxlength="60" ${pending?'disabled':''}></div>
           <div><label>Player 1</label><input value="${esc(t.player_1)}" disabled></div>
           <div><label>Player 2</label><input value="${esc(t.player_2)}" disabled></div>
-          <div class="full"><label>Contact</label><input id="phone-${t.id}" value="${esc(t.phone)}" inputmode="tel"></div>
-          <div><label>Heat</label><input id="heat-${t.id}" type="number" min="1" max="6" value="${t.heat_no}"></div>
+          <div class="full"><label>Contact</label><input id="phone-${t.id}" value="${esc(t.phone)}" inputmode="tel" ${pending?'disabled':''}></div>
+          ${pending?'<div class="full"><label>Roster Status</label><input value="PAYMENT PENDING" disabled></div>':`
+          <div><label>Heat</label><input id="heat-${t.id}" type="number" min="1" max="12" value="${t.heat_no}"></div>
           <div><label>Station</label><select id="station-${t.id}"><option value="1" ${t.station_no===1?'selected':''}>1</option><option value="2" ${t.station_no===2?'selected':''}>2</option></select></div>
-          <div class="full"><label>Roster Status</label><select id="teamstatus-${t.id}"><option value="confirmed" ${t.status==='confirmed'?'selected':''}>LOCKED IN</option><option value="cancelled" ${t.status==='cancelled'?'selected':''}>OUT</option></select></div>
+          <div class="full"><label>Roster Status</label><select id="teamstatus-${t.id}"><option value="confirmed" ${t.status==='confirmed'?'selected':''}>LOCKED IN</option><option value="cancelled" ${t.status==='cancelled'?'selected':''}>OUT</option></select></div>`}
         </div>
         <div class="admin-team-actions">
           <button class="btn danger delete-spacer" type="button" onclick="deleteTeam('${t.id}')">DELETE TEAM</button>
           ${t.photo_url?`<a class="btn dark" href="${esc(t.photo_url)}" target="_blank" rel="noopener">OPEN PHOTO</a>`:''}
-          <button id="save-${t.id}" class="btn arcade-primary" type="button" onclick="saveTeam('${t.id}')">SAVE TEAM</button>
+          ${check?`<button id="confirm-${t.id}" class="btn arcade-primary payment-confirm-btn" type="button" onclick="confirmPayment('${t.id}')">CONFIRM PAYMENT</button>`:pending?'<button class="btn dark" type="button" disabled>WAITING BANK</button>':`<button id="save-${t.id}" class="btn arcade-primary" type="button" onclick="saveTeam('${t.id}')">SAVE TEAM</button>`}
         </div>
       </div>
-    </article>`).join('');
+    </article>`;
+  }).join('');
 }
 
 window.saveTeam=async id=>{
@@ -295,6 +319,22 @@ window.saveTeam=async id=>{
     await refreshAdmin();
   }catch(e){notice('teamAdminMsg',adminError(e),true)}
   finally{if(document.getElementById(`save-${id}`)){document.getElementById(`save-${id}`).disabled=false;document.getElementById(`save-${id}`).textContent='SAVE TEAM'}}
+};
+
+window.confirmPayment=async id=>{
+  const t=allAdminTeams.find(x=>x.id===id);if(!t)return;
+  if(!confirm(`${t.team_name}\n입금자: ${t.depositor_name||'—'}\n금액: ${formatWon(t.amount_due)}\n\n법인계좌 입금을 확인했나요?`))return;
+  const btn=$(`confirm-${id}`);
+  if(btn){btn.disabled=true;btn.textContent='CONFIRMING…'}
+  try{
+    const r=await db.rpc('tg_admin_confirm_payment',{p_team_id:id});
+    if(r.error)throw r.error;
+    notice('teamAdminMsg',`${t.team_name} · PAYMENT CONFIRMED · LOCKED IN`);
+    await refreshAdmin();
+  }catch(e){
+    notice('teamAdminMsg',adminError(e),true);
+    if(btn){btn.disabled=false;btn.textContent='CONFIRM PAYMENT'}
+  }
 };
 
 window.deleteTeam=async id=>{
