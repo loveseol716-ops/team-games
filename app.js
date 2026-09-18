@@ -1,6 +1,8 @@
 const C=window.TG_CONFIG;
 const db=window.supabase.createClient(C.supabaseUrl,C.supabaseAnonKey);
 
+function divisionLabel(v){return v==='OPEN'?'BEGINNER':v==='PRO'?'ATHLETE':v||'—'}
+
 function esc(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
 
 function nav(active){
@@ -8,7 +10,7 @@ function nav(active){
     ['HOME','index.html'],['GAME','event.html'],['TEAMS','teams.html'],
     ['FAN PICK','fanpick.html'],['LIVE','live.html'],['PLAYER','athlete.html']
   ];
-  return `<header class="nav"><div class="container navin"><a class="brand" href="index.html">TEAM GAMES</a><nav class="links">${p.map(([n,h])=>`<a class="${active===n?'active':''}" href="${h}">${n}</a>`).join('')}</nav><a class="cta arcade-cta" href="athlete.html?join=1">ENTER GAME #01</a></div></header>`;
+  return `<header class="nav"><div class="container navin"><a class="brand" href="index.html">ARC GAMES</a><nav class="links">${p.map(([n,h])=>`<a class="${active===n?'active':''}" href="${h}">${n}</a>`).join('')}</nav><a class="cta arcade-cta" href="athlete.html?join=1">ENTER GAME #01</a></div></header>`;
 }
 
 function adminNav(){
@@ -18,11 +20,11 @@ function adminNav(){
 function shell(active){
   if(active==='ADMIN'){
     document.querySelector('#nav').innerHTML=adminNav();
-    document.querySelector('#footer').innerHTML=`<footer class="footer admin-only-footer"><div class="container arcade-footer"><span>TEAM GAMES // GAME MASTER</span><span>PRIVATE CONTROL ROOM</span></div></footer>`;
+    document.querySelector('#footer').innerHTML=`<footer class="footer admin-only-footer"><div class="container arcade-footer"><span>ARC GAMES // GAME MASTER</span><span>PRIVATE CONTROL ROOM</span></div></footer>`;
     return;
   }
   document.querySelector('#nav').innerHTML=nav(active);
-  document.querySelector('#footer').innerHTML=`<footer class="footer"><div class="container arcade-footer"><span>TEAM GAMES // STAGE 01</span><span>OCT 31, 2026 · SEOUL</span><span>PLAY · PICK · WATCH</span></div></footer>`;
+  document.querySelector('#footer').innerHTML=`<footer class="footer"><div class="container arcade-footer"><span>ARC GAMES // STAGE 01</span><span>OCT 31, 2026 · NOLTO GYM</span><span>PLAY · PICK · WATCH</span></div></footer>`;
 }
 
 function revealGameMaster(){/* admin is intentionally isolated from participant navigation */}
