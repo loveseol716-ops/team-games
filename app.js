@@ -96,11 +96,7 @@ function shell(active){
         <div class="arc-business-info">
           <span>상호명: 버드컴퍼니 유한회사</span>
           <span>대표자: 설재현</span>
-          <span>사업자등록번호: 539-81-03765</span>
-          <span>통신판매업신고번호: 2025-서울구로-1975</span>
-          <span>사업자 주소: 서울특별시 강남구 언주로146길 9 (논현동 98-10), 지하1층</span>
-          <span>대표전화: 010-9206-4927</span>
-          <span>문의: lovesol716@gmail.com</span>
+          <span>사업자등록번호: 539-81-03765</span>          <span>사업자 주소: 서울특별시 강남구 언주로146길 9 (논현동 98-10), 지하1층</span>          <span>문의: lovesol716@gmail.com</span>
         </div>
         <div class="arc-footer-bottom">
           <span>© 2026 ARC GAMES. ALL RIGHTS RESERVED.</span>
