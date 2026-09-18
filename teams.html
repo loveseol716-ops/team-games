@@ -5,41 +5,18 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>TEAMS · ARC GAMES</title>
   <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="athlete.css">
-  <link rel="stylesheet" href="arcade-pages.css">
+  <link rel="stylesheet" href="arcade-pages.css?v=20260918-5">
+  
 </head>
-<body class="tg-arcade-page teams-arcade">
+<body class="tg-arcade-page teams-arcade coming-soon-page">
 <div id="nav"></div>
 <main>
-  <section class="player-hero arcade-page-hero teams-hero">
+  <section class="arcade-page-hero coming-soon-hero">
     <div class="container">
-      <div class="arcade-eyebrow">FIGHTER SELECT // GAME #01</div>
-      <h1>TEAM<br>LINE-UP.</h1>
-      <p class="lead">LOCKED IN 된 24팀. 얼굴을 보고, 이름을 보고, 누구를 찍을지 정한다.</p>
-      <div class="arcade-page-chips"><span>BEGINNER 12</span><span>ATHLETE 12</span><span>24 TEAMS</span><span>TEAM OF 3</span></div>
-    </div>
-  </section>
-
-  <section class="section arcade-deck-section">
-    <div class="container">
-      <div class="sectionhead arcade-sectionhead"><div><div class="kicker">LOCKED IN // SELECT FIGHTER</div><h2>24 TEAMS. GAME #01.</h2></div><p id="count">Loading…</p></div>
-      <div id="teamGrid" class="teamgrid arcade-team-grid"></div>
-    </div>
-  </section>
-
-  <section class="section arcade-deck-section heats-section">
-    <div class="container">
-      <div class="sectionhead arcade-sectionhead"><div><div class="kicker">START LIST // MATCH BOARD</div><h2>HEAD TO HEAD.</h2></div><p>OFFICIAL HEAT ASSIGNMENT</p></div>
-      <div id="heatGrid" class="heatgrid arcade-heat-grid"></div>
-    </div>
-  </section>
-
-  <section class="section arcade-deck-section" id="register">
-    <div class="container">
-      <div class="team-entry-console arcade-entry-console">
-        <div><div class="arcade-eyebrow">INSERT COIN // WANT IN?</div><h3>CREATE PLAYER. BUILD YOUR TEAM.</h3><p>팀 구성을 완료하고 참가비 입금 → 관리자 확인 → LOCKED IN.</p></div>
-        <a class="btn arcade-primary" href="athlete.html">ENTER PLAYER MODE</a>
-      </div>
+      <div class="arcade-eyebrow">ARC GAMES #01 // TEAM LINE-UP</div>
+      <h1>TEAMS<br>COMING SOON.</h1>
+      <p class="lead">24개 팀의 라인업은 참가 신청 오픈 이후 공개됩니다.</p>
+      <div class="arcade-page-chips"><span>24 TEAMS</span><span>TEAM OF 2</span><span>BEGINNER / ATHLETE</span><span>MM / FF / MF</span></div>
     </div>
   </section>
 </main>
@@ -47,34 +24,5 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script src="app.js"></script>
-<script>
-shell('TEAMS');
-
-function duo(t,roster){
-  if(roster?.length){
-    return `<div class="duo-photo">${roster.slice(0,2).map(p=>`<div><a href="player.html?id=${encodeURIComponent(p.id)}"><img src="${esc(p.photo_url)}" alt="${esc(p.display_name)}"><span class="duo-label">@${esc(p.handle)}</span></a></div>`).join('')}</div>`;
-  }
-  return `<div class="photo">${t.photo_url?`<img src="${esc(t.photo_url)}" alt="${esc(t.team_name)}">`:'TEAM PHOTO'}</div>`;
-}
-
-async function init(){
-  try{
-    const ts=await teams();const ev=await event();const rm=await rosterMap(ts.map(t=>t.id));
-    count.textContent=`${ts.length} / ${ev.max_teams} TEAMS LOCKED`;
-    teamGrid.innerHTML=ts.map((t,i)=>{
-      const r=rm[t.id]||[];
-      const names=r.length?r.map(x=>x.display_name).join(' × '):`${t.player_1} × ${t.player_2}`;
-      return `<article class="card arcade-fighter-card"><div class="fighter-card-top"><span>TEAM ${String(i+1).padStart(2,'0')}</span><b>${esc(divisionLabel(t.division))} · ${esc(t.category||'—')}</b></div>${duo(t,r)}<div class="teamname">${esc(t.team_name)}</div><div class="fighter-names">${esc(names)}</div><div class="teammeta">HEAT ${t.heat_no} · STATION ${t.station_no}</div><div class="fighter-status">LOCKED IN</div></article>`;
-    }).join('')||'<div class="card"><div class="kicker">NO TEAM LOCKED YET</div><h3>FIRST TEAM GETS THE FIRST SLOT.</h3></div>';
-
-    const h={};ts.forEach(t=>(h[t.heat_no]??=[]).push(t));
-    heatGrid.innerHTML=Array.from({length:12},(_,i)=>i+1).map(n=>{
-      const a=(h[n]||[]).sort((x,y)=>x.station_no-y.station_no);
-      return `<div class="card heat"><div><div class="num">HEAT ${n} · S1</div><strong>${esc(a.find(x=>x.station_no===1)?.team_name||'TBD')}</strong></div><div class="vs">VS</div><div style="text-align:right"><div class="num">S2</div><strong>${esc(a.find(x=>x.station_no===2)?.team_name||'TBD')}</strong></div></div>`;
-    }).join('');
-  }catch(e){teamGrid.innerHTML=`<div class="card notice err" style="display:block">${esc(e.message)}</div>`}
-}
-init();
-</script>
-</body>
-</html>
+<script>shell('TEAMS');</script>
+</body></html>
