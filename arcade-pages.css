@@ -1040,3 +1040,49 @@ radial-gradient(circle at 88% 8%,rgba(45,226,255,.05),transparent 25%),
     margin-top:30px!important;
   }
 }
+
+/* EVENT PARTNER + LEGAL FOOTER + POLICY */
+.arc-event-partner-section{background:#06070a;border-top:1px solid rgba(255,255,255,.06)}
+.arc-event-partner-card{
+  display:flex;align-items:center;justify-content:space-between;gap:30px;
+  padding:28px;border:1px solid #2a2d35;background:
+  linear-gradient(90deg,rgba(201,255,71,.035),#090a0e 48%,rgba(45,226,255,.03));
+}
+.arc-event-partner-card h2{margin:7px 0 8px;font-size:clamp(30px,5vw,48px)}
+.arc-event-partner-card p{margin:0;color:#737984}
+.arc-event-partner-logo{
+  width:min(310px,40vw);min-height:110px;display:grid;place-items:center;padding:20px 28px;
+  border:1px solid rgba(201,255,71,.22);background:#07080b;
+  box-shadow:5px 5px 0 rgba(49,91,33,.28);
+  transition:transform .15s ease,border-color .15s ease
+}
+.arc-event-partner-logo:hover{transform:translateY(-3px);border-color:rgba(201,255,71,.5)}
+.arc-event-partner-logo img{display:block;width:min(225px,100%);height:auto}
+
+.tg-arcade-page .arc-legal-footer{padding:44px 0 34px;border-top:1px solid rgba(143,92,255,.16);background:#050506}
+.tg-arcade-page .arc-footer-top{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;padding-bottom:18px;border-bottom:1px solid #20232a}
+.tg-arcade-page .arc-footer-brand{display:grid;gap:4px}
+.tg-arcade-page .arc-footer-brand b{font-family:var(--font-display);font-size:14px;color:#fff;font-weight:400}
+.tg-arcade-page .arc-footer-brand span{font-size:8px;color:#5f6570;letter-spacing:.08em}
+.tg-arcade-page .arc-footer-links{display:flex;gap:16px;flex-wrap:wrap;font-size:10px;font-weight:700}
+.tg-arcade-page .arc-footer-links a{color:#8f959e}
+.tg-arcade-page .arc-footer-links a:hover{color:var(--tg-lime)}
+.tg-arcade-page .arc-business-info{display:flex;gap:8px 18px;flex-wrap:wrap;padding:18px 0;color:#606670;font-size:9px;line-height:1.7}
+.tg-arcade-page .arc-footer-bottom{display:flex;justify-content:space-between;gap:16px;padding-top:15px;border-top:1px solid #20232a;color:#4f5560;font-size:8px;font-weight:700;letter-spacing:.06em}
+
+.arc-policy-main{padding:96px 0 72px;min-height:70vh}
+.arc-policy-main>.container{max-width:920px}
+.arc-policy-main h1{margin:12px 0 6px;font-size:clamp(44px,7vw,76px);line-height:.92}
+.arc-policy-date{margin:0 0 34px;color:#666d77;font-size:11px}
+.arc-policy-main section{padding:24px 0;border-top:1px solid #262932}
+.arc-policy-main section h2{margin:0 0 10px;font-size:18px;color:#fff}
+.arc-policy-main section p{margin:7px 0;color:#9ba1aa;font-size:13px;line-height:1.8}
+.arc-policy-main section b{color:#d7dbe1}
+
+@media(max-width:700px){
+  .arc-event-partner-card{align-items:flex-start;flex-direction:column;padding:20px}
+  .arc-event-partner-logo{width:100%}
+  .tg-arcade-page .arc-footer-top,.tg-arcade-page .arc-footer-bottom{flex-direction:column}
+  .tg-arcade-page .arc-footer-links{gap:10px 14px}
+  .arc-policy-main{padding:78px 0 52px}
+}
