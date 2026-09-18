@@ -32,7 +32,7 @@ const joinIntent=new URLSearchParams(location.search).get('join')==='1';
 const BANK_NAME='기업은행';
 const BANK_ACCOUNT='244-105758-04-010';
 const BANK_HOLDER='버드컴퍼니 유한회사';
-let user=null,me=null,privateData=null,currentEvent=null,allPlayers=[],myInvites=[],myTeam=null,myRoster=[],myStats=null,myHistory=[],capacityRows=[];
+let user=null,me=null,privateData=null,currentEvent=null,allPlayers=[],myInvites=[],myTeam=null,myRoster=[],myStats=null,myHistory=[],capacityRows=[],paymentPoll=null;
 
 function friendly(e){
   const m=String(e?.message||e||'');
@@ -220,13 +220,31 @@ function bankBox(team){
   </div>`;
 }
 
+function stopPaymentPoll(){if(paymentPoll){clearInterval(paymentPoll);paymentPoll=null}}
+function startPaymentPoll(){
+  if(paymentPoll)return;
+  paymentPoll=setInterval(async()=>{
+    if(document.hidden||!myTeam||myTeam.status!=='pending_payment')return;
+    try{
+      await loadHub();
+      if(myTeam?.status==='confirmed'){
+        stopPaymentPoll();
+        renderHub();
+      }
+    }catch(_){}
+  },8000);
+}
+
 function renderGameHub(){
+  if(!myTeam)stopPaymentPoll();
   if(myTeam){
     const mate=myRoster.find(x=>x.id!==user.id);
     if(myTeam.status==='confirmed'){
+      stopPaymentPoll();
       gameHub.innerHTML=`<div class="entry-progress-card locked"><div class="entry-progress-label">STEP 05 / 05</div><strong>LOCKED IN</strong></div><div class="team-lock"><div class="kicker">GAME #01 // ENTRY COMPLETE</div><div class="team-lock-top"><div><h3>${esc(myTeam.team_name)}</h3><p class="muted">${esc(me.display_name)} × ${esc(mate?.display_name||'PARTNER')}</p><p class="payment-team-meta">${esc(myTeam.division||'—')} · ${categoryName(myTeam.category)} · PAID ${formatWon(myTeam.amount_due)}</p></div><div class="slot-display">H${myTeam.heat_no} · S${myTeam.station_no}</div></div></div>`;return;
     }
     if(myTeam.status==='pending_payment'){
+      startPaymentPoll();
       const expired=myTeam.payment_status!=='payment_check'&&myTeam.payment_deadline&&new Date(myTeam.payment_deadline)<new Date();
       if(myTeam.payment_status==='payment_check'){
         gameHub.innerHTML=`<div class="entry-progress-card payment-check"><div class="entry-progress-label">STEP 04 / 05</div><strong>PAYMENT CHECK</strong><small>관리자 입금 확인 후 자동으로 LOCKED IN 됩니다.</small></div>${bankBox(myTeam)}<div class="player-panel payment-wait-panel"><div class="kicker">BANK TRANSFER REPORTED</div><h3>입금 확인 중입니다.</h3><p class="muted">입금자명 <b>${esc(myTeam.depositor_name||'—')}</b>으로 신고되었습니다. 운영자가 법인계좌 입금을 확인하면 참가가 최종 확정됩니다.</p></div>`;return;
@@ -262,7 +280,7 @@ window.sendInvite=async id=>{try{const name=teamNameInput.value.trim();if(!name)
 window.respondInvite=async(id,accept)=>{try{const r=await db.rpc('tg_respond_team_invite',{p_invite_id:id,p_accept:accept});if(r.error)throw r.error;await loadHub();renderHub()}catch(e){alert(friendly(e))}};
 window.cancelInvite=async id=>{try{const r=await db.rpc('tg_cancel_team_invite',{p_invite_id:id});if(r.error)throw r.error;await loadHub();renderHub()}catch(e){alert(friendly(e))}};
 
-async function logout(){await db.auth.signOut();user=null;me=null;privateData=null;showAuth(joinIntent?'signup':'login')}
+async function logout(){stopPaymentPoll();await db.auth.signOut();user=null;me=null;privateData=null;showAuth(joinIntent?'signup':'login')}
 async function boot(){
   const {data:{user:u}}=await db.auth.getUser();user=u||null;
   if(!user){showAuth(joinIntent?'signup':'login');return}
