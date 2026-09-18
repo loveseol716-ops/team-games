@@ -18,3 +18,26 @@
 .admin-payment-box.needs-check b{color:#ffe45c}
 .payment-confirm-btn{min-width:180px}
 @media(max-width:760px){.admin-payment-box{grid-template-columns:1fr 1fr}.admin-payment-box>div{border-right:0;border-bottom:1px solid #292929}.admin-payment-box>div:nth-last-child(-n+2){border-bottom:0}}
+
+/* PLAY POINT // PREDICTION CONTROL */
+.prediction-admin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+.prediction-admin-card{border:1px solid #2b2d36;background:#090a0f;padding:14px}
+.prediction-admin-card.is-settled{border-color:rgba(201,255,71,.28);background:linear-gradient(180deg,rgba(201,255,71,.045),#090a0f)}
+.prediction-admin-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;padding-bottom:12px;border-bottom:1px solid #23252d}
+.prediction-admin-head span{font-family:var(--font-display);font-size:8px;color:#2de2ff}
+.prediction-admin-head h4{font-size:16px;margin:5px 0 0}
+.prediction-admin-head>b{font-family:var(--font-display);font-size:7px;font-weight:400;color:#ff3bd4;border:1px solid rgba(255,59,212,.28);padding:5px 6px}
+.prediction-admin-card.is-settled .prediction-admin-head>b{color:#c9ff47;border-color:rgba(201,255,71,.28)}
+.prediction-admin-stats{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:10px 0}
+.prediction-admin-stats>div{padding:9px;background:#07080c;border:1px solid #22242b}
+.prediction-admin-stats span{display:block;font-size:8px;color:#606670}
+.prediction-admin-stats b{display:block;margin-top:4px;font-family:var(--font-display);font-size:12px;font-weight:400}
+.prediction-admin-settle{display:grid;grid-template-columns:1fr auto;gap:7px}
+.prediction-admin-settle select{min-width:0}
+.prediction-admin-settle .btn{white-space:nowrap}
+.prediction-admin-lock-note{display:block;margin-top:8px;color:#666c75;font-size:9px}
+.prediction-admin-winner{padding:12px;border:1px solid rgba(201,255,71,.2);background:rgba(201,255,71,.035)}
+.prediction-admin-winner span{display:block;font-family:var(--font-display);font-size:7px;color:#c9ff47}
+.prediction-admin-winner b{display:block;margin-top:5px;font-size:14px}
+@media(max-width:1000px){.prediction-admin-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:650px){.prediction-admin-grid{grid-template-columns:1fr}.prediction-admin-settle{grid-template-columns:1fr}}
