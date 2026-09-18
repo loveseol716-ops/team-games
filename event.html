@@ -1,1 +1,120 @@
-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>EVENT · TEAM GAMES</title><link rel="stylesheet" href="styles.css"></head><body><div id="nav"></div><main><section class="section"><div class="container"><div class="sectionhead"><div><div class="kicker">EVENT #01</div><h2>OCT 31, 2026</h2></div><p>Seoul · 12 Teams · 24 Athletes · Time Cap 8:00</p></div><div class="grid g2"><div class="card"><div class="kicker">WORKOUT</div><div class="big" style="margin-top:12px">WORKOUT · TBA</div><p class="muted">최종 WOD 확정 후 공개.</p></div><div class="card"><div class="kicker">PRIZE</div><div class="big" style="margin-top:12px">WINNER PRIZE · TBA</div><p class="muted">프라이즈 파트너 확정 후 공개.</p></div></div></div></section></main><div id="footer"></div><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script src="app.js"></script><script>shell("EVENT");</script></body></html>
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>GAME · TEAM GAMES</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="arcade-pages.css">
+</head>
+<body class="tg-arcade-page game-arcade">
+<div id="nav"></div>
+
+<main>
+  <section class="arcade-page-hero game-brief-hero">
+    <div class="container">
+      <div class="arcade-eyebrow">GAME #01 // MISSION BRIEF</div>
+      <h1>GAME<br>INFO.</h1>
+      <p class="lead">OCT 31, 2026 · SEOUL · TEAM OF 2 · 8 MIN CAP</p>
+      <div class="arcade-page-chips">
+        <span>24 TEAMS</span>
+        <span>48 PLAYERS</span>
+        <span>OPEN / PRO</span>
+        <span>12 HEATS</span>
+      </div>
+      <div class="game-hero-actions">
+        <a class="btn arcade-primary" href="athlete.html?join=1">▶ ENTER GAME #01</a>
+        <a class="btn dark" href="teams.html">VIEW FIGHTERS</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section arcade-deck-section">
+    <div class="container">
+      <div class="sectionhead arcade-sectionhead">
+        <div><div class="kicker">MISSION DATA</div><h2>THE FORMAT.</h2></div>
+        <p>짧고 강한 더블 팀 이벤트. 한 번의 게임으로 순위를 가른다.</p>
+      </div>
+
+      <div class="game-format-grid">
+        <div class="game-data-card pink">
+          <span>01</span>
+          <b>TEAM OF 2</b>
+          <small>2명이 하나의 팀으로 출전</small>
+        </div>
+        <div class="game-data-card blue">
+          <span>02</span>
+          <b>HEAD TO HEAD</b>
+          <small>2개 팀 · 2개 STATION 동시 진행</small>
+        </div>
+        <div class="game-data-card purple">
+          <span>03</span>
+          <b>8 MIN CAP</b>
+          <small>짧고 강하게 끝나는 단일 GAME</small>
+        </div>
+        <div class="game-data-card lime">
+          <span>04</span>
+          <b>24 TEAMS</b>
+          <small>OPEN 12 · PRO 12</small>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section arcade-deck-section game-mission-section">
+    <div class="container">
+      <div class="sectionhead arcade-sectionhead">
+        <div><div class="kicker">MISSION // LOCKED UNTIL RELEASE</div><h2>WORKOUT.</h2></div>
+        <p>최종 WOD 공개 전까지는 잠금 상태.</p>
+      </div>
+
+      <div class="game-terminal-grid">
+        <div class="game-terminal-card workout-terminal">
+          <div class="terminal-head"><span>WORKOUT FILE</span><b>LOCKED</b></div>
+          <div class="terminal-body">
+            <div class="terminal-lock">?</div>
+            <h3>WORKOUT · TBA</h3>
+            <p>GAME #01의 최종 워크아웃은 추후 공개됩니다.</p>
+          </div>
+          <div class="terminal-foot">AWAITING GAME MASTER RELEASE</div>
+        </div>
+
+        <div class="game-terminal-card prize-terminal">
+          <div class="terminal-head"><span>PRIZE FILE</span><b>LOCKED</b></div>
+          <div class="terminal-body">
+            <div class="terminal-lock">★</div>
+            <h3>WINNER PRIZE · TBA</h3>
+            <p>프라이즈 파트너 확정 후 공개됩니다.</p>
+          </div>
+          <div class="terminal-foot">REWARD DATA NOT FOUND</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section arcade-deck-section game-entry-section">
+    <div class="container">
+      <div class="game-entry-panel">
+        <div>
+          <div class="arcade-eyebrow">READY PLAYER?</div>
+          <h2>LOCK YOUR TEAM.</h2>
+          <p>파트너를 고르고 참가비를 입금하면 GAME #01에 들어온다.</p>
+        </div>
+        <div class="game-entry-price">
+          <span>EARLY BIRD</span>
+          <b>₩20,000</b>
+          <small>/ TEAM · UNTIL OCT 10</small>
+        </div>
+        <a class="btn arcade-primary" href="athlete.html?join=1">PRESS START →</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div id="footer"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+<script>shell('GAME');</script>
+</body>
+</html>
