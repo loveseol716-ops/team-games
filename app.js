@@ -1,3 +1,20 @@
+
+// ARC GAMES favicon
+(()=> {
+  const head=document.head;
+  if(!head)return;
+  const icon=document.createElement('link');
+  icon.rel='icon';
+  icon.type='image/x-icon';
+  icon.href='favicon.ico?v=arcgames-20260918';
+  head.appendChild(icon);
+  const png=document.createElement('link');
+  png.rel='icon';
+  png.type='image/png';
+  png.sizes='64x64';
+  png.href='favicon.png?v=arcgames-20260918';
+  head.appendChild(png);
+})();
 const C=window.TG_CONFIG;
 const db=window.supabase.createClient(C.supabaseUrl,C.supabaseAnonKey);
 
