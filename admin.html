@@ -99,6 +99,18 @@
         <section class="admin-block">
           <div class="admin-block-head">
             <div>
+              <div class="kicker">PLAY POINT</div>
+              <h3>PREDICTION CONTROL</h3>
+            </div>
+            <p class="muted">6개 마켓 우승팀 확정 → FAN WALLET 자동 정산.</p>
+          </div>
+          <div id="predictionAdminMsg" class="notice"></div>
+          <div id="predictionAdminGrid" class="prediction-admin-grid"></div>
+        </section>
+
+        <section class="admin-block">
+          <div class="admin-block-head">
+            <div>
               <div class="kicker">SCOREBOARD</div>
               <h3>SCORE INPUT</h3>
             </div>
@@ -128,6 +140,8 @@ const $=id=>document.getElementById(id);
 let allAdminTeams=[];
 let adminAthletes=[];
 let currentEvent=null;
+let predictionAdminSummary=[];
+let predictionAdminBoard=[];
 
 const fmtPhone=v=>String(v||'').replace(/\s+/g,' ').trim();
 const formatWon=v=>`${Number(v||0).toLocaleString('ko-KR')}원`;
@@ -152,6 +166,10 @@ function adminError(x){
   if(m.includes('REGISTRATION_FULL')) return '전체 참가 정원이 모두 찼습니다.';
   if(m.includes('CATEGORY_FULL')) return '해당 OPEN/PRO · 팀 구성 정원이 모두 찼습니다.';
   if(m.includes('PAYMENT_NOT_PENDING')) return '현재 입금 확인 대기 상태가 아닙니다.';
+  if(m.includes('MARKET_STILL_OPEN')) return 'GAME 시작 전에는 예측 마켓을 정산할 수 없습니다.';
+  if(m.includes('MARKET_ALREADY_SETTLED')) return '이미 정산이 완료된 마켓입니다.';
+  if(m.includes('MARKET_NOT_FOUND')) return '예측 마켓을 찾을 수 없습니다.';
+  if(m.includes('TEAM_NOT_IN_MARKET')) return '해당 마켓에 속한 팀이 아닙니다.';
   if(m.includes('TEAM_NAME_REQUIRED')) return '팀 이름을 입력해 주세요.';
   if(m.includes('TEAM_NOT_FOUND')) return '팀을 찾을 수 없습니다. 새로고침 후 다시 시도해 주세요.';
   return m || '처리 중 오류가 발생했습니다.';
@@ -174,7 +192,7 @@ async function refreshAdmin(){
   renderSummary();
   renderAddTeam();
   renderTeamManagement();
-  await loadResults();
+  await Promise.all([loadResults(),loadPredictionControl()]);
 }
 
 async function enterAdmin(){
@@ -347,6 +365,82 @@ window.deleteTeam=async id=>{
     notice('teamAdminMsg',`${t.team_name} DELETED.`);
     await refreshAdmin();
   }catch(e){notice('teamAdminMsg',adminError(e),true)}
+};
+
+
+function predictionCategory(v){
+  return v==='MM'?'MEN / MEN':v==='WW'?'WOMEN / WOMEN':v==='MIXED'?'MIXED':'—';
+}
+
+function groupPredictionBoard(){
+  const map={};
+  predictionAdminBoard.forEach(r=>{
+    if(!map[r.market_id])map[r.market_id]={
+      market_id:r.market_id,division:r.division,category:r.category,
+      market_status:r.market_status,lock_at:r.lock_at,winning_team_id:r.winning_team_id,teams:[]
+    };
+    if(r.team_id)map[r.market_id].teams.push({id:r.team_id,name:r.team_name});
+  });
+  return Object.values(map).sort((a,b)=>{
+    const d=(a.division==='OPEN'?0:1)-(b.division==='OPEN'?0:1);
+    if(d)return d;
+    const order={MM:0,WW:1,MIXED:2};
+    return order[a.category]-order[b.category];
+  });
+}
+
+async function loadPredictionControl(){
+  const [s,b]=await Promise.all([
+    db.rpc('tg_admin_prediction_summary',{p_event_slug:C.eventSlug}),
+    db.rpc('tg_prediction_board',{p_event_slug:C.eventSlug})
+  ]);
+  if(s.error)throw s.error;
+  if(b.error)throw b.error;
+  predictionAdminSummary=s.data||[];
+  predictionAdminBoard=b.data||[];
+
+  const summaryMap=Object.fromEntries(predictionAdminSummary.map(x=>[x.market_id,x]));
+  const markets=groupPredictionBoard();
+
+  $('predictionAdminGrid').innerHTML=markets.map(m=>{
+    const sum=summaryMap[m.market_id]||{};
+    const settled=m.market_status==='settled';
+    const stillOpen=new Date(m.lock_at)>new Date();
+    const winner=m.teams.find(t=>t.id===m.winning_team_id);
+    const options='<option value="">SELECT WINNER</option>'+m.teams.map(t=>`<option value="${t.id}" ${t.id===m.winning_team_id?'selected':''}>${esc(t.name)}</option>`).join('');
+    return `
+      <article class="prediction-admin-card ${settled?'is-settled':''}">
+        <div class="prediction-admin-head">
+          <div><span>${m.division}</span><h4>${predictionCategory(m.category)}</h4></div>
+          <b>${settled?'SETTLED':stillOpen?'OPEN':'LOCKED'}</b>
+        </div>
+        <div class="prediction-admin-stats">
+          <div><span>BETS</span><b>${sum.bets_count||0}</b></div>
+          <div><span>STAKED</span><b>${Number(sum.points_staked||0).toLocaleString()} P</b></div>
+        </div>
+        ${settled
+          ?`<div class="prediction-admin-winner"><span>WINNER</span><b>${esc(winner?.name||'—')}</b></div>`
+          :`<div class="prediction-admin-settle">
+              <select id="prediction-winner-${m.market_id}" ${!m.teams.length?'disabled':''}>${options}</select>
+              <button class="btn arcade-primary" type="button" onclick="settlePredictionMarket('${m.market_id}')" ${stillOpen||!m.teams.length?'disabled':''}>SETTLE MARKET</button>
+            </div>
+            <small class="prediction-admin-lock-note">${stillOpen?'GAME 시작 후 정산 가능':'우승팀 선택 후 정산하면 모든 FAN WALLET이 즉시 반영됩니다.'}</small>`}
+      </article>`;
+  }).join('')||'<div class="card admin-empty">NO PREDICTION MARKETS.</div>';
+}
+
+window.settlePredictionMarket=async marketId=>{
+  const select=$(`prediction-winner-${marketId}`);
+  const teamId=select?.value;
+  if(!teamId){notice('predictionAdminMsg','우승팀을 선택해 주세요.',true);return}
+  const teamName=select.options[select.selectedIndex]?.textContent||'SELECTED TEAM';
+  if(!confirm(`${teamName}\n\n이 팀을 우승팀으로 확정하고 PLAY POINT를 정산할까요?\n정산 후에는 되돌릴 수 없습니다.`))return;
+  try{
+    const q=await db.rpc('tg_admin_settle_prediction_market',{p_market_id:marketId,p_winning_team_id:teamId});
+    if(q.error)throw q.error;
+    notice('predictionAdminMsg',`${teamName} · MARKET SETTLED · WALLET PAID`);
+    await loadPredictionControl();
+  }catch(e){notice('predictionAdminMsg',adminError(e),true)}
 };
 
 async function loadResults(){
