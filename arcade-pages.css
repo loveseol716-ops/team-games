@@ -815,3 +815,30 @@
   }
   .rulebook-hero .game-hero-actions .btn{width:100%}
 }
+
+/* ARC GAMES // LOCKED PUBLIC PAGES */
+.coming-soon-page .coming-soon-hero{
+  min-height:calc(100vh - 68px);
+  display:flex;
+  align-items:center;
+}
+.coming-soon-page .coming-soon-hero h1{
+  font-size:clamp(62px,10vw,124px)!important;
+  line-height:.82!important;
+  max-width:1050px;
+}
+.coming-soon-page .coming-soon-hero .lead{
+  max-width:720px;
+  font-size:16px;
+}
+.coming-soon-panel{
+  border:1px solid rgba(45,226,255,.2);
+  background:linear-gradient(90deg,rgba(45,226,255,.035),#08090d 52%,rgba(255,59,212,.035));
+  padding:28px;
+}
+.coming-soon-panel h2{font-size:clamp(34px,5vw,54px);margin:8px 0 12px}
+.coming-soon-panel p{max-width:720px;color:#7f858e}
+@media(max-width:650px){
+  .coming-soon-page .coming-soon-hero{min-height:520px}
+  .coming-soon-page .coming-soon-hero h1{font-size:clamp(50px,16vw,74px)!important}
+}
