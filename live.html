@@ -1,1 +1,108 @@
-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LIVE · TEAM GAMES</title><link rel="stylesheet" href="styles.css"></head><body><div id="nav"></div><main><section class="section"><div class="container"><div class="sectionhead"><div><div class="kicker">LIVE</div><h2>LEADERBOARD</h2></div><p>경기 당일 실시간 기록.</p></div><div class="card"><table><thead><tr><th>RANK</th><th>TEAM</th><th>HEAT</th><th>TIME</th><th>REPS</th><th>STATUS</th></tr></thead><tbody id="lb"></tbody></table></div></div></section></main><div id="footer"></div><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script src="app.js"></script><script>shell("LIVE");async function render(){const ts=await teams(),ev=await event(),r=await db.from('tg_results').select('*').eq('event_id',ev.id);if(r.error)throw r.error;const m={};r.data.forEach(x=>m[x.team_id]=x);lb.innerHTML=ts.map(t=>{const x=m[t.id]||{};const tm=x.finish_seconds!=null?`${Math.floor(x.finish_seconds/60)}:${String(Math.floor(x.finish_seconds%60)).padStart(2,'0')}`:'—';return `<tr><td>${x.rank||'—'}</td><td>${t.team_name}</td><td>${t.heat_no}</td><td>${tm}</td><td>${x.reps_completed??'—'}</td><td>${x.status||'Not Started'}</td></tr>`}).join('')}render();setInterval(render,5000);</script></body></html>
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>LIVE · TEAM GAMES</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="arcade-pages.css">
+</head>
+<body class="tg-arcade-page live-arcade">
+<div id="nav"></div>
+<main>
+  <section class="arcade-page-hero live-score-hero">
+    <div class="container">
+      <div class="live-terminal-top"><span class="live-dot"></span><b>LIVE SCORE TERMINAL</b><span id="liveClock">SYNCING...</span></div>
+      <div class="arcade-eyebrow">GAME #01 // SCOREBOARD</div>
+      <h1>LIVE<br>BOARD.</h1>
+      <p class="lead">경기 당일 기록과 순위가 이 보드에서 움직인다.</p>
+      <div class="arcade-page-chips"><span>12 HEATS</span><span>2 STATIONS</span><span>8 MIN CAP</span><span>AUTO REFRESH 5S</span></div>
+    </div>
+  </section>
+
+  <section class="section arcade-deck-section live-board-section">
+    <div class="container">
+      <div class="live-hud" id="liveHud">
+        <div><span>GAME STATUS</span><b id="gameStatus">STANDBY</b></div>
+        <div><span>LOCKED TEAMS</span><b id="lockedCount">--</b></div>
+        <div><span>FINISHED</span><b id="finishedCount">--</b></div>
+        <div><span>LEADER</span><b id="leaderName">TBD</b></div>
+      </div>
+
+      <div class="sectionhead arcade-sectionhead">
+        <div><div class="kicker">LED SCOREBOARD // LIVE</div><h2>WHO'S ON TOP?</h2></div>
+        <p>5초마다 자동으로 새로고침됩니다.</p>
+      </div>
+
+      <div class="live-score-shell">
+        <div class="live-score-marquee"><span>RANK</span><span>TEAM</span><span>HEAT</span><span>TIME</span><span>REPS</span><span>STATUS</span></div>
+        <div class="table-scroll">
+          <table class="live-score-table">
+            <thead><tr><th>RANK</th><th>TEAM</th><th>HEAT</th><th>TIME</th><th>REPS</th><th>STATUS</th></tr></thead>
+            <tbody id="lb"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+<div id="footer"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+<script>
+shell('LIVE');
+
+function fmtStatus(s){return s||'Not Started'}
+function statusClass(s){
+  if(s==='Finished')return 'is-finished';
+  if(s==='Running')return 'is-running';
+  if(s==='Time Cap')return 'is-cap';
+  return 'is-waiting';
+}
+
+function tickClock(){
+  const d=new Date();
+  liveClock.textContent=d.toLocaleTimeString('ko-KR',{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+tickClock();setInterval(tickClock,1000);
+
+async function render(){
+  try{
+    const ts=await teams(),ev=await event(),r=await db.from('tg_results').select('*').eq('event_id',ev.id);
+    if(r.error)throw r.error;
+    const m={};(r.data||[]).forEach(x=>m[x.team_id]=x);
+    const rows=ts.map(t=>({t,x:m[t.id]||{}})).sort((a,b)=>{
+      const ar=a.x.rank??999,brr=b.x.rank??999;
+      if(ar!==brr)return ar-brr;
+      return (a.t.heat_no||99)-(b.t.heat_no||99);
+    });
+    const finished=rows.filter(o=>['Finished','Time Cap'].includes(o.x.status)).length;
+    const running=rows.some(o=>o.x.status==='Running');
+    const leader=rows.find(o=>o.x.rank===1);
+    lockedCount.textContent=ts.length;
+    finishedCount.textContent=finished;
+    leaderName.textContent=leader?.t?.team_name||'TBD';
+    gameStatus.textContent=running?'LIVE':finished===ts.length&&ts.length?'COMPLETE':'STANDBY';
+    gameStatus.className=running?'hud-live':'';
+
+    lb.innerHTML=rows.map(({t,x})=>{
+      const tm=x.finish_seconds!=null?`${Math.floor(x.finish_seconds/60)}:${String(Math.floor(x.finish_seconds%60)).padStart(2,'0')}`:'—';
+      const rank=x.rank||'—';
+      return `<tr class="${x.rank&&x.rank<=3?'top-rank':''} ${statusClass(x.status)}">
+        <td><span class="rank-led">${rank}</span></td>
+        <td><strong>${esc(t.team_name)}</strong><small>${esc(t.division||'')} ${esc(t.category||'')}</small></td>
+        <td>H${t.heat_no||'—'}</td>
+        <td><b class="time-led">${tm}</b></td>
+        <td>${x.reps_completed??'—'}</td>
+        <td><span class="live-status ${statusClass(x.status)}">${esc(fmtStatus(x.status))}</span></td>
+      </tr>`;
+    }).join('')||'<tr><td colspan="6" class="muted">NO LOCKED-IN TEAMS YET.</td></tr>';
+  }catch(e){
+    lb.innerHTML=`<tr><td colspan="6" class="notice err" style="display:table-cell">${esc(e.message)}</td></tr>`;
+  }
+}
+render();setInterval(render,5000);
+</script>
+</body>
+</html>
