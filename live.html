@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>LIVE · TEAM GAMES</title>
+  <title>LIVE · ARC GAMES</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="arcade-pages.css">
 </head>
@@ -16,7 +16,7 @@
       <div class="arcade-eyebrow">GAME #01 // SCOREBOARD</div>
       <h1>LIVE<br>BOARD.</h1>
       <p class="lead">경기 당일 기록과 순위가 이 보드에서 움직인다.</p>
-      <div class="arcade-page-chips"><span>12 HEATS</span><span>2 STATIONS</span><span>8 MIN CAP</span><span>AUTO REFRESH 5S</span></div>
+      <div class="arcade-page-chips"><span>TEAM OF 3</span><span>4 TEAMS / HEAT</span><span>8 MIN CAP</span><span>AUTO REFRESH 5S</span></div>
     </div>
   </section>
 
@@ -91,7 +91,7 @@ async function render(){
       const rank=x.rank||'—';
       return `<tr class="${x.rank&&x.rank<=3?'top-rank':''} ${statusClass(x.status)}">
         <td><span class="rank-led">${rank}</span></td>
-        <td><strong>${esc(t.team_name)}</strong><small>${esc(t.division||'')} ${esc(t.category||'')}</small></td>
+        <td><strong>${esc(t.team_name)}</strong><small>${esc(divisionLabel(t.division))} ${esc(t.category||'')}</small></td>
         <td>H${t.heat_no||'—'}</td>
         <td><b class="time-led">${tm}</b></td>
         <td>${x.reps_completed??'—'}</td>
