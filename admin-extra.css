@@ -3,3 +3,18 @@
 .admin-only-nav{border-bottom-color:#263322;background:#070907}.admin-only-navin{justify-content:space-between}.admin-only-brand{cursor:default}.admin-only-badge{font-family:var(--font-display);font-size:10px;letter-spacing:.12em;color:var(--arcade);border:1px solid #3b4d31;padding:8px 10px;background:#0d120b}.admin-only-footer .arcade-footer{grid-template-columns:1fr auto}.admin-only-footer{opacity:.62}
 @media(max-width:980px){.admin-add-grid{grid-template-columns:1fr 1fr}.admin-add-grid .wide{grid-column:1/-1}.admin-add-grid .add-button{grid-column:1/-1}.admin-add-grid .add-button .btn{width:100%}}
 @media(max-width:640px){.admin-add-grid{grid-template-columns:1fr}.admin-add-grid .wide,.admin-add-grid .add-button{grid-column:auto}.admin-add-head{align-items:flex-start;flex-direction:column}.admin-team-actions{justify-content:stretch}.admin-team-actions .btn,.admin-team-actions a.btn{flex:1;justify-content:center}.admin-team-actions .delete-spacer{margin-right:0;flex-basis:100%}.admin-only-badge{font-size:8px}.admin-only-footer .arcade-footer{grid-template-columns:1fr}}
+
+/* PAYMENT CONTROL */
+.admin-stat-alert{border-color:#7a6724!important;background:linear-gradient(180deg,#211d0b,#11100a)!important}
+.admin-stat-alert strong{color:#ffe45c!important}
+.admin-team-card.is-payment-check{border-color:#7e6b2b;box-shadow:0 0 0 1px rgba(255,228,92,.08)}
+.admin-status-badge.pending{background:#2a2308!important;border-color:#8b7425!important;color:#ffe45c!important}
+.admin-payment-box{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0;padding:12px;border:1px solid #343434;background:#090909;border-radius:7px}
+.admin-payment-box.needs-check{border-color:#806c25;background:linear-gradient(90deg,#171408,#0a0a0a)}
+.admin-payment-box>div{padding:8px;border-right:1px solid #292929}
+.admin-payment-box>div:last-child{border-right:0}
+.admin-payment-box span,.admin-payment-box small{display:block;color:#777;font-size:9px;letter-spacing:.07em}
+.admin-payment-box b{display:block;margin:4px 0 2px;font-size:13px;color:#e6eee2}
+.admin-payment-box.needs-check b{color:#ffe45c}
+.payment-confirm-btn{min-width:180px}
+@media(max-width:760px){.admin-payment-box{grid-template-columns:1fr 1fr}.admin-payment-box>div{border-right:0;border-bottom:1px solid #292929}.admin-payment-box>div:nth-last-child(-n+2){border-bottom:0}}
