@@ -10,7 +10,7 @@ function nav(active){
     ['HOME','index.html'],['GAME','event.html'],['TEAMS','teams.html'],
     ['FAN PICK','fanpick.html'],['LIVE','live.html'],['PLAYER','athlete.html']
   ];
-  return `<header class="nav"><div class="container navin"><a class="brand" href="index.html">ARC GAMES</a><nav class="links">${p.map(([n,h])=>`<a class="${active===n?'active':''}" href="${h}">${n}</a>`).join('')}</nav><a class="cta arcade-cta" href="athlete.html?join=1">ENTER GAME #01</a></div></header>`;
+  return `<header class="nav"><div class="container navin"><a class="brand" href="index.html">ARC GAMES</a><nav class="links">${p.map(([n,h])=>`<a class="${active===n?'active':''}" href="${h}">${n}</a>`).join('')}</nav><a class="cta arcade-cta" href="event.html">EVENT SOON</a></div></header>`;
 }
 
 function adminNav(){
@@ -24,7 +24,7 @@ function shell(active){
     return;
   }
   document.querySelector('#nav').innerHTML=nav(active);
-  document.querySelector('#footer').innerHTML=`<footer class="footer"><div class="container arcade-footer"><span>ARC GAMES // STAGE 01</span><span>OCT 31, 2026 · NOLTO GYM</span><span>PLAY · PICK · WATCH</span></div></footer>`;
+  document.querySelector('#footer').innerHTML=`<footer class="footer"><div class="container arcade-footer"><span>ARC GAMES // STAGE 01</span><span>EVENT #01 · COMING SOON</span><span>TEAM OF 2 · 24 TEAMS</span></div></footer>`;
 }
 
 function revealGameMaster(){/* admin is intentionally isolated from participant navigation */}
