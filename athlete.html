@@ -26,7 +26,10 @@
       <h1>ENTRY<br>COMING SOON.</h1>
       <p class="lead">참가신청은 아직 열리지 않았습니다.</p>
       <div class="arcade-page-chips"><span>TEAM OF 2</span><span>24 TEAMS</span><span>BEGINNER / ATHLETE</span><span>MM / FF / MF</span></div>
-      <div class="game-hero-actions"><a class="btn arcade-primary" href="account.html?next=athlete.html">CREATE ARC ACCOUNT</a></div>
+      <div class="game-hero-actions">
+        <button id="entryAction" class="btn arcade-primary" type="button" disabled>ENTRY COMING SOON</button>
+        <div id="entryState" class="notice"></div>
+      </div>
     </div>
   </section>
 </main>
@@ -34,5 +37,34 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script src="app.js"></script>
-<script>shell('PLAYER');</script>
+<script>
+shell('PLAYER');
+
+async function initEntry(){
+  const {data:ev,error}=await db.from('tg_events')
+    .select('registration_open')
+    .eq('slug',C.eventSlug)
+    .maybeSingle();
+
+  if(error && error.code!=='PGRST116')return;
+  if(!ev?.registration_open)return;
+
+  entryAction.disabled=false;
+  entryAction.textContent='ENTER GAME →';
+  entryAction.onclick=()=>arcBeginGameEntry('athlete.html?stage=profile-ready')
+    .catch(e=>notice('entryState',e.message||String(e),true));
+
+  const params=new URLSearchParams(location.search);
+  if(params.get('stage')==='profile-ready'){
+    const user=await currentUser();
+    if(!user)return;
+    const p=await db.rpc('arc_player_profile');
+    if(!p.error&&p.data?.[0]?.profile_complete){
+      notice('entryState','PLAYER PROFILE READY. TEAM APPLICATION STEP IS NEXT.');
+    }
+  }
+}
+
+initEntry();
+</script>
 </body></html>
