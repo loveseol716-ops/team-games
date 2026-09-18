@@ -1,0 +1,362 @@
+/* TEAM GAMES // SHARED ARCADE BETTING HALL */
+.tg-arcade-page{
+  --tg-lime:#c9ff47;
+  --tg-pink:#ff3bd4;
+  --tg-blue:#2de2ff;
+  --tg-purple:#8f5cff;
+  --tg-yellow:#ffe45c;
+  background:
+    radial-gradient(circle at 14% 8%,rgba(255,59,212,.07),transparent 24%),
+    radial-gradient(circle at 86% 16%,rgba(45,226,255,.07),transparent 22%),
+    #050506;
+}
+.tg-arcade-page .nav{
+  background:rgba(4,4,7,.94);
+  border-bottom:1px solid rgba(45,226,255,.16);
+  box-shadow:0 10px 30px rgba(0,0,0,.35);
+}
+.tg-arcade-page .brand{color:#fff;text-shadow:0 0 14px rgba(201,255,71,.25)}
+.tg-arcade-page .links a:hover,
+.tg-arcade-page .links a.active{color:var(--tg-blue);text-shadow:0 0 12px rgba(45,226,255,.38)}
+.tg-arcade-page .arcade-cta{
+  border-radius:3px;background:var(--tg-lime);color:#050505;
+  box-shadow:0 0 18px rgba(201,255,71,.24),4px 4px 0 #315b21;
+}
+.tg-arcade-page .footer{border-top:1px solid rgba(143,92,255,.16);background:#050506}
+.tg-arcade-page .arcade-footer span:first-child{color:#9297a0}
+
+.arcade-page-hero{
+  position:relative;overflow:hidden;
+  min-height:430px;padding:84px 0 54px!important;
+  border-bottom:1px solid rgba(255,255,255,.07)!important;
+  background:
+    linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px),
+    radial-gradient(circle at 14% 35%,rgba(255,59,212,.11),transparent 30%),
+    radial-gradient(circle at 82% 30%,rgba(45,226,255,.10),transparent 29%),
+    linear-gradient(180deg,#07080d,#07060b)!important;
+  background-size:34px 34px,34px 34px,auto,auto,auto!important;
+}
+.arcade-page-hero:before{
+  content:"";position:absolute;left:-4%;top:14%;width:36vw;height:4px;
+  background:var(--tg-pink);box-shadow:0 0 14px var(--tg-pink),0 0 34px rgba(255,59,212,.34);
+  transform:rotate(9deg);opacity:.72;
+}
+.arcade-page-hero:after{
+  content:"";position:absolute!important;right:-5%;top:24%;bottom:auto!important;width:29vw!important;height:4px!important;
+  background:var(--tg-blue)!important;box-shadow:0 0 14px var(--tg-blue),0 0 34px rgba(45,226,255,.35);
+  transform:rotate(-11deg);opacity:.68;border-radius:99px;
+}
+.arcade-page-hero .container{position:relative;z-index:2}
+.arcade-page-hero .arcade-eyebrow{
+  color:var(--tg-pink);text-shadow:0 0 12px rgba(255,59,212,.38)
+}
+.arcade-page-hero h1{
+  font-size:clamp(62px,9vw,112px)!important;line-height:.82!important;
+  margin:12px 0 18px!important;
+  text-shadow:-4px 0 0 rgba(255,59,212,.25),4px 0 0 rgba(45,226,255,.22),0 0 24px rgba(255,255,255,.04);
+}
+.arcade-page-hero .lead{color:#aeb3bc!important}
+.arcade-page-chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:21px}
+.arcade-page-chips span{
+  padding:7px 9px;border:1px solid rgba(45,226,255,.23);background:rgba(8,10,16,.72);
+  color:#969da7;font:700 9px var(--font-body);letter-spacing:.08em;
+}
+.arcade-page-chips span:nth-child(2n){border-color:rgba(255,59,212,.25);color:#b9a4b7}
+
+.arcade-deck-section{
+  position:relative;background:
+    linear-gradient(rgba(143,92,255,.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(45,226,255,.018) 1px,transparent 1px),
+    #070709;
+  background-size:44px 44px,44px 44px,auto;
+}
+.arcade-deck-section:before{
+  content:"";position:absolute;left:0;right:0;top:0;height:1px;
+  box-shadow:0 0 26px 4px rgba(143,92,255,.12);
+}
+.arcade-sectionhead .kicker,.arcade-deck-section .kicker{color:var(--tg-blue)}
+.arcade-sectionhead h2{letter-spacing:-.035em}
+.tg-arcade-page .btn.arcade-primary{
+  border-radius:3px;background:var(--tg-lime);color:#050505;
+  border:1px solid var(--tg-lime);
+  box-shadow:0 0 18px rgba(201,255,71,.20),4px 4px 0 #315b21;
+}
+.tg-arcade-page .btn.dark{border-radius:3px;background:#101117;border-color:#30323b}
+.tg-arcade-page input,.tg-arcade-page select{
+  border-radius:3px;background:#08090e;border-color:#2c2e37;
+}
+.tg-arcade-page input:focus,.tg-arcade-page select:focus{
+  border-color:var(--tg-blue);box-shadow:0 0 0 1px rgba(45,226,255,.12);
+}
+
+/* TEAMS // FIGHTER SELECT */
+.teams-arcade .arcade-team-grid{gap:12px}
+.teams-arcade .arcade-fighter-card{
+  position:relative;overflow:hidden;padding:0;border-radius:0;
+  border:1px solid #292b34;background:#090a0f;
+  transition:transform .14s ease,border-color .14s ease,box-shadow .14s ease;
+}
+.teams-arcade .arcade-fighter-card:hover{
+  transform:translateY(-4px);border-color:var(--tg-pink);
+  box-shadow:0 14px 34px rgba(0,0,0,.30),0 0 20px rgba(255,59,212,.08);
+}
+.teams-arcade .fighter-card-top{
+  display:flex;justify-content:space-between;gap:10px;padding:10px 12px;
+  border-bottom:1px solid #242630;background:#07080c;
+  font-family:var(--font-display);font-size:8px;color:#69707b;
+}
+.teams-arcade .fighter-card-top b{font-weight:400;color:var(--tg-blue)}
+.teams-arcade .arcade-fighter-card .duo-photo,
+.teams-arcade .arcade-fighter-card .photo{
+  border:0;border-radius:0;aspect-ratio:4/3;
+}
+.teams-arcade .arcade-fighter-card .duo-photo img,
+.teams-arcade .arcade-fighter-card .photo img{
+  filter:saturate(.82) contrast(1.05);
+  transition:filter .16s ease,transform .18s ease;
+}
+.teams-arcade .arcade-fighter-card:hover img{filter:saturate(1.05) contrast(1.05);transform:scale(1.018)}
+.teams-arcade .arcade-fighter-card .teamname{
+  padding:14px 14px 0;margin:0;font-family:var(--font-display);font-size:19px;
+}
+.teams-arcade .fighter-names{padding:5px 14px 0;color:#b8bdc4;font-size:12px}
+.teams-arcade .arcade-fighter-card .teammeta{padding:8px 14px 14px;margin:0;color:#626873;font-size:10px}
+.teams-arcade .fighter-status{
+  position:absolute;right:10px;bottom:10px;padding:5px 7px;
+  border:1px solid rgba(201,255,71,.34);background:#0a1107d9;
+  color:var(--tg-lime);font-family:var(--font-display);font-size:7px;
+  box-shadow:0 0 12px rgba(201,255,71,.08);
+}
+.teams-arcade .duo-label{
+  border-radius:0;border-color:rgba(45,226,255,.25);background:rgba(4,5,8,.86);
+  color:#d8dbe0;
+}
+.teams-arcade .arcade-heat-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+.teams-arcade .arcade-heat-grid .heat{
+  border-radius:0;border:1px solid #292b34;background:linear-gradient(90deg,rgba(255,59,212,.045),#090a0e 48%,rgba(45,226,255,.045));
+  min-height:105px;
+}
+.teams-arcade .arcade-heat-grid .vs{
+  color:var(--tg-pink);text-shadow:0 0 10px rgba(255,59,212,.38)
+}
+.teams-arcade .arcade-entry-console{
+  border-radius:0;border:1px solid rgba(201,255,71,.28);
+  background:linear-gradient(90deg,rgba(201,255,71,.06),#08090c);
+  box-shadow:0 0 28px rgba(201,255,71,.04);
+}
+
+/* FAN PICK // BETTING BOARD */
+.fanpick-arcade .fanpick-betting-hero{padding-top:86px!important}
+.fanpick-arcade .fanpick-title-row h1{
+  text-shadow:-4px 0 0 rgba(255,59,212,.25),4px 0 0 rgba(45,226,255,.2)
+}
+.fanpick-arcade .betting-rules{
+  border-radius:0;border-color:rgba(255,59,212,.28);
+  background:linear-gradient(180deg,rgba(255,59,212,.05),#090a0e);
+  box-shadow:7px 7px 0 rgba(45,226,255,.055),0 0 26px rgba(255,59,212,.05);
+}
+.fanpick-arcade .betting-rules span{color:var(--tg-pink)}
+.fanpick-arcade .betting-character-select{gap:10px}
+.fanpick-arcade .fighter-card{
+  border-radius:0;border-color:#2b2d35;background:#090a0f;
+  box-shadow:none;
+}
+.fanpick-arcade .fighter-card:hover{
+  border-color:var(--tg-blue);box-shadow:0 0 18px rgba(45,226,255,.09);
+}
+.fanpick-arcade .fighter-card.active{
+  border-color:var(--tg-pink);
+  box-shadow:0 0 0 1px rgba(255,59,212,.28),0 0 25px rgba(255,59,212,.12),6px 6px 0 rgba(143,92,255,.16);
+}
+.fanpick-arcade .fighter-no{border-radius:0;border-color:rgba(45,226,255,.3);color:var(--tg-blue)}
+.fanpick-arcade .fighter-card.active .fighter-no{color:var(--tg-pink);border-color:rgba(255,59,212,.38)}
+.fanpick-arcade .fighter-select{color:#6c727c}
+.fanpick-arcade .fighter-card.active .fighter-select{background:var(--tg-pink);color:#080308}
+.fanpick-arcade .betting-submit-row{padding-top:12px}
+.fanpick-arcade .betting-podium-console{
+  border-radius:0;border-color:rgba(143,92,255,.26);
+  background:linear-gradient(90deg,rgba(143,92,255,.05),#08090d);
+}
+.fanpick-arcade .podium-slot span{color:var(--tg-blue)}
+.fanpick-arcade .betting-board{
+  border-radius:0;border-color:#2b2d36;background:#08090d;
+}
+.fanpick-arcade .arcade-bar-row{padding:10px 0;border-bottom:1px solid #1f2128}
+.fanpick-arcade .arcade-bar-row:last-child{border-bottom:0}
+.fanpick-arcade .arcade-bar-top b{color:var(--tg-pink)}
+.fanpick-arcade .arcade-bar{background:#15171e}
+.fanpick-arcade .arcade-bar>div{
+  background:linear-gradient(90deg,var(--tg-purple),var(--tg-pink),var(--tg-blue));
+  box-shadow:0 0 12px rgba(255,59,212,.24);
+}
+
+/* LIVE // LED SCOREBOARD */
+.live-score-hero .live-terminal-top{
+  display:inline-flex;gap:9px;align-items:center;margin-bottom:18px;
+  padding:7px 10px;border:1px solid rgba(45,226,255,.25);background:#070910;
+  color:#7e8590;font-size:9px;font-weight:800;letter-spacing:.08em;
+}
+.live-score-hero .live-terminal-top b{color:var(--tg-blue)}
+.live-score-hero .live-terminal-top span:last-child{color:#aeb4bd}
+.live-hud{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:34px;
+}
+.live-hud>div{
+  min-height:112px;padding:16px;border:1px solid #292b34;background:#090a0f;
+  position:relative;overflow:hidden;
+}
+.live-hud>div:after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--tg-blue);opacity:.6}
+.live-hud>div:nth-child(2):after{background:var(--tg-pink)}
+.live-hud>div:nth-child(3):after{background:var(--tg-purple)}
+.live-hud>div:nth-child(4):after{background:var(--tg-lime)}
+.live-hud span{display:block;font-size:9px;color:#656b75;letter-spacing:.10em}
+.live-hud b{
+  display:block;margin-top:10px;font-family:var(--font-display);font-size:clamp(21px,3vw,32px);font-weight:400;color:#fff;
+}
+.live-hud .hud-live{color:var(--tg-pink);text-shadow:0 0 14px rgba(255,59,212,.38)}
+.live-score-shell{
+  border:1px solid rgba(45,226,255,.23);background:#07080c;
+  box-shadow:0 0 28px rgba(45,226,255,.045);
+}
+.live-score-marquee{
+  display:grid;grid-template-columns:75px 1fr 90px 120px 90px 130px;gap:10px;
+  padding:10px 14px;border-bottom:1px solid rgba(45,226,255,.18);
+  color:var(--tg-blue);font-family:var(--font-display);font-size:7px;letter-spacing:.08em;
+}
+.live-score-table thead{display:none}
+.live-score-table td{border-color:#20222a;padding:16px 14px}
+.live-score-table tr{background:#08090d}
+.live-score-table tr:nth-child(even){background:#0a0b10}
+.live-score-table tr.top-rank{background:linear-gradient(90deg,rgba(255,59,212,.06),#090a0f 36%)}
+.live-score-table td:nth-child(2) strong{display:block;font-family:var(--font-display);font-size:12px;font-weight:400}
+.live-score-table td:nth-child(2) small{display:block;margin-top:3px;color:#626873;font-size:9px}
+.rank-led{
+  display:inline-grid;place-items:center;min-width:38px;height:30px;
+  border:1px solid rgba(255,59,212,.28);color:var(--tg-pink);
+  font-family:var(--font-display);font-size:10px;
+}
+.time-led{font-family:var(--font-display);font-weight:400;color:var(--tg-blue);text-shadow:0 0 10px rgba(45,226,255,.2)}
+.live-status{
+  display:inline-flex;padding:5px 7px;border:1px solid #333;font-size:8px;font-weight:800;letter-spacing:.05em;
+}
+.live-status.is-running{color:var(--tg-pink);border-color:rgba(255,59,212,.35);box-shadow:0 0 10px rgba(255,59,212,.08)}
+.live-status.is-finished{color:var(--tg-lime);border-color:rgba(201,255,71,.30)}
+.live-status.is-cap{color:var(--tg-yellow);border-color:rgba(255,228,92,.30)}
+.live-status.is-waiting{color:#737983}
+
+/* PLAYER // ARCADE TERMINAL */
+.player-arcade .player-terminal-hero{min-height:470px}
+.player-arcade .player-entry-steps{
+  margin-top:24px;padding:12px;border:1px solid rgba(45,226,255,.14);
+  background:rgba(5,7,11,.72);color:#717782;
+}
+.player-arcade .player-entry-steps b{color:var(--tg-pink)}
+.player-arcade .player-entry-steps i{color:#3e414a}
+.player-arcade main>.section{background:
+  linear-gradient(rgba(143,92,255,.022) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(45,226,255,.018) 1px,transparent 1px),
+  #070709;background-size:44px 44px,44px 44px,auto;
+}
+.player-arcade .player-auth-card,
+.player-arcade .player-form,
+.player-arcade .player-panel,
+.player-arcade .settings-form{
+  border-radius:0;border-color:#2b2d36;background:#090a0f;
+  box-shadow:0 0 24px rgba(45,226,255,.025);
+}
+.player-arcade .player-auth-card{position:relative;overflow:hidden}
+.player-arcade .player-auth-card:before{
+  content:"PLAYER TERMINAL";position:absolute;right:14px;top:10px;
+  color:#363a44;font-family:var(--font-display);font-size:7px;letter-spacing:.08em;
+}
+.player-arcade .player-auth-tabs .active{background:var(--tg-pink);color:#080308}
+.player-arcade .entry-status-line{border-color:#292b34;color:#68707a}
+.player-arcade .entry-status-line b{color:var(--tg-blue)}
+.player-arcade .entry-next-note{
+  border-left-color:var(--tg-pink);background:#100b12;color:#9f949f;
+}
+.player-arcade .player-card{
+  border-radius:0;border-color:rgba(143,92,255,.25);
+  background:linear-gradient(180deg,rgba(143,92,255,.055),#090a0e 44%);
+}
+.player-arcade .player-card-rank{color:var(--tg-blue)}
+.player-arcade .player-card-handle{color:var(--tg-pink)}
+.player-arcade .player-chip{border-radius:0;border-color:#30323a;background:#0a0b10;color:#9ba1aa}
+.player-arcade .player-stat{border-color:#252730;background:#07080c}
+.player-arcade .player-stat strong{color:var(--tg-blue)}
+.player-arcade .entry-progress-card{
+  border-radius:0;border-color:rgba(45,226,255,.25);background:#090b10;
+}
+.player-arcade .entry-progress-card strong{color:var(--tg-blue)}
+.player-arcade .entry-progress-card.locked{
+  border-color:rgba(201,255,71,.35);background:linear-gradient(90deg,rgba(201,255,71,.06),#090a0d);
+}
+.player-arcade .entry-progress-card.locked strong{color:var(--tg-lime)}
+.player-arcade .entry-progress-card.payment-check{
+  border-color:rgba(255,228,92,.34);background:linear-gradient(90deg,rgba(255,228,92,.06),#090a0d);
+}
+.player-arcade .entry-progress-card.payment-check strong{color:var(--tg-yellow)}
+.player-arcade .entry-progress-card.expired{border-color:#703b4e;background:#120b0e}
+.player-arcade .team-lock{
+  border-radius:0;border-color:rgba(201,255,71,.3);
+  background:linear-gradient(90deg,rgba(201,255,71,.055),#090a0d);
+}
+.player-arcade .slot-display{color:var(--tg-lime);text-shadow:0 0 10px rgba(201,255,71,.2)}
+.player-arcade .invite-row,
+.player-arcade .player-search-row,
+.player-arcade .history-row{
+  border-radius:0;border-color:#262831;background:#08090d;
+}
+.player-arcade .mini-avatar{border-radius:0}
+.player-arcade .mini-btn{border-radius:0;border-color:#343741;background:#0c0d12}
+.player-arcade .mini-btn.hot{background:var(--tg-pink);border-color:var(--tg-pink);color:#080308}
+.player-arcade .capacity-chip{border-radius:0;border-color:#30323a;background:#090a0e}
+.player-arcade .capacity-chip b{color:var(--tg-blue)}
+.player-arcade .capacity-chip.full{border-color:#653449;background:#120b0f}
+.player-arcade .bank-transfer-box{
+  border-radius:0;border-color:rgba(255,228,92,.28);
+  background:linear-gradient(180deg,rgba(255,228,92,.055),#090a0d);
+}
+.player-arcade .bank-transfer-head span{color:#807b63}
+.player-arcade .bank-transfer-head strong{color:var(--tg-yellow);text-shadow:0 0 12px rgba(255,228,92,.14)}
+.player-arcade .payment-chip{border-color:rgba(143,92,255,.3);color:#b3a6c2}
+.player-arcade .bank-account-row b{color:#fff}
+.player-arcade .settings-current{border-color:#2b2d36;background:#090a0e}
+.player-arcade .settings-current span{color:var(--tg-pink)}
+.player-arcade .settings-current img{border-color:rgba(45,226,255,.28)}
+
+/* PUBLIC PLAYER CARD */
+.public-player-arcade .player-shell{
+  min-height:calc(100vh - 68px);
+  background:
+    radial-gradient(circle at 15% 18%,rgba(255,59,212,.08),transparent 26%),
+    radial-gradient(circle at 84% 18%,rgba(45,226,255,.08),transparent 24%),
+    #060608;
+}
+.public-player-arcade .public-player-photo{border-color:rgba(45,226,255,.28)}
+.public-player-arcade .public-player-copy .handle{color:var(--tg-pink)}
+.public-player-arcade .team-lock{border-radius:0;border-color:rgba(201,255,71,.28);background:#090c08}
+.public-player-arcade .player-panel{border-radius:0;border-color:#2b2d36;background:#090a0e}
+
+@media(max-width:980px){
+  .teams-arcade .arcade-heat-grid{grid-template-columns:1fr}
+  .live-hud{grid-template-columns:repeat(2,1fr)}
+  .live-score-marquee{display:none}
+  .live-score-table thead{display:table-header-group}
+}
+@media(max-width:700px){
+  .arcade-page-hero{padding:58px 0 42px!important;min-height:390px}
+  .arcade-page-hero h1{font-size:clamp(58px,20vw,84px)!important}
+  .arcade-page-hero:before{width:62vw}
+  .arcade-page-hero:after{width:52vw!important}
+  .live-hud{grid-template-columns:1fr 1fr}
+  .live-hud>div{min-height:92px}
+  .live-score-table{min-width:720px}
+  .teams-arcade .arcade-team-grid{grid-template-columns:1fr}
+  .fanpick-arcade .character-select{grid-template-columns:1fr 1fr}
+}
+@media(max-width:520px){
+  .live-hud{grid-template-columns:1fr}
+  .fanpick-arcade .character-select{grid-template-columns:1fr}
+}
