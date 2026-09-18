@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>PLAYER · TEAM GAMES</title>
+  <title>PLAYER · ARC GAMES</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="athlete.css">
   <link rel="stylesheet" href="arcade-pages.css">
@@ -15,10 +15,10 @@
     <div class="container">
       <div class="arcade-eyebrow">PLAYER TERMINAL // GAME #01</div>
       <h1>ENTER<br>THE GAME.</h1>
-      <p class="lead">PLAYER ID → PARTNER → BANK TRANSFER → LOCKED IN. 하나씩 클리어하면 된다.</p>
-      <div class="arcade-page-chips"><span>OPEN / PRO</span><span>24 TEAMS</span><span>TEAM OF 2</span><span>₩20K EARLY BIRD</span></div>
+      <p class="lead">PLAYER ID → TEAM BUILD → BANK TRANSFER → LOCKED IN.</p>
+      <div class="arcade-page-chips"><span>BEGINNER / ATHLETE</span><span>24 TEAMS</span><span>TEAM OF 3</span><span>₩20K EARLY BIRD</span></div>
       <div class="player-entry-steps">
-        <span><b>01</b> ACCOUNT</span><i>→</i><span><b>02</b> PLAYER CARD</span><i>→</i><span><b>03</b> PARTNER</span><i>→</i><span><b>04</b> PAYMENT</span><i>→</i><span><b>05</b> LOCKED IN</span>
+        <span><b>01</b> ACCOUNT</span><i>→</i><span><b>02</b> PLAYER CARD</span><i>→</i><span><b>03</b> TEAM BUILD</span><i>→</i><span><b>04</b> PAYMENT</span><i>→</i><span><b>05</b> LOCKED IN</span>
       </div>
     </div>
   </section>
@@ -48,7 +48,7 @@ function friendly(e){
   if(m.includes('REGISTRATION_FULL'))return 'GAME #01 참가팀이 모두 찼습니다.';
   if(m.includes('REGISTRATION_CLOSED'))return '현재 GAME #01 참가 신청이 닫혀 있습니다.';
   if(m.includes('INVITE_NOT_PENDING'))return '이미 처리된 초대입니다.';
-  if(m.includes('INVALID_DIVISION'))return 'OPEN 또는 PRO를 선택해 주세요.';
+  if(m.includes('INVALID_DIVISION'))return 'BEGINNER 또는 ATHLETE를 선택해 주세요.';
   if(m.includes('PAYMENT_HOLD_EXPIRED'))return '24시간 입금 대기 시간이 만료되었습니다. 자리 다시 잡기를 눌러 주세요.';
   if(m.includes('DEPOSITOR_NAME_REQUIRED'))return '입금자명을 입력해 주세요.';
   if(m.includes('PAYMENT_NOT_PENDING'))return '현재 입금 대기 상태가 아닙니다.';
@@ -94,13 +94,13 @@ function showOnboarding(){
     <div><label>Player Name</label><input id="displayName" maxlength="50" placeholder="JAY SEOL" required></div>
     <div><label>Player ID</label><input id="handle" maxlength="24" pattern="[A-Za-z0-9._-]{2,24}" placeholder="jay.seol" required></div>
     <div><label>Gender</label><select id="gender"><option value="male">MALE</option><option value="female">FEMALE</option></select></div>
-    <div><label>Default Division</label><select id="division"><option>OPEN</option><option>PRO</option></select><div class="hint">GAME 참가 시 OPEN / PRO를 다시 선택할 수 있습니다.</div></div>
+    <div><label>Default Division</label><select id="division"><option value="OPEN">BEGINNER</option><option value="PRO">ATHLETE</option></select><div class="hint">GAME 참가 시 BEGINNER / ATHLETE를 다시 선택할 수 있습니다.</div></div>
     <div><label>Gym / Crew</label><input id="gym" maxlength="60" placeholder="NOLTO GYM"></div>
     <div><label>Instagram</label><input id="instagram" maxlength="40" placeholder="@handle"></div>
     <div class="full"><label>Phone</label><input id="phone" inputmode="tel" placeholder="010-0000-0000" required></div>
     <div class="full"><label>Player Photo</label><input id="playerPhoto" type="file" accept="image/jpeg,image/png,image/webp" required><div class="hint">GAME #01의 팀 라인업과 FAN PICK에 공개됩니다. 최대 5MB.</div></div>
-    <div class="full"><label style="display:flex;gap:8px;align-items:flex-start"><input id="consent" type="checkbox" style="width:auto;margin-top:3px" required><span>TEAM GAMES 참가 운영을 위한 이름·연락처·사진 수집 및 선수 카드 공개에 동의합니다.</span></label></div>
-    <div class="full"><button id="saveProfileBtn" class="btn arcade-primary entry-wide-btn" type="submit">SAVE & PICK PARTNER →</button><div id="profileMsg" class="notice"></div></div>
+    <div class="full"><label style="display:flex;gap:8px;align-items:flex-start"><input id="consent" type="checkbox" style="width:auto;margin-top:3px" required><span>ARC GAMES 참가 운영을 위한 이름·연락처·사진 수집 및 선수 카드 공개에 동의합니다.</span></label></div>
+    <div class="full"><button id="saveProfileBtn" class="btn arcade-primary entry-wide-btn" type="submit">SAVE & BUILD TEAM →</button><div id="profileMsg" class="notice"></div></div>
   </form>`;
   logoutSetup.onclick=logout; profileForm.onsubmit=saveProfile;
 }
@@ -166,7 +166,7 @@ function showSettings(){
       <div><label>Player Name</label><input id="setName" maxlength="50" value="${esc(me.display_name)}" required></div>
       <div><label>Player ID</label><input id="setHandle" maxlength="24" pattern="[A-Za-z0-9._-]{2,24}" value="${esc(me.handle)}" required></div>
       <div><label>Gender</label><select id="setGender"><option value="male" ${me.gender==='male'?'selected':''}>MALE</option><option value="female" ${me.gender==='female'?'selected':''}>FEMALE</option></select></div>
-      <div><label>Default Division</label><select id="setDivision"><option ${me.division==='OPEN'?'selected':''}>OPEN</option><option ${me.division==='PRO'?'selected':''}>PRO</option></select></div>
+      <div><label>Default Division</label><select id="setDivision"><option value="OPEN" ${me.division==='OPEN'?'selected':''}>BEGINNER</option><option value="PRO" ${me.division==='PRO'?'selected':''}>ATHLETE</option></select></div>
       <div><label>Gym / Crew</label><input id="setGym" maxlength="60" value="${esc(me.gym||'')}"></div>
       <div><label>Instagram</label><input id="setInstagram" maxlength="40" value="${esc(me.instagram||'')}"></div>
       <div class="full"><label>Phone</label><input id="setPhone" inputmode="tel" value="${esc(privateData?.phone||'')}" required></div>
@@ -211,7 +211,7 @@ function deadlineText(v){return v?new Date(v).toLocaleString('ko-KR',{month:'num
 
 function inviteRow(inv,incoming){
   const p=person(incoming?inv.captain_id:inv.invitee_id);
-  return `<div class="invite-row"><div class="mini-avatar">${p?.photo_url?`<img src="${esc(p.photo_url)}" alt="">`:''}</div><div><div class="row-title">${esc(inv.team_name)} · ${esc(inv.division||'OPEN')}</div><div class="row-sub">${esc(p?.display_name||'PLAYER')} · @${esc(p?.handle||'')}</div></div><div class="row-actions">${incoming?`<button class="mini-btn hot" onclick="respondInvite('${inv.id}',true)">ACCEPT</button><button class="mini-btn" onclick="respondInvite('${inv.id}',false)">DECLINE</button>`:`<button class="mini-btn" onclick="cancelInvite('${inv.id}')">CANCEL</button>`}</div></div>`;
+  return `<div class="invite-row"><div class="mini-avatar">${p?.photo_url?`<img src="${esc(p.photo_url)}" alt="">`:''}</div><div><div class="row-title">${esc(inv.team_name)} · ${esc(divisionLabel(inv.division))}</div><div class="row-sub">${esc(p?.display_name||'PLAYER')} · @${esc(p?.handle||'')}</div></div><div class="row-actions">${incoming?`<button class="mini-btn hot" onclick="respondInvite('${inv.id}',true)">ACCEPT</button><button class="mini-btn" onclick="respondInvite('${inv.id}',false)">DECLINE</button>`:`<button class="mini-btn" onclick="cancelInvite('${inv.id}')">CANCEL</button>`}</div></div>`;
 }
 
 function bankBox(team){
@@ -243,7 +243,7 @@ function renderGameHub(){
     const mate=myRoster.find(x=>x.id!==user.id);
     if(myTeam.status==='confirmed'){
       stopPaymentPoll();
-      gameHub.innerHTML=`<div class="entry-progress-card locked"><div class="entry-progress-label">STEP 05 / 05</div><strong>LOCKED IN</strong></div><div class="team-lock"><div class="kicker">GAME #01 // ENTRY COMPLETE</div><div class="team-lock-top"><div><h3>${esc(myTeam.team_name)}</h3><p class="muted">${esc(me.display_name)} × ${esc(mate?.display_name||'PARTNER')}</p><p class="payment-team-meta">${esc(myTeam.division||'—')} · ${categoryName(myTeam.category)} · PAID ${formatWon(myTeam.amount_due)}</p></div><div class="slot-display">H${myTeam.heat_no} · S${myTeam.station_no}</div></div></div>`;return;
+      gameHub.innerHTML=`<div class="entry-progress-card locked"><div class="entry-progress-label">STEP 05 / 05</div><strong>LOCKED IN</strong></div><div class="team-lock"><div class="kicker">GAME #01 // ENTRY COMPLETE</div><div class="team-lock-top"><div><h3>${esc(myTeam.team_name)}</h3><p class="muted">${esc(me.display_name)} × ${esc(mate?.display_name||'PARTNER')}</p><p class="payment-team-meta">${esc(divisionLabel(myTeam.division))} · ${categoryName(myTeam.category)} · PAID ${formatWon(myTeam.amount_due)}</p></div><div class="slot-display">H${myTeam.heat_no} · S${myTeam.station_no}</div></div></div>`;return;
     }
     if(myTeam.status==='pending_payment'){
       startPaymentPoll();
@@ -258,7 +258,7 @@ function renderGameHub(){
     }
   }
   const incoming=myInvites.filter(x=>x.invitee_id===user.id&&x.status==='pending');const outgoing=myInvites.filter(x=>x.captain_id===user.id&&x.status==='pending');
-  gameHub.innerHTML=`<div class="entry-progress-card"><div class="entry-progress-label">STEP 03 / 05</div><strong>PICK YOUR PARTNER</strong><small>상대가 ACCEPT하면 24시간 입금 대기 상태로 넘어갑니다.</small></div><div class="player-panel"><div class="kicker">GAME #01 ENTRY</div><h3>BUILD YOUR TEAM.</h3><p class="muted">OPEN / PRO를 선택하고 팀 이름을 정한 뒤 다른 PLAYER에게 초대하세요.</p><div style="margin-top:18px"><label>Division</label><select id="teamDivisionInput"><option value="OPEN" ${me.division==='OPEN'?'selected':''}>OPEN</option><option value="PRO" ${me.division==='PRO'?'selected':''}>PRO</option></select><div id="capacityStrip" class="capacity-strip"></div><label style="margin-top:12px">Team Name</label><input id="teamNameInput" maxlength="60" placeholder="YOUR TEAM NAME"><label style="margin-top:12px">Find Player</label><input id="playerSearch" type="search" placeholder="이름 / PLAYER ID / GYM"><div id="playerSearchList" class="player-search-list" style="margin-top:10px"></div></div></div><div class="player-panel" style="margin-top:14px"><div class="kicker">INCOMING</div><h3>INVITES</h3><div class="invite-list" id="incomingList"></div></div><div class="player-panel" style="margin-top:14px"><div class="kicker">OUTGOING</div><h3>YOUR INVITE</h3><div class="invite-list" id="outgoingList"></div></div>`;
+  gameHub.innerHTML=`<div class="entry-progress-card"><div class="entry-progress-label">STEP 03 / 05</div><strong>BUILD YOUR TEAM</strong><small>팀원 초대를 완료하면 참가비 결제 단계로 넘어갑니다.</small></div><div class="player-panel"><div class="kicker">GAME #01 ENTRY</div><h3>BUILD YOUR TEAM.</h3><p class="muted">BEGINNER / ATHLETE를 선택하고 팀 이름을 정한 뒤 PLAYER를 초대하세요.</p><div style="margin-top:18px"><label>Division</label><select id="teamDivisionInput"><option value="OPEN" ${me.division==='OPEN'?'selected':''}>BEGINNER</option><option value="PRO" ${me.division==='PRO'?'selected':''}>ATHLETE</option></select><div id="capacityStrip" class="capacity-strip"></div><label style="margin-top:12px">Team Name</label><input id="teamNameInput" maxlength="60" placeholder="YOUR TEAM NAME"><label style="margin-top:12px">Find Player</label><input id="playerSearch" type="search" placeholder="이름 / PLAYER ID / GYM"><div id="playerSearchList" class="player-search-list" style="margin-top:10px"></div></div></div><div class="player-panel" style="margin-top:14px"><div class="kicker">INCOMING</div><h3>INVITES</h3><div class="invite-list" id="incomingList"></div></div><div class="player-panel" style="margin-top:14px"><div class="kicker">OUTGOING</div><h3>YOUR INVITE</h3><div class="invite-list" id="outgoingList"></div></div>`;
   teamDivisionInput.onchange=()=>{renderCapacity();renderPlayerSearch()};playerSearch.oninput=renderPlayerSearch;renderCapacity();renderPlayerSearch();incomingList.innerHTML=incoming.map(x=>inviteRow(x,true)).join('')||'<div class="muted">NO INVITES.</div>';outgoingList.innerHTML=outgoing.map(x=>inviteRow(x,false)).join('')||'<div class="muted">NO PENDING INVITE.</div>';
 }
 
