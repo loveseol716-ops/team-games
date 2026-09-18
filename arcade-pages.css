@@ -712,3 +712,34 @@
   .game-rulebook-cta,.rulebook-prize-panel{grid-template-columns:1fr}
   .game-rulebook-cta .btn,.rulebook-prize-panel .btn{width:100%;text-align:center}
 }
+
+/* RULEBOOK HERO COLLISION FIX */
+.rulebook-hero .rulebook-title{
+  display:flex!important;
+  flex-direction:column;
+  gap:8px;
+  font-size:clamp(68px,8vw,102px)!important;
+  line-height:.9!important;
+  letter-spacing:-.035em!important;
+  max-width:920px;
+}
+.rulebook-hero .rulebook-title span{
+  display:block;
+  line-height:.9;
+}
+@media(max-width:900px){
+  .rulebook-hero .rulebook-title{
+    font-size:clamp(58px,11vw,88px)!important;
+    gap:6px;
+    line-height:.92!important;
+  }
+  .rulebook-hero .rulebook-title span{line-height:.92}
+}
+@media(max-width:650px){
+  .rulebook-hero .rulebook-title{
+    font-size:clamp(48px,16vw,72px)!important;
+    gap:4px;
+    line-height:.94!important;
+  }
+  .rulebook-hero .rulebook-title span{line-height:.94}
+}
