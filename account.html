@@ -32,6 +32,16 @@
           <button id="signupTab" class="btn arcade-primary" type="button">CREATE ACCOUNT</button>
           <button id="loginTab" class="btn dark" type="button">LOGIN</button>
         </div>
+        <div class="arc-social-login">
+          <div class="arc-social-title"><span></span><b>QUICK LOGIN</b><span></span></div>
+          <div class="arc-social-grid">
+            <button class="arc-social-btn social-google" type="button" data-provider="google"><i>G</i><span>GOOGLE</span></button>
+            <button class="arc-social-btn social-kakao" type="button" data-provider="kakao"><i>K</i><span>KAKAO</span></button>
+            <button class="arc-social-btn social-naver" type="button" data-provider="custom:naver"><i>N</i><span>NAVER</span></button>
+          </div>
+          <div id="socialMsg" class="notice"></div>
+        </div>
+        <div class="arc-auth-divider"><span>OR EMAIL</span></div>
         <div id="authCard"></div>
       </div>
     </div>
@@ -43,9 +53,16 @@
 <script src="app.js"></script>
 <script>
 shell('ACCOUNT');
+
 const params=new URLSearchParams(location.search);
-const next=safeNextUrl(params.get('next'),'my.html');
+const storedNext=safeNextUrl(sessionStorage.getItem('arc_oauth_next'),'my.html');
+const next=safeNextUrl(params.get('next'),params.get('oauth')==='1'?storedNext:'my.html');
 let mode=params.get('mode')==='login'?'login':'signup';
+
+const byId=id=>document.getElementById(id);
+const signupTab=byId('signupTab');
+const loginTab=byId('loginTab');
+const authCard=byId('authCard');
 
 function authError(e){
   const m=String(e?.message||e||'');
@@ -53,6 +70,7 @@ function authError(e){
   if(m.includes('INVALID_EMAIL'))return '이메일 형식을 확인해 주세요.';
   if(m.includes('INVALID_PASSWORD'))return '비밀번호는 8자 이상 입력해 주세요.';
   if(m.includes('Invalid login credentials'))return '이메일 또는 비밀번호가 맞지 않습니다.';
+  if(m.includes('Unsupported provider')||m.includes('provider is not enabled')||m.includes('not enabled'))return '아직 해당 간편 로그인 연결 설정이 완료되지 않았습니다.';
   if(m.includes('ORIGIN_NOT_ALLOWED'))return '현재 도메인에서 회원가입을 사용할 수 없습니다.';
   return m||'처리 중 오류가 발생했습니다.';
 }
@@ -60,6 +78,7 @@ function authError(e){
 function renderAuth(){
   signupTab.className='btn '+(mode==='signup'?'arcade-primary':'dark');
   loginTab.className='btn '+(mode==='login'?'arcade-primary':'dark');
+
   authCard.innerHTML=`
     <div class="arc-auth-status"><span>${mode==='signup'?'NEW PLAYER':'RETURNING PLAYER'}</span><b>${mode==='signup'?'10,000 P WELCOME CREDIT':'ACCESS YOUR ARC ID'}</b></div>
     <form id="arcAuthForm" class="arc-auth-form">
@@ -71,44 +90,92 @@ function renderAuth(){
       <div id="authMsg" class="notice"></div>
     </form>
     <div class="arc-auth-note">가입 즉시 ARC ACCOUNT가 생성되고 FAN PICK용 PLAY POINT 10,000P가 지급됩니다.</div>`;
-  arcAuthForm.onsubmit=submit;
+
+  byId('arcAuthForm').onsubmit=submitEmail;
 }
 
-async function submit(e){
+async function finishLogin(name=null){
+  const boot=await db.rpc('arc_account_bootstrap',{p_display_name:name});
+  if(boot.error)throw boot.error;
+  sessionStorage.removeItem('arc_oauth_next');
+  location.href=next;
+}
+
+async function submitEmail(e){
   e.preventDefault();
-  submitAuth.disabled=true;submitAuth.textContent='LOADING…';
+  const submitBtn=byId('submitAuth');
+  submitBtn.disabled=true;
+  submitBtn.textContent='LOADING…';
+
   try{
-    const mail=email.value.trim().toLowerCase(),pw=password.value;
+    const mail=byId('email').value.trim().toLowerCase();
+    const pw=byId('password').value;
     let name=null;
+
     if(mode==='signup'){
-      name=nickname.value.trim();
-      const r=await db.functions.invoke('tg-athlete-signup',{body:{email:mail,password:pw,website:website.value}});
+      name=byId('nickname').value.trim();
+      const r=await db.functions.invoke('tg-athlete-signup',{body:{email:mail,password:pw,website:byId('website').value}});
       if(r.error)throw r.error;
       if(!r.data?.ok)throw new Error(r.data?.error||'SIGNUP_FAILED');
     }
+
     const login=await db.auth.signInWithPassword({email:mail,password:pw});
     if(login.error)throw login.error;
-    const boot=await db.rpc('arc_account_bootstrap',{p_display_name:name});
-    if(boot.error)throw boot.error;
-    location.href=next;
+    await finishLogin(name);
   }catch(err){
     notice('authMsg',authError(err),true);
-    submitAuth.disabled=false;
-    submitAuth.textContent=mode==='signup'?'CREATE ARC ACCOUNT →':'LOGIN →';
+    submitBtn.disabled=false;
+    submitBtn.textContent=mode==='signup'?'CREATE ARC ACCOUNT →':'LOGIN →';
   }
 }
+
+async function socialLogin(provider,button){
+  button.disabled=true;
+  const original=button.innerHTML;
+  button.innerHTML='<span>CONNECTING…</span>';
+
+  try{
+    sessionStorage.setItem('arc_oauth_next',next);
+    const {error}=await db.auth.signInWithOAuth({
+      provider,
+      options:{redirectTo:location.origin+'/account.html?oauth=1'}
+    });
+    if(error)throw error;
+  }catch(err){
+    sessionStorage.removeItem('arc_oauth_next');
+    notice('socialMsg',authError(err),true);
+    button.disabled=false;
+    button.innerHTML=original;
+  }
+}
+
+document.querySelectorAll('.arc-social-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>socialLogin(btn.dataset.provider,btn));
+});
 
 signupTab.onclick=()=>{mode='signup';renderAuth()};
 loginTab.onclick=()=>{mode='login';renderAuth()};
 
-(async()=>{
+let finishing=false;
+async function handleExistingSession(){
+  if(finishing)return;
   const user=await currentUser();
-  if(user){
-    const boot=await db.rpc('arc_account_bootstrap',{p_display_name:null});
-    if(!boot.error)location.href=next;
+  if(!user)return;
+  finishing=true;
+  try{
+    await finishLogin(null);
+  }catch(e){
+    finishing=false;
+    notice('socialMsg',authError(e),true);
   }
-})();
+}
+
+db.auth.onAuthStateChange((event,session)=>{
+  if(session?.user&&(event==='SIGNED_IN'||event==='INITIAL_SESSION'))handleExistingSession();
+});
+
 renderAuth();
+setTimeout(handleExistingSession,150);
 </script>
 </body>
 </html>
