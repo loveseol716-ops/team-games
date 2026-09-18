@@ -976,3 +976,25 @@ radial-gradient(circle at 88% 8%,rgba(45,226,255,.05),transparent 25%),
   .arc-my-panel{min-height:auto;padding:16px}
   .arc-stat-row{grid-template-columns:1fr}
 }
+
+/* SOCIAL LOGIN */
+.arc-social-login{padding:12px;border:1px solid #272a33;background:#08090d}
+.arc-social-title{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:9px;margin-bottom:10px}
+.arc-social-title span{height:1px;background:#252933}
+.arc-social-title b{font-family:var(--font-display);font-size:7px;font-weight:400;color:#747b86;letter-spacing:.08em}
+.arc-social-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.arc-social-btn{min-height:48px;border:1px solid transparent;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 10px;font-family:var(--font-display);font-size:8px;cursor:pointer;transition:.18s transform,.18s opacity,.18s border-color}
+.arc-social-btn:hover{transform:translateY(-1px)}
+.arc-social-btn:disabled{opacity:.55;cursor:wait;transform:none}
+.arc-social-btn i{font-style:normal;font-size:12px}
+.social-google{background:#fff;color:#111;border-color:#fff}
+.social-kakao{background:#fee500;color:#191919;border-color:#fee500}
+.social-naver{background:#03c75a;color:#fff;border-color:#03c75a}
+.arc-auth-divider{display:flex;align-items:center;gap:10px;padding:10px 0}
+.arc-auth-divider:before,.arc-auth-divider:after{content:"";height:1px;background:#242832;flex:1}
+.arc-auth-divider span{font-family:var(--font-display);font-size:7px;color:#555d68}
+
+@media(max-width:600px){
+  .arc-social-grid{grid-template-columns:1fr}
+  .arc-social-btn{justify-content:flex-start;padding-left:16px}
+}
