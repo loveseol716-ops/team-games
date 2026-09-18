@@ -58,6 +58,62 @@
       <div id="control" style="display:none">
         <div id="summary" class="admin-summary"></div>
 
+        <section class="admin-block fan-wallet-admin-block">
+          <div class="admin-block-head">
+            <div>
+              <div class="kicker">PLAY POINT // WALLET</div>
+              <h3>FAN WALLET CONTROL</h3>
+            </div>
+            <p class="muted">회원별 잔액·누적 BET·적중률 확인 및 수동 포인트 조정.</p>
+          </div>
+
+          <div id="fanWalletSummary" class="fan-wallet-summary"></div>
+
+          <div class="fan-wallet-toolbar">
+            <input id="fanWalletSearch" type="search" placeholder="닉네임 / 이메일 검색">
+            <select id="fanWalletSort">
+              <option value="activity">RECENT ACTIVITY</option>
+              <option value="balance">HIGHEST BALANCE</option>
+              <option value="staked">MOST STAKED</option>
+              <option value="hit">HIGHEST HIT RATE</option>
+            </select>
+          </div>
+
+          <div id="fanWalletMsg" class="notice"></div>
+
+          <div class="card fan-wallet-table-wrap">
+            <div class="table-scroll">
+              <table class="fan-wallet-table">
+                <thead>
+                  <tr>
+                    <th>FAN</th><th>BALANCE</th><th>TOTAL BET</th><th>WINS</th><th>HIT RATE</th><th>NET WIN</th><th>ADJUST</th><th>LAST</th><th></th>
+                  </tr>
+                </thead>
+                <tbody id="fanWalletRows"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="fanWalletEditor" class="fan-wallet-editor" style="display:none">
+            <div class="fan-wallet-editor-head">
+              <div><span>MANUAL ADJUSTMENT</span><h4 id="fanWalletEditorName">SELECT FAN</h4><small id="fanWalletEditorBalance"></small></div>
+              <button id="closeWalletEditor" class="btn dark" type="button">CLOSE</button>
+            </div>
+            <div class="fan-wallet-editor-grid">
+              <div><label>Point Adjustment</label><input id="fanAdjustAmount" type="number" step="100" placeholder="+1000 / -500"></div>
+              <div class="wide"><label>Reason / Note</label><input id="fanAdjustNote" maxlength="200" placeholder="예: 현장 운영 보정, CS 보상"></div>
+              <div class="action"><button id="submitFanAdjustment" class="btn arcade-primary" type="button">APPLY ADJUSTMENT</button></div>
+            </div>
+            <div class="fan-wallet-editor-note">조정 내역은 삭제하지 않고 감사 로그로 영구 기록됩니다. 잔액은 0P 아래로 내려갈 수 없습니다.</div>
+          </div>
+
+          <div class="fan-adjustment-history-head">
+            <div><div class="kicker">AUDIT LOG</div><h4 id="fanHistoryTitle">MANUAL ADJUSTMENT HISTORY</h4></div>
+            <button id="showAllFanHistory" class="btn dark" type="button">SHOW ALL</button>
+          </div>
+          <div id="fanAdjustmentHistory" class="fan-adjustment-history"></div>
+        </section>
+
         <section class="admin-block">
           <div class="card admin-add-card">
             <div class="admin-add-head">
@@ -142,6 +198,10 @@ let adminAthletes=[];
 let currentEvent=null;
 let predictionAdminSummary=[];
 let predictionAdminBoard=[];
+let fanWallets=[];
+let fanAdjustments=[];
+let selectedFanUserId=null;
+let historyFanUserId=null;
 
 const fmtPhone=v=>String(v||'').replace(/\s+/g,' ').trim();
 const formatWon=v=>`${Number(v||0).toLocaleString('ko-KR')}원`;
@@ -149,6 +209,9 @@ const formatDate=v=>v?new Date(v).toLocaleString('ko-KR',{month:'numeric',day:'n
 const categoryLabel=v=>v==='MM'?'MEN / MEN':v==='WW'?'WOMEN / WOMEN':v==='MIXED'?'MIXED':'—';
 const statusLabel=t=>t.status==='confirmed'?'LOCKED IN':t.status==='pending_payment'?(t.payment_status==='payment_check'?'PAYMENT CHECK':'WAITING PAYMENT'):'OUT';
 const statusClass=t=>t.status==='confirmed'?'approved':t.status==='pending_payment'?'pending':'cancelled';
+const formatPoint=v=>`${Number(v||0).toLocaleString('en-US')} P`;
+const formatSignedPoint=v=>`${Number(v||0)>0?'+':''}${Number(v||0).toLocaleString('en-US')} P`;
+const formatAdminDate=v=>v?new Date(v).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}):'—';
 
 function adminError(x){
   const m=String(x?.message||x||'');
@@ -170,6 +233,11 @@ function adminError(x){
   if(m.includes('MARKET_ALREADY_SETTLED')) return '이미 정산이 완료된 마켓입니다.';
   if(m.includes('MARKET_NOT_FOUND')) return '예측 마켓을 찾을 수 없습니다.';
   if(m.includes('TEAM_NOT_IN_MARKET')) return '해당 마켓에 속한 팀이 아닙니다.';
+  if(m.includes('ADJUSTMENT_ZERO')) return '조정할 포인트를 입력해 주세요.';
+  if(m.includes('ADJUSTMENT_TOO_LARGE')) return '한 번에 조정할 수 있는 범위를 초과했습니다.';
+  if(m.includes('ADJUSTMENT_NOTE_REQUIRED')) return '수동 조정 사유를 입력해 주세요.';
+  if(m.includes('BALANCE_CANNOT_BE_NEGATIVE')) return '조정 후 잔액은 0P 아래로 내려갈 수 없습니다.';
+  if(m.includes('FAN_WALLET_NOT_FOUND')) return '해당 FAN WALLET을 찾을 수 없습니다.';
   if(m.includes('TEAM_NAME_REQUIRED')) return '팀 이름을 입력해 주세요.';
   if(m.includes('TEAM_NOT_FOUND')) return '팀을 찾을 수 없습니다. 새로고침 후 다시 시도해 주세요.';
   return m || '처리 중 오류가 발생했습니다.';
@@ -192,7 +260,7 @@ async function refreshAdmin(){
   renderSummary();
   renderAddTeam();
   renderTeamManagement();
-  await Promise.all([loadResults(),loadPredictionControl()]);
+  await Promise.all([loadResults(),loadPredictionControl(),loadFanWalletControl()]);
 }
 
 async function enterAdmin(){
@@ -368,6 +436,122 @@ window.deleteTeam=async id=>{
 };
 
 
+
+async function loadFanWalletControl(){
+  const [w,h]=await Promise.all([
+    db.rpc('tg_admin_fan_wallets'),
+    db.rpc('tg_admin_fan_adjustment_history',{p_user_id:null,p_limit:200})
+  ]);
+  if(w.error)throw w.error;
+  if(h.error)throw h.error;
+  fanWallets=w.data||[];
+  fanAdjustments=h.data||[];
+  renderFanWalletControl();
+}
+
+function renderFanWalletControl(){
+  const totalBalance=fanWallets.reduce((a,x)=>a+Number(x.balance||0),0);
+  const totalStaked=fanWallets.reduce((a,x)=>a+Number(x.total_staked||0),0);
+  const totalWins=fanWallets.reduce((a,x)=>a+Number(x.wins||0),0);
+  const avgHit=fanWallets.length?fanWallets.reduce((a,x)=>a+Number(x.hit_rate||0),0)/fanWallets.length:0;
+
+  $('fanWalletSummary').innerHTML=`
+    <div><span>FAN ACCOUNTS</span><b>${fanWallets.length}</b><small>WALLETS</small></div>
+    <div><span>POINTS OUT</span><b>${formatPoint(totalBalance)}</b><small>CURRENT BALANCE</small></div>
+    <div><span>TOTAL BET</span><b>${formatPoint(totalStaked)}</b><small>ALL TIME</small></div>
+    <div><span>TOTAL WINS</span><b>${totalWins}</b><small>AVG HIT ${avgHit.toFixed(1)}%</small></div>`;
+
+  renderFanWalletRows();
+  renderFanAdjustmentHistory();
+}
+
+function renderFanWalletRows(){
+  const search=($('fanWalletSearch')?.value||'').trim().toLowerCase();
+  const sort=$('fanWalletSort')?.value||'activity';
+  let rows=fanWallets.filter(x=>!search||[x.display_name,x.email].some(v=>String(v||'').toLowerCase().includes(search)));
+
+  rows=[...rows].sort((a,b)=>{
+    if(sort==='balance')return Number(b.balance||0)-Number(a.balance||0);
+    if(sort==='staked')return Number(b.total_staked||0)-Number(a.total_staked||0);
+    if(sort==='hit')return Number(b.hit_rate||0)-Number(a.hit_rate||0);
+    return new Date(b.last_activity||0)-new Date(a.last_activity||0);
+  });
+
+  $('fanWalletRows').innerHTML=rows.map(x=>`
+    <tr class="${selectedFanUserId===x.user_id?'is-selected':''}">
+      <td><strong>${esc(x.display_name)}</strong><div class="table-sub">${esc(x.email||'')}</div></td>
+      <td><b class="wallet-table-balance">${formatPoint(x.balance)}</b></td>
+      <td>${formatPoint(x.total_staked)}</td>
+      <td>${x.wins} / ${x.settled_bets}</td>
+      <td>${Number(x.hit_rate||0).toFixed(1)}%</td>
+      <td><span class="${Number(x.net_win||0)>=0?'wallet-positive':'wallet-negative'}">${formatSignedPoint(x.net_win)}</span></td>
+      <td><span class="${Number(x.adjustment_net||0)>=0?'wallet-positive':'wallet-negative'}">${formatSignedPoint(x.adjustment_net)}</span><div class="table-sub">${x.adjustments_count} LOGS</div></td>
+      <td>${formatAdminDate(x.last_activity)}</td>
+      <td><div class="wallet-row-actions"><button class="mini-btn hot" type="button" onclick="openFanWalletEditor('${x.user_id}')">ADJUST</button><button class="mini-btn" type="button" onclick="showFanHistory('${x.user_id}')">HISTORY</button></div></td>
+    </tr>`).join('')||'<tr><td colspan="9" class="muted">NO FAN WALLET.</td></tr>';
+}
+
+window.openFanWalletEditor=id=>{
+  const x=fanWallets.find(v=>v.user_id===id);if(!x)return;
+  selectedFanUserId=id;
+  $('fanWalletEditor').style.display='block';
+  $('fanWalletEditorName').textContent=x.display_name;
+  $('fanWalletEditorBalance').textContent=`${x.email||''} · CURRENT ${formatPoint(x.balance)}`;
+  $('fanAdjustAmount').value='';
+  $('fanAdjustNote').value='';
+  renderFanWalletRows();
+  $('fanWalletEditor').scrollIntoView({behavior:'smooth',block:'center'});
+};
+
+window.showFanHistory=id=>{
+  historyFanUserId=id;
+  const x=fanWallets.find(v=>v.user_id===id);
+  $('fanHistoryTitle').textContent=x?`${x.display_name} · ADJUSTMENT HISTORY`:'MANUAL ADJUSTMENT HISTORY';
+  renderFanAdjustmentHistory();
+  $('fanAdjustmentHistory').scrollIntoView({behavior:'smooth',block:'start'});
+};
+
+function closeFanWalletEditor(){
+  selectedFanUserId=null;
+  $('fanWalletEditor').style.display='none';
+  renderFanWalletRows();
+}
+
+async function submitFanAdjustment(){
+  const x=fanWallets.find(v=>v.user_id===selectedFanUserId);
+  if(!x)return;
+  const amount=Number($('fanAdjustAmount').value);
+  const note=$('fanAdjustNote').value.trim();
+  if(!Number.isInteger(amount)||amount===0){notice('fanWalletMsg','+ 또는 - 포인트를 정수로 입력해 주세요.',true);return}
+  if(note.length<2){notice('fanWalletMsg','조정 사유를 입력해 주세요.',true);return}
+  const after=Number(x.balance||0)+amount;
+  if(after<0){notice('fanWalletMsg','조정 후 잔액은 0P 아래로 내려갈 수 없습니다.',true);return}
+  const verb=amount>0?'ADD':'DEDUCT';
+  if(!confirm(`${x.display_name}\n${verb} ${formatPoint(Math.abs(amount))}\n${formatPoint(x.balance)} → ${formatPoint(after)}\n\n사유: ${note}\n\n이 조정은 감사 로그에 영구 기록됩니다.`))return;
+
+  $('submitFanAdjustment').disabled=true;$('submitFanAdjustment').textContent='APPLYING…';
+  try{
+    const q=await db.rpc('tg_admin_adjust_fan_points',{p_user_id:x.user_id,p_amount:amount,p_note:note});
+    if(q.error)throw q.error;
+    notice('fanWalletMsg',`${x.display_name} · ${formatSignedPoint(amount)} · ADJUSTMENT SAVED`);
+    closeFanWalletEditor();
+    await loadFanWalletControl();
+  }catch(e){notice('fanWalletMsg',adminError(e),true)}
+  finally{if($('submitFanAdjustment')){$('submitFanAdjustment').disabled=false;$('submitFanAdjustment').textContent='APPLY ADJUSTMENT'}}
+}
+
+function renderFanAdjustmentHistory(){
+  let rows=historyFanUserId?fanAdjustments.filter(x=>x.user_id===historyFanUserId):fanAdjustments;
+  $('fanAdjustmentHistory').innerHTML=rows.slice(0,100).map(x=>`
+    <div class="fan-adjustment-row">
+      <div><strong>${esc(x.display_name)}</strong><small>${esc(x.email||'')}</small></div>
+      <div><span>ADJUST</span><b class="${Number(x.amount)>=0?'wallet-positive':'wallet-negative'}">${formatSignedPoint(x.amount)}</b></div>
+      <div><span>BALANCE</span><b>${formatPoint(x.balance_before)} → ${formatPoint(x.balance_after)}</b></div>
+      <div class="fan-adjustment-note"><span>NOTE</span><b>${esc(x.note||'—')}</b></div>
+      <div><span>GAME MASTER</span><b>${esc(x.admin_email||'ADMIN')}</b><small>${formatAdminDate(x.created_at)}</small></div>
+    </div>`).join('')||'<div class="card muted">NO MANUAL ADJUSTMENT HISTORY.</div>';
+}
+
 function predictionCategory(v){
   return v==='MM'?'MEN / MEN':v==='WW'?'WOMEN / WOMEN':v==='MIXED'?'MIXED':'—';
 }
@@ -513,6 +697,11 @@ $('saveNewPassword').onclick=async()=>{
 $('logoutBtn').onclick=async()=>{await db.auth.signOut();location.reload()};
 $('teamSearch').oninput=renderTeamManagement;
 $('statusFilter').onchange=renderTeamManagement;
+$('fanWalletSearch').oninput=renderFanWalletRows;
+$('fanWalletSort').onchange=renderFanWalletRows;
+$('closeWalletEditor').onclick=closeFanWalletEditor;
+$('submitFanAdjustment').onclick=submitFanAdjustment;
+$('showAllFanHistory').onclick=()=>{historyFanUserId=null;$('fanHistoryTitle').textContent='MANUAL ADJUSTMENT HISTORY';renderFanAdjustmentHistory()};
 $('pass').addEventListener('keydown',e=>{if(e.key==='Enter')$('login').click()});
 
 db.auth.onAuthStateChange((evt)=>{
