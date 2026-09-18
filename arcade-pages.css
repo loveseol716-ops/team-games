@@ -600,3 +600,115 @@
   .prediction-lock-btn{grid-column:1/-1;width:100%}
   .prediction-safety-strip{grid-template-columns:1fr}
 }
+
+/* ARC GAMES #01 // EVENT NOTICE + RULEBOOK */
+.game-event-notice{
+  position:relative;display:grid;grid-template-columns:auto 1fr auto;gap:18px;align-items:center;
+  padding:18px;border:1px solid rgba(201,255,71,.28);
+  background:linear-gradient(90deg,rgba(201,255,71,.06),#08090d 34%,rgba(45,226,255,.035));
+}
+.game-event-notice:before{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(90deg,transparent 0 36px,rgba(255,255,255,.012) 37px 38px)}
+.game-event-notice-label{
+  writing-mode:vertical-rl;transform:rotate(180deg);font-family:var(--font-display);font-size:8px;
+  letter-spacing:.12em;color:var(--tg-lime);border-right:1px solid rgba(201,255,71,.2);padding-right:12px
+}
+.game-event-notice-grid{display:grid;grid-template-columns:.8fr 1.3fr 1.2fr;gap:10px}
+.game-event-notice-grid>div{padding:12px;border:1px solid #292b34;background:#090a0f}
+.game-event-notice-grid span{display:block;font-size:7px;font-weight:800;letter-spacing:.09em;color:#656c76}
+.game-event-notice-grid b{display:block;margin-top:5px;font-family:var(--font-display);font-size:12px;font-weight:400;color:#fff}
+.game-event-notice-grid small{display:block;margin-top:5px;color:#747a83;font-size:9px;line-height:1.45}
+.game-event-notice .btn{position:relative;z-index:1;white-space:nowrap}
+
+.game-division-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.game-division-card{border:1px solid #2a2c34;background:#08090e;padding:0 16px 16px}
+.game-division-card.beginner{border-top:3px solid var(--tg-pink)}
+.game-division-card.athlete{border-top:3px solid var(--tg-blue)}
+.game-division-card .terminal-head{margin:0 -16px 15px}
+.game-division-card h3{font-size:28px;margin:8px 0}
+.game-division-card p{color:#777e88;max-width:520px}
+.game-load-row{display:flex;justify-content:space-between;align-items:center;margin-top:7px;padding:10px 11px;border:1px solid #262832;background:#07080c}
+.game-load-row span{font-size:8px;color:#626873;letter-spacing:.08em}
+.game-load-row b{font-family:var(--font-display);font-size:15px;font-weight:400;color:var(--tg-lime)}
+.game-category-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.game-category-strip>div{padding:12px;border:1px solid #292b34;background:#08090e}
+.game-category-strip span{display:block;font-family:var(--font-display);font-size:8px;color:var(--tg-purple)}
+.game-category-strip b{display:block;margin-top:6px;font-size:11px;color:#979ca4}
+.workout-summary h3{font-size:30px;margin-bottom:12px}
+.workout-summary p{font-family:var(--font-body);font-size:13px;line-height:1.8;color:#d7d9de}
+.workout-summary p b{color:var(--tg-lime)}
+.workout-summary small{display:block;margin-top:14px;color:#737983;font-size:9px}
+.game-rulebook-cta{
+  display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;margin-top:10px;
+  padding:14px 16px;border:1px solid rgba(255,59,212,.22);background:linear-gradient(90deg,rgba(255,59,212,.045),#08090d)
+}
+.game-rulebook-cta span{display:block;font-family:var(--font-display);font-size:7px;color:var(--tg-pink)}
+.game-rulebook-cta b{display:block;margin-top:5px;font-size:12px}
+.game-rulebook-cta small{display:block;margin-top:5px;color:#707681;font-size:9px}
+
+/* RULEBOOK */
+.rulebook-hero{border-bottom-color:rgba(201,255,71,.18)}
+.rulebook-notice{display:grid;grid-template-columns:.8fr 1.4fr .8fr;gap:8px}
+.rulebook-notice>div{padding:14px;border:1px solid #292b34;background:#08090e}
+.rulebook-notice span{display:block;font-family:var(--font-display);font-size:7px;color:var(--tg-lime)}
+.rulebook-notice b{display:block;margin-top:6px;font-size:13px}
+.rulebook-notice small{display:block;margin-top:5px;color:#6f7580;font-size:9px}
+.rulebook-division-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.rulebook-division{border:1px solid #292b34;background:#08090e;padding:18px}
+.rulebook-division.beginner{border-top:3px solid var(--tg-pink)}
+.rulebook-division.athlete{border-top:3px solid var(--tg-blue)}
+.rulebook-division>span{font-family:var(--font-display);font-size:8px;color:#6f7580}
+.rulebook-division.beginner>span{color:var(--tg-pink)}
+.rulebook-division.athlete>span{color:var(--tg-blue)}
+.rulebook-division h3{font-size:25px;margin:8px 0}
+.rulebook-division p{color:#777e88;min-height:46px}
+.rulebook-division>div{display:flex;justify-content:space-between;align-items:center;margin-top:7px;padding:10px;border:1px solid #272932;background:#07080c}
+.rulebook-division>div b{font-size:8px;color:#686f79}
+.rulebook-division>div strong{font-family:var(--font-display);font-size:16px;font-weight:400;color:var(--tg-lime)}
+.rulebook-category-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.rulebook-category-strip>div{padding:12px;border:1px solid #292b34;background:#08090e}
+.rulebook-category-strip span{display:block;font-family:var(--font-display);font-size:8px;color:var(--tg-purple)}
+.rulebook-category-strip b{display:block;margin-top:6px;font-size:11px;color:#969ba3}
+.rulebook-workout-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:12px}
+.rulebook-workout-card .terminal-body{min-height:310px}
+.rulebook-rounds{font-family:var(--font-display);font-size:28px;color:#fff;margin-bottom:14px}
+.rulebook-wod-list{list-style:none;padding:0;margin:0;display:grid;gap:6px}
+.rulebook-wod-list li{display:grid;grid-template-columns:44px 1fr;gap:10px;align-items:center;padding:9px 10px;border:1px solid #282a32;background:#07080c}
+.rulebook-wod-list li b{font-family:var(--font-display);font-size:15px;font-weight:400;color:var(--tg-pink)}
+.rulebook-wod-list li span{font-size:11px;color:#d0d3d9}
+.rulebook-row-target>span{font-family:var(--font-display);font-size:30px;color:#fff}
+.rulebook-row-target>div{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding:14px;border:1px solid #282a32;background:#07080c}
+.rulebook-row-target b{font-size:9px;color:#747a84}
+.rulebook-row-target strong{font-family:var(--font-display);font-size:17px;font-weight:400;color:var(--tg-blue)}
+.rulebook-tag-rule{margin-top:14px;padding:12px;border-left:3px solid var(--tg-purple);background:rgba(143,92,255,.045)}
+.rulebook-tag-rule>span{font-family:var(--font-display);font-size:8px;color:var(--tg-purple)}
+.rulebook-tag-rule p{margin:6px 0 0;color:#888e98;font-size:10px;line-height:1.55}
+.rulebook-tag-rule b{color:#fff}
+.rulebook-score-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rulebook-score-grid>div{padding:16px;border:1px solid #292b34;background:#08090e}
+.rulebook-score-grid span{display:block;font-family:var(--font-display);font-size:8px;color:var(--tg-blue)}
+.rulebook-score-grid b{display:block;margin-top:6px;font-size:16px}
+.rulebook-score-grid small{display:block;margin-top:7px;color:#737983;font-size:9px}
+.rulebook-finish-rule{margin-top:10px;padding:14px 16px;border:1px solid rgba(201,255,71,.25);background:rgba(201,255,71,.035)}
+.rulebook-finish-rule span{font-family:var(--font-display);font-size:8px;color:var(--tg-lime)}
+.rulebook-finish-rule p{margin:7px 0 0;color:#8a9099;font-size:11px}
+.rulebook-finish-rule b{color:#fff}
+.rulebook-standards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.rulebook-standards article{padding:15px;border:1px solid #292b34;background:#08090e;min-height:170px}
+.rulebook-standards article span{font-family:var(--font-display);font-size:7px;color:var(--tg-pink)}
+.rulebook-standards article h3{font-size:16px;margin:7px 0 9px}
+.rulebook-standards article p{color:#777e88;font-size:10px;line-height:1.55}
+.rulebook-standards article b{color:#fff}
+.rulebook-prize-panel{grid-template-columns:1fr auto}
+.rulebook-prize-panel p{max-width:760px}
+
+@media(max-width:900px){
+  .game-event-notice{grid-template-columns:1fr}
+  .game-event-notice-label{writing-mode:initial;transform:none;border-right:0;border-bottom:1px solid rgba(201,255,71,.2);padding:0 0 8px}
+  .game-event-notice-grid,.game-division-grid,.rulebook-notice,.rulebook-division-grid,.rulebook-workout-grid{grid-template-columns:1fr}
+  .rulebook-standards{grid-template-columns:1fr 1fr}
+}
+@media(max-width:650px){
+  .game-event-notice-grid,.game-category-strip,.rulebook-category-strip,.rulebook-score-grid,.rulebook-standards{grid-template-columns:1fr}
+  .game-rulebook-cta,.rulebook-prize-panel{grid-template-columns:1fr}
+  .game-rulebook-cta .btn,.rulebook-prize-panel .btn{width:100%;text-align:center}
+}
