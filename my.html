@@ -13,8 +13,8 @@
   <meta name="twitter:card" content="summary">
   <meta name="theme-color" content="#050508">
   <title>MY PAGE · ARC GAMES</title>
-  <link rel="stylesheet" href="styles.css?v=20260919-mobile3">
-  <link rel="stylesheet" href="arcade-pages.css?v=20260919-mobile3">
+  <link rel="stylesheet" href="styles.css?v=20260919-account1">
+  <link rel="stylesheet" href="arcade-pages.css?v=20260919-account1">
 </head>
 <body class="tg-arcade-page arc-my-page">
 <div id="nav"></div>
@@ -76,6 +76,14 @@
             <input id="editNickname" maxlength="30" placeholder="YOUR ARC ID">
           </label>
           <button id="saveNickname" class="btn arcade-primary" type="button">SAVE NICKNAME</button>
+          <div class="arc-settings-divider"><span>SECURITY</span></div>
+          <label>NEW PASSWORD
+            <input id="newPassword" type="password" minlength="8" maxlength="72" autocomplete="new-password" placeholder="영문 + 숫자, 8자 이상">
+          </label>
+          <label>CONFIRM PASSWORD
+            <input id="newPasswordConfirm" type="password" minlength="8" maxlength="72" autocomplete="new-password" placeholder="새 비밀번호 다시 입력">
+          </label>
+          <button id="changePassword" class="btn dark" type="button">CHANGE PASSWORD</button>
           <button id="logoutAccount" class="btn dark" type="button">LOGOUT</button>
           <div id="settingsMsg" class="notice"></div>
         </article>
@@ -87,7 +95,7 @@
 <div id="footer"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
-<script src="app.js?v=20260919-mobile3"></script>
+<script src="app.js?v=20260919-account1"></script>
 <script>
 shell('ACCOUNT');
 
@@ -148,6 +156,31 @@ el('saveNickname').onclick=async()=>{
     notice('settingsMsg',e.message||String(e),true);
   }finally{
     el('saveNickname').disabled=false;
+  }
+};
+
+el('changePassword').onclick=async()=>{
+  const password=el('newPassword').value;
+  const confirmation=el('newPasswordConfirm').value;
+  if(!/^(?=.*[A-Za-z])(?=.*\d).{8,72}$/.test(password)){
+    notice('settingsMsg','비밀번호는 영문과 숫자를 포함해 8자 이상 입력해 주세요.',true);return
+  }
+  if(password!==confirmation){notice('settingsMsg','두 비밀번호가 일치하지 않습니다.',true);return}
+
+  el('changePassword').disabled=true;
+  el('changePassword').textContent='SAVING…';
+  try{
+    const {error}=await db.auth.updateUser({password});
+    if(error)throw error;
+    el('newPassword').value='';
+    el('newPasswordConfirm').value='';
+    notice('settingsMsg','비밀번호가 변경되었습니다. 다음 로그인부터 새 비밀번호를 사용해 주세요.');
+  }catch(e){
+    const message=String(e?.message||e);
+    notice('settingsMsg',/reauth|nonce/i.test(message)?'보안을 위해 다시 로그인한 뒤 비밀번호를 변경해 주세요.':message,true);
+  }finally{
+    el('changePassword').disabled=false;
+    el('changePassword').textContent='CHANGE PASSWORD';
   }
 };
 

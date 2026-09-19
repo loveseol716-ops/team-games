@@ -21,7 +21,7 @@
   const style=document.createElement('style');
   style.textContent=`
     .arc-partners-strip{
-      width:100%;overflow:clip;
+      width:100%;overflow:visible;
       border-top:1px solid rgba(255,255,255,.07);
       border-bottom:1px solid rgba(255,255,255,.07);
       background:#030405;padding:38px 0 40px
@@ -47,7 +47,7 @@
     }
     .arc-partner-item:hover{opacity:1;transform:translateY(-2px)}
     .arc-partner-item img{
-      display:block;width:min(240px,100%);max-width:100%;height:auto;
+      display:block;width:min(190px,100%);max-width:100%;height:auto;aspect-ratio:190/68;
       object-fit:contain;object-position:left center
     }
     @media(max-width:720px){
@@ -55,7 +55,7 @@
       .arc-partners-label strong{font-size:13px;line-height:1.25}
       .arc-partners-logos{gap:22px;margin-top:18px}
       .arc-partner-item{width:100%;min-height:68px;padding:8px 0}
-      .arc-partner-item img{width:min(220px,100%)}
+      .arc-partner-item img{width:min(190px,100%)}
     }
   `;
   document.head.appendChild(style);
@@ -119,7 +119,7 @@ function shell(active){
         </div>
         <div class="arc-partners-logos">
           <a class="arc-partner-item" href="https://www.instagram.com/welwelwel.official/" target="_blank" rel="noopener noreferrer" aria-label="WELWELWEL Instagram">
-            <img src="wel-logo-site.png?v=20260919-mobile3" alt="WEL">
+            <img src="wel-logo.svg?v=20260919-account1" alt="WEL">
           </a>
         </div>
       </div>
