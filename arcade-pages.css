@@ -1086,3 +1086,100 @@ radial-gradient(circle at 88% 8%,rgba(45,226,255,.05),transparent 25%),
   .tg-arcade-page .arc-footer-links{gap:10px 14px}
   .arc-policy-main{padding:78px 0 52px}
 }
+
+
+/* MOBILE FINAL QA // 2026-09-19 */
+@media(max-width:720px){
+  .arcade-page-hero{
+    min-height:auto!important;
+    padding:58px 0 44px!important;
+  }
+  .arcade-page-hero h1,
+  .arc-account-copy h1,
+  .arc-player-profile-layout h1,
+  .arc-my-head h1{
+    max-width:100%;
+    font-size:clamp(44px,14vw,64px)!important;
+    line-height:.94!important;
+    letter-spacing:-.035em!important;
+    overflow-wrap:normal;
+    word-break:keep-all;
+  }
+  .coming-soon-hero h1{
+    font-size:clamp(48px,15vw,68px)!important;
+    line-height:.94!important;
+    margin-bottom:24px!important;
+  }
+  .arcade-page-chips{
+    gap:6px;margin-top:22px
+  }
+  .arcade-page-chips span{
+    font-size:8px;padding:7px 8px
+  }
+  .game-hero-actions{
+    width:100%;margin-top:30px!important
+  }
+  .game-hero-actions .btn,
+  .game-hero-actions a.btn{
+    width:100%;justify-content:center;text-align:center
+  }
+
+  .tg-arcade-page .arc-legal-footer{
+    padding:34px 0 30px
+  }
+  .tg-arcade-page .arc-footer-top{
+    gap:18px;padding-bottom:16px
+  }
+  .tg-arcade-page .arc-footer-brand b{
+    font-size:13px
+  }
+  .tg-arcade-page .arc-footer-brand span{
+    font-size:8px;line-height:1.5
+  }
+  .tg-arcade-page .arc-footer-links{
+    gap:10px 14px;font-size:10px;line-height:1.5
+  }
+  .tg-arcade-page .arc-business-info{
+    display:grid;grid-template-columns:1fr;
+    gap:7px;padding:17px 0;
+    font-size:10px;line-height:1.55
+  }
+  .tg-arcade-page .arc-business-info span{
+    display:block;max-width:100%;overflow-wrap:anywhere
+  }
+  .tg-arcade-page .arc-footer-bottom{
+    gap:8px;padding-top:14px;
+    font-size:8px;line-height:1.55
+  }
+
+  .arc-my-dashboard{padding-top:46px}
+  .arc-my-head h1{margin-top:9px}
+  .arc-my-panel{width:100%;overflow:hidden}
+  .arc-id-card h2,.arc-wallet-card h2{
+    overflow-wrap:anywhere;word-break:break-word
+  }
+
+  .arc-auth-shell,.arc-player-form-card{width:100%;min-width:0}
+  .arc-auth-status,.arc-profile-step{
+    align-items:flex-start;flex-direction:column
+  }
+  .arc-auth-form input,.arc-player-form input,.arc-player-form select{
+    font-size:16px
+  }
+
+  .coming-soon-panel{padding:22px!important}
+}
+
+@media(max-width:420px){
+  .arcade-page-hero h1,
+  .arc-account-copy h1,
+  .arc-player-profile-layout h1,
+  .arc-my-head h1{
+    font-size:clamp(40px,13.5vw,56px)!important;
+  }
+  .fanpick-arcade .coming-soon-hero h1,
+  .player-arcade .coming-soon-hero h1{
+    font-size:clamp(42px,14vw,58px)!important;
+  }
+  .arcade-page-chips span{font-size:7px}
+}
