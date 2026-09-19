@@ -393,3 +393,71 @@
   .home-arcade .arc-footer-top,.home-arcade .arc-footer-bottom{flex-direction:column}
   .home-arcade .arc-footer-links{gap:10px 14px}
 }
+
+
+/* HOME MOBILE FINAL QA // 2026-09-19 */
+@media(max-width:700px){
+  .tg-arcade-hero{
+    min-height:auto;
+    padding:48px 0 44px
+  }
+  .tg-hero-main h1{
+    font-size:clamp(58px,20vw,82px);
+    line-height:.84;
+    max-width:100%
+  }
+  .tg-main-tagline{
+    font-size:14px;line-height:1.4
+  }
+  .tg-main-copy{
+    font-size:12px;line-height:1.55
+  }
+  .tg-coming-soon-lock{
+    gap:8px;padding:11px 12px
+  }
+  .tg-coming-soon-lock strong{font-size:12px}
+  .tg-coming-soon-lock small{font-size:8px;line-height:1.5}
+
+  .tg-section-title h2{
+    font-size:clamp(30px,10vw,42px);
+    line-height:.98
+  }
+  .tg-mode-card{
+    min-height:230px;padding:20px
+  }
+  .tg-mode-card h3{
+    font-size:clamp(28px,10vw,38px)
+  }
+
+  .home-arcade .arc-legal-footer{
+    padding:34px 0 30px
+  }
+  .home-arcade .arc-footer-top{
+    gap:18px;padding-bottom:16px
+  }
+  .home-arcade .arc-footer-brand b{font-size:13px}
+  .home-arcade .arc-footer-brand span{
+    font-size:8px;line-height:1.5
+  }
+  .home-arcade .arc-footer-links{
+    gap:10px 14px;font-size:10px;line-height:1.5
+  }
+  .home-arcade .arc-business-info{
+    display:grid;grid-template-columns:1fr;
+    gap:7px;padding:17px 0;
+    font-size:10px;line-height:1.55
+  }
+  .home-arcade .arc-business-info span{
+    display:block;max-width:100%;overflow-wrap:anywhere
+  }
+  .home-arcade .arc-footer-bottom{
+    gap:8px;padding-top:14px;
+    font-size:8px;line-height:1.55
+  }
+}
+
+@media(max-width:420px){
+  .tg-hero-main h1{font-size:clamp(54px,19vw,74px)}
+  .tg-public-format{gap:5px}
+  .tg-public-format>div{padding:9px}
+}
