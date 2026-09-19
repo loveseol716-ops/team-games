@@ -25,3 +25,12 @@
 
 @media(max-width:980px){.player-grid{grid-template-columns:1fr}.rank-row{grid-template-columns:50px 60px 1fr 80px}.rank-row .rank-metric:nth-last-child(-n+3){display:none}.public-player-head{grid-template-columns:180px 1fr}.points-rule-grid{grid-template-columns:repeat(4,1fr)}}
 @media(max-width:700px){.player-form{grid-template-columns:1fr}.player-form .full{grid-column:auto}.rank-row{grid-template-columns:42px 52px 1fr 72px;padding:9px;gap:8px}.rank-avatar{width:52px;height:52px}.rank-name strong{font-size:12px}.rank-metric b{font-size:14px}.public-player-head{grid-template-columns:1fr}.public-player-photo{max-width:240px}.public-stats{grid-template-columns:repeat(2,1fr)}.team-entry-console{grid-template-columns:1fr}.points-rule-grid{grid-template-columns:repeat(3,1fr)}.invite-row,.player-search-row,.history-row{grid-template-columns:48px 1fr}.mini-avatar{width:48px;height:48px}.row-actions{grid-column:1/-1}.player-stats{grid-template-columns:repeat(2,1fr)}.entry-flow-grid{grid-template-columns:1fr}.entry-flow-arrow{display:none}.entry-flow-item{padding:10px 0;border-bottom:1px solid #1f251d}.home-entry-actions .btn{width:100%;text-align:center}.player-entry-steps{gap:7px}.settings-current{grid-template-columns:64px 1fr}.settings-current img{width:64px;height:64px}.bank-transfer-head{flex-direction:column}.bank-account-row{grid-template-columns:1fr}.bank-account-row span,.bank-account-row b,.bank-account-row small,.bank-account-row .mini-btn{grid-column:1;grid-row:auto}.payment-actions .btn{width:100%}}
+
+.player-grid>*,.public-player-head>*,.invite-row>*,.player-search-row>*,.history-row>*{min-width:0}
+@media(max-width:420px){
+  .points-rule-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .rank-row{grid-template-columns:36px 46px minmax(0,1fr);gap:7px}
+  .rank-row .rank-metric{display:none}
+  .rank-avatar{width:46px;height:46px}
+  .player-panel{padding:16px}
+}

@@ -461,3 +461,12 @@
   .tg-public-format{gap:5px}
   .tg-public-format>div{padding:9px}
 }
+
+/* MOBILE CONTENT GUARDS */
+.tg-arcade-grid>*,.tg-section-title>*,.tg-mode-card>*{min-width:0}
+@media(max-width:700px){
+  .tg-status-strip{max-width:100%;flex-wrap:wrap;line-height:1.35}
+  .cabinet-screen{min-height:0;padding:28px 20px 24px}
+  .cabinet-screen h2{font-size:clamp(36px,12vw,52px);overflow-wrap:normal}
+  .cabinet-screen p{font-size:14px;line-height:1.65}
+}

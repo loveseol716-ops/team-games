@@ -1183,3 +1183,18 @@ radial-gradient(circle at 88% 8%,rgba(45,226,255,.05),transparent 25%),
   }
   .arcade-page-chips span{font-size:7px}
 }
+
+/* MOBILE CONTENT GUARDS */
+.arc-account-layout>*,.arc-player-profile-layout>*,.arc-my-grid>*,.arc-event-partner-card>*{min-width:0}
+.arc-event-partner-logo img{max-width:100%;height:auto;object-fit:contain}
+
+@media(max-width:720px){
+  .arc-event-partner-card{width:100%;overflow:visible}
+  .arc-event-partner-logo{
+    width:100%;min-height:96px;padding:18px;
+    display:grid;place-items:center;overflow:visible
+  }
+  .arc-event-partner-logo img{width:min(240px,100%);max-height:none}
+  .arc-policy-main section h2{line-height:1.35;overflow-wrap:anywhere}
+  .arc-policy-main section p{font-size:14px;line-height:1.75;overflow-wrap:anywhere}
+}

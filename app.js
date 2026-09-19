@@ -21,7 +21,7 @@
   const style=document.createElement('style');
   style.textContent=`
     .arc-partners-strip{
-      width:100%;overflow:hidden;
+      width:100%;overflow:clip;
       border-top:1px solid rgba(255,255,255,.07);
       border-bottom:1px solid rgba(255,255,255,.07);
       background:#030405;padding:38px 0 40px
@@ -32,7 +32,8 @@
       font-family:var(--font-display);font-size:8px;letter-spacing:.12em;color:#666d77
     }
     .arc-partners-label strong{
-      font-family:var(--font-display);font-size:15px;font-weight:400;color:#fff
+      font-family:var(--font-display);font-size:15px;font-weight:400;line-height:1.35;
+      color:#fff;overflow-wrap:anywhere
     }
     .arc-partners-logos{
       display:flex;align-items:center;gap:54px;flex-wrap:wrap;
@@ -40,21 +41,21 @@
     }
     .arc-partner-item{
       display:flex;align-items:center;justify-content:flex-start;
-      width:220px;max-width:100%;min-width:0;
+      width:min(260px,100%);max-width:100%;min-width:0;min-height:76px;
       padding:8px 0;opacity:.94;
       transition:opacity .15s ease,transform .15s ease
     }
     .arc-partner-item:hover{opacity:1;transform:translateY(-2px)}
     .arc-partner-item img{
-      display:block;width:180px;max-width:100%;height:auto;max-height:62px;
+      display:block;width:min(240px,100%);max-width:100%;height:auto;
       object-fit:contain;object-position:left center
     }
     @media(max-width:720px){
       .arc-partners-strip{padding:32px 0 34px}
       .arc-partners-label strong{font-size:13px;line-height:1.25}
-      .arc-partners-logos{gap:28px;margin-top:22px}
-      .arc-partner-item{width:180px;padding:4px 0}
-      .arc-partner-item img{width:165px;max-height:56px}
+      .arc-partners-logos{gap:22px;margin-top:18px}
+      .arc-partner-item{width:100%;min-height:68px;padding:8px 0}
+      .arc-partner-item img{width:min(220px,100%)}
     }
   `;
   document.head.appendChild(style);
@@ -72,7 +73,29 @@ function nav(active){
     ['HOME','index.html'],['GAME','event.html'],['TEAMS','teams.html'],
     ['FAN PICK','fanpick.html'],['LIVE','live.html'],['PLAYER','athlete.html']
   ];
-  return `<header class="nav"><div class="container navin"><a class="brand" href="index.html">ARC GAMES</a><nav class="links">${p.map(([n,h])=>`<a class="${active===n?'active':''}" href="${h}">${n}</a>`).join('')}</nav><a id="arcAccountNav" class="cta arcade-cta ${active==='ACCOUNT'?'active':''}" href="account.html">LOGIN</a></div></header>`;
+  return `<header class="nav"><div class="container navin"><a class="brand" href="index.html">ARC GAMES</a><button class="nav-toggle" type="button" aria-expanded="false" aria-controls="arcPrimaryNav"><span aria-hidden="true"></span><span class="nav-toggle-label">MENU</span></button><nav id="arcPrimaryNav" class="links" aria-label="Primary navigation">${p.map(([n,h])=>`<a class="${active===n?'active':''}" href="${h}">${n}</a>`).join('')}</nav><a id="arcAccountNav" class="cta arcade-cta ${active==='ACCOUNT'?'active':''}" href="account.html">LOGIN</a></div></header>`;
+}
+
+function initMobileNav(){
+  const header=document.querySelector('.nav');
+  const toggle=document.querySelector('.nav-toggle');
+  const links=document.querySelector('.links');
+  if(!header||!toggle||!links)return;
+  const label=toggle.querySelector('.nav-toggle-label');
+  const close=()=>{
+    header.classList.remove('is-menu-open');
+    toggle.setAttribute('aria-expanded','false');
+    label.textContent='MENU';
+  };
+  toggle.addEventListener('click',()=>{
+    const open=!header.classList.contains('is-menu-open');
+    header.classList.toggle('is-menu-open',open);
+    toggle.setAttribute('aria-expanded',String(open));
+    label.textContent=open?'CLOSE':'MENU';
+  });
+  links.addEventListener('click',event=>{if(event.target.closest('a'))close()});
+  document.addEventListener('keydown',event=>{if(event.key==='Escape')close()});
+  window.matchMedia('(min-width: 901px)').addEventListener?.('change',event=>{if(event.matches)close()});
 }
 
 function adminNav(){
@@ -86,6 +109,7 @@ function shell(active){
     return;
   }
   document.querySelector('#nav').innerHTML=nav(active);
+  initMobileNav();
   document.querySelector('#footer').innerHTML=`
     <section class="arc-partners-strip" aria-label="official partners">
       <div class="container arc-partners-inner">
@@ -95,7 +119,7 @@ function shell(active){
         </div>
         <div class="arc-partners-logos">
           <a class="arc-partner-item" href="https://www.instagram.com/welwelwel.official/" target="_blank" rel="noopener noreferrer" aria-label="WELWELWEL Instagram">
-            <img src="wel-logo-site.png?v=20260919-mobile" alt="WEL">
+            <img src="wel-logo-site.png?v=20260919-mobile3" alt="WEL">
           </a>
         </div>
       </div>
