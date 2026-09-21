@@ -1,1 +1,1 @@
-window.TG_CONFIG={supabaseUrl:"https://tdhdmlhwahxcadoeywxi.supabase.co",supabaseAnonKey:"sb_publishable_WwnUOni0jfagjJD-v24OFg_RBcePX8-",eventSlug:"team-games-001",eventDateISO:"2026-10-31T14:00:00+09:00"};
+window.TG_CONFIG={supabaseUrl:"https://tdhdmlhwahxcadoeywxi.supabase.co",supabaseAnonKey:"sb_publishable_WwnUOni0jfagjJD-v24OFg_RBcePX8-",eventSlug:"team-games-001",eventDateISO:"2026-10-31T10:00:00+09:00"};

@@ -1,0 +1,33 @@
+.arc-entry [hidden]{display:none!important}
+.arc-entry .entry-main{padding-top:50px;padding-bottom:60px}
+.arc-entry .entry-head{margin-bottom:36px}
+.arc-entry .entry-head h1{font-size:clamp(48px,9vw,96px);line-height:1.08;margin:14px 0 22px}
+.arc-entry p,.arc-entry label,.arc-entry li{font-size:16px;line-height:1.7}
+.arc-entry a{color:var(--tg-blue);text-underline-offset:4px}
+.arc-entry .entry-eyebrow{font-size:14px;letter-spacing:.05em;color:var(--tg-lime);margin-top:26px}
+.arc-entry .entry-prices{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.arc-entry .entry-prices article,.arc-entry .entry-panel{border:1px solid #343740;background:#101117;padding:26px;min-width:0}
+.arc-entry .entry-prices .highlight{border-color:var(--tg-lime)}
+.arc-entry .entry-prices span{font-size:14px;color:#b9bec9}
+.arc-entry .entry-prices strong{display:block;font-size:30px;color:#fff;margin:10px 0}
+.arc-entry .entry-prices p{margin:0;color:#b9bec9}
+.arc-entry .entry-note{color:#bec3cf}
+.arc-entry .entry-panel{margin:24px 0}
+.arc-entry h2{font-size:26px;line-height:1.3;margin:0 0 18px}
+.arc-entry .entry-fields{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:22px 0}
+.arc-entry label{display:block}
+.arc-entry input,.arc-entry select{width:100%;min-height:48px;font-size:16px;margin-top:8px;padding:12px;color:#fff;background:#08090e;border:1px solid #424651}
+.arc-entry .entry-check{display:flex;align-items:flex-start;gap:12px;margin:24px 0}
+.arc-entry .entry-check input{width:20px;min-width:20px;min-height:20px;height:20px;margin:5px 0 0}
+.arc-entry .entry-check span{font-size:14px;line-height:1.7}
+.arc-entry .entry-total{font-size:20px;line-height:1.7;padding:24px;background:#181f0e;border:1px solid #485b27;margin:24px 0}
+.arc-entry .entry-total strong{color:var(--tg-lime);font-size:28px}
+.arc-entry .entry-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}
+.arc-entry .btn{font-size:16px;white-space:normal;min-height:48px;text-align:center}
+.arc-entry .btn[disabled]{opacity:.5;cursor:not-allowed}
+.arc-entry .btn.arcade-primary{color:#050505}
+.arc-entry .entry-status-label{color:var(--tg-lime);font-size:14px}
+.arc-entry #myCode{overflow-wrap:anywhere;color:var(--tg-lime);font-size:20px}
+.arc-entry .notice{font-size:16px;line-height:1.6;scroll-margin-top:90px}
+.arc-entry .bank-public strong{overflow-wrap:anywhere}
+@media(max-width:700px){.arc-entry .entry-prices,.arc-entry .entry-fields{grid-template-columns:1fr}.arc-entry .entry-panel,.arc-entry .entry-prices article{padding:20px}.arc-entry .entry-main{padding-top:30px}.arc-entry .entry-actions .btn{flex:1 1 100%}}

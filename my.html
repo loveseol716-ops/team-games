@@ -67,6 +67,8 @@
             <div><b>FAN PICK</b><span>LOGIN READY</span></div>
             <div><b>GAME ENTRY</b><span id="arcEntryState">COMING SOON</span></div>
           </div>
+          <a class="btn arcade-primary arc-my-action" href="athlete.html">참가신청 · 입금 상태 · 팀 초대 →</a>
+          <p id="arcTeamNotice" aria-live="polite"></p>
           <a id="arcProfileButton" class="btn arcade-primary arc-my-action" href="player-profile.html">PLAYER PROFILE</a>
         </article>
 
@@ -130,7 +132,7 @@ async function loadMy(){
 
   if(a.athlete_ready){
     el('arcPlayerState').textContent='PLAYER PROFILE READY';
-    el('arcPlayerCopy').textContent='참가신청이 열리면 바로 팀 신청 단계로 이동할 수 있습니다.';
+    el('arcPlayerCopy').textContent='참가신청과 입금 확인, 팀원 초대를 진행할 수 있습니다.';
     el('arcProfileButton').textContent='EDIT PLAYER PROFILE';
   }else{
     el('arcPlayerState').textContent='PLAYER PROFILE NOT SET';
@@ -140,6 +142,11 @@ async function loadMy(){
 
   const ev=await db.from('tg_events').select('registration_open').eq('slug',C.eventSlug).maybeSingle();
   if(!ev.error&&ev.data?.registration_open)el('arcEntryState').textContent='OPEN';
+  const entry=await db.rpc('arc_entry_action',{p_action:'state',p_payload:{}});
+  if(!entry.error){
+    const s=entry.data;
+    el('arcTeamNotice').textContent=s.entry?(s.entry.status==='confirmed'?'참가 확정 · ':'입금 확인 진행 중 · ')+s.entry.team_name:(s.invites?.length?'받은 팀 초대 '+s.invites.length+'건 · 참가신청 화면에서 확인하세요.':'대표부터 먼저 신청할 수 있습니다.');
+  }
 }
 
 el('saveNickname').onclick=async()=>{
