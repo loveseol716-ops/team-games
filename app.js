@@ -70,10 +70,10 @@ function esc(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&l
 
 function nav(active){
   const p=[
-    ['HOME','index.html'],['GAME','event.html'],['TEAMS','teams.html'],
-    ['FAN PICK','fanpick.html'],['LIVE','live.html'],['PLAYER','athlete.html']
+    ['GAME','event.html'],['TEAMS','teams.html'],
+    ['FAN PICK','fanpick.html'],['PLAYER','athlete.html']
   ];
-  return `<header class="nav"><div class="container navin"><a class="brand" href="index.html">ARC GAMES</a><button class="nav-toggle" type="button" aria-expanded="false" aria-controls="arcPrimaryNav"><span aria-hidden="true"></span><span class="nav-toggle-label">MENU</span></button><nav id="arcPrimaryNav" class="links" aria-label="Primary navigation">${p.map(([n,h])=>`<a class="${active===n?'active':''}" href="${h}">${n}</a>`).join('')}</nav><a id="arcAccountNav" class="cta arcade-cta ${active==='ACCOUNT'?'active':''}" href="account.html">LOGIN</a></div></header>`;
+  return `<header class="nav"><div class="container navin"><a class="brand" href="index.html">ARC GAMES</a><button class="nav-toggle" type="button" aria-expanded="false" aria-controls="arcPrimaryNav"><span aria-hidden="true"></span><span class="nav-toggle-label">MENU</span></button><nav id="arcPrimaryNav" class="links" aria-label="Primary navigation">${p.map(([n,h])=>`<a class="${active===n?'active':''}" href="${h}">${({GAME:'경기 안내',TEAMS:'참가팀','FAN PICK':'관중 플레이',PLAYER:'참가신청'})[n]||n}</a>`).join('')}</nav><a id="arcAccountNav" class="cta arcade-cta ${active==='ACCOUNT'?'active':''}" href="account.html">로그인</a></div></header>`;
 }
 
 function initMobileNav(){
@@ -132,7 +132,7 @@ function shell(active){
             <span>OPERATED BY BIRD COMPANY LLC</span>
           </div>
           <nav class="arc-footer-links" aria-label="legal">
-            <a href="terms.html">이용약관</a>
+            <a href="live.html">라이브</a><a href="terms.html">이용약관</a>
             <a href="privacy.html">개인정보처리방침</a>
             <a href="refund.html">환불·취소정책</a>
           </nav>
@@ -182,16 +182,16 @@ async function syncArcAccountNav(){
   try{
     const user=await currentUser();
     if(user){
-      el.textContent='MY PAGE';
+      el.textContent='내 계정';
       el.href='my.html';
       el.dataset.auth='in';
     }else{
-      el.textContent='LOGIN';
+      el.textContent='로그인';
       el.href='account.html';
       el.dataset.auth='out';
     }
   }catch(_){
-    el.textContent='LOGIN';
+    el.textContent='로그인';
     el.href='account.html';
   }
 }

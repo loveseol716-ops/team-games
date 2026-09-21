@@ -29,13 +29,14 @@ async function refreshEntry(){
  entryEl('invitePanel').hidden=!s.invites?.length;
  entryEl('inviteCards').innerHTML=(s.invites||[]).map(i=>'<article class="entry-panel"><h2>'+esc(i.team_name)+'</h2><p>'+esc(divisionLabel(i.division))+' / '+esc(categoryName(i.category))+'<br>대표: '+esc(i.captain)+'</p><p>팀 참가비는 입금 확인되었습니다. 추가 입금 없이 초대를 수락해 합류하세요.</p>'+(!playerProfile?.profile_complete?'<p><a href="player-profile.html?next=athlete.html">먼저 선수 정보 작성 →</a></p>':'')+'<label class="entry-consent"><input type="checkbox" id="consent-'+esc(i.id)+'"><span><a href="terms.html" target="_blank" rel="noopener">이용약관</a>·<a href="privacy.html" target="_blank" rel="noopener">개인정보처리방침</a>·<a href="refund.html" target="_blank" rel="noopener">환불·취소정책</a>을 확인하고 팀 참가에 동의합니다.</span></label><div class="entry-actions"><button class="btn arcade-primary" data-respond="'+esc(i.id)+'" data-accept="true">초대 수락</button><button class="btn dark" data-respond="'+esc(i.id)+'" data-accept="false">거절</button></div></article>').join('');
  renderEntryStatus(s.entry);
+ setEntryStep(s.entry?3:entryStep===3?1:entryStep,false);
  if(!s.entry&&s.registration_open)await updateEntryQuote();
 }
 function renderEntryStatus(t){
  const box=entryEl('entryStatus');box.hidden=!t;if(!t)return;
  const paid=t.status==='confirmed',reported=t.payment_status==='payment_check',expired=!paid&&!reported&&new Date(t.deadline)<=new Date();
  let content='<p class="entry-status-label">'+(paid?'참가 확정':reported?'입금 확인 대기':expired?'입금 안내 기한 만료':'입금 대기')+'</p><h2>'+esc(t.team_name)+'</h2><p>'+esc(divisionLabel(t.division))+' / '+esc(categoryName(t.category))+'</p><div class="entry-total">대표 '+won(t.captain_fee)+' + 팀원 '+won(t.partner_fee)+'<br>팀 합계 <strong>'+won(t.amount_due)+'</strong></div>';
- if(paid){content+='<p>대표: '+esc(t.player_1)+'<br>팀원: '+esc(t.player_2)+'</p>';if(t.roster_complete){content+='<p>2인 팀 구성이 완료되었습니다.</p>';}else if(t.is_captain){content+='<p>팀원은 먼저 ARC 계정을 만들어야 합니다. 아래에 팀원의 ARC 계정 이메일을 입력하세요. 초대는 팀원의 참가신청 화면에 표시됩니다.</p>';if(t.pending_invite)content+='<p>초대 수락 대기: '+esc(t.pending_invite.name)+'</p><button class="btn dark" data-entry-action="cancel_invite">현재 초대 취소</button>';else content+='<form id="inviteForm"><label>팀원의 ARC 계정 이메일<input id="inviteEmail" type="email" autocomplete="off" required></label><button class="btn arcade-primary" type="submit">팀원 초대</button></form>';}}
+ if(paid){content+='<div class="arc-roster"><div><span>대표 선수</span><strong>'+esc(t.player_1||'대표')+'</strong></div><div><span>팀원</span><strong>'+esc(t.roster_complete?t.player_2:'초대 대기')+'</strong></div></div>';if(t.roster_complete){content+='<p>2인 팀 구성이 완료되었습니다.</p>';}else if(t.is_captain){content+='<p>팀원은 먼저 ARC 계정을 만들어야 합니다. 아래에 팀원의 ARC 계정 이메일을 입력하세요. 초대는 팀원의 참가신청 화면에 표시됩니다.</p>';if(t.pending_invite)content+='<p>초대 수락 대기: '+esc(t.pending_invite.name)+'</p><button class="btn dark" data-entry-action="cancel_invite">현재 초대 취소</button>';else content+='<form id="inviteForm"><label>팀원의 ARC 계정 이메일<input id="inviteEmail" type="email" autocomplete="off" required></label><button class="btn arcade-primary" type="submit">팀원 초대</button></form>';}}
  else{content+='<p>기업은행 <strong>244-105758-04-010</strong><br>버드컴퍼니 유한회사</p><button class="btn dark" data-copy-bank>계좌번호 복사</button><p>입금 및 신고 기한: '+esc(new Date(t.deadline).toLocaleString('ko-KR',{timeZone:'Asia/Seoul'}))+' (한국시간)</p>';
  if(reported)content+='<p>입금자 '+esc(t.depositor_name)+' · 운영자가 실제 입금을 확인 중입니다. 이 화면에서 참가 확정 여부를 확인할 수 있습니다.</p>';
  else if(expired)content+='<p>이미 입금했다면 재신청하지 말고 <a href="mailto:lovesol716@gmail.com">운영자에게 문의</a>해 주세요. 아직 입금하지 않았다면 신청을 취소한 뒤 다시 신청할 수 있습니다.</p>';
@@ -44,6 +45,23 @@ function renderEntryStatus(t){
  content+='<div class="entry-actions"><button class="btn dark" data-refresh-entry>상태 새로고침</button></div>';
  box.innerHTML=content;
 }
+let entryStep=1;
+function setEntryStep(step,focus=true){
+ entryStep=step;entryEl('entryStep1').hidden=step!==1;entryEl('entryStep2').hidden=step!==2;
+ document.querySelectorAll('[data-step]').forEach(item=>{if(Number(item.dataset.step)===step)item.setAttribute('aria-current','step');else item.removeAttribute('aria-current');});
+ if(focus&&step<3){const target=entryEl(step===1?'entryName':'discountCode');target.focus();entryEl('entryApplication').scrollIntoView({behavior:'smooth',block:'start'});}
+}
+function validateEntryInfo(){
+ const fields=[...entryEl('entryStep1').querySelectorAll('input,select')];const invalid=fields.find(input=>!input.checkValidity());
+ if(invalid){setEntryStep(1,false);invalid.reportValidity();invalid.focus();return false;}return true;
+}
+function goEntryReview(){
+ if(!validateEntryInfo())return;
+ entryEl('entryReview').textContent=entryEl('entryTeam').value.trim()+' · '+divisionLabel(entryEl('entryDivision').value)+' · '+categoryName(entryEl('entryCategory').value);
+ setEntryStep(2);
+}
+entryEl('entryNext').onclick=goEntryReview;
+entryEl('entryBack').onclick=()=>setEntryStep(1);
 let quoteTimer,quoteVersion=0;
 async function updateEntryQuote(){
  const version=++quoteVersion,code=entryEl('discountCode').value.trim();
@@ -58,7 +76,7 @@ async function updateEntryQuote(){
 }
 entryEl('discountCode').addEventListener('input',()=>{quoteVersion++;invalidateQuote();clearTimeout(quoteTimer);quoteTimer=setTimeout(updateEntryQuote,350);});
 entryEl('quoteButton').onclick=()=>{clearTimeout(quoteTimer);updateEntryQuote();};
-entryEl('entryForm').onsubmit=e=>{e.preventDefault();if(!entryQuote||entryQuote.code!==entryEl('discountCode').value.trim()||!e.target.reportValidity())return;runEntryAction(async()=>{
+entryEl('entryForm').onsubmit=e=>{e.preventDefault();if(entryStep!==2){goEntryReview();return;}if(!validateEntryInfo()){return;}if(!entryQuote||entryQuote.code!==entryEl('discountCode').value.trim()||!entryEl('entryConsent').reportValidity())return;runEntryAction(async()=>{
  const p=await db.rpc('arc_save_player_profile',{p_full_name:entryEl('entryName').value.trim(),p_gender:entryEl('entryGender').value,p_phone:entryEl('entryPhone').value,p_instagram:entryEl('entryInstagram').value,p_gym:entryEl('entryGym').value,p_privacy_consent:entryEl('entryConsent').checked});if(p.error)throw p.error;
  await entryRpc('register',{team_name:entryEl('entryTeam').value.trim(),division:entryEl('entryDivision').value,category:entryEl('entryCategory').value,discount_code:entryEl('discountCode').value.trim(),expected_amount:entryQuote.amount_due,consent:entryEl('entryConsent').checked});
  entryQuote=null;await refreshEntry();entryMessage('참가신청이 접수되었습니다. 아래 계좌와 팀 합계 금액을 확인한 뒤 입금해 주세요.');
