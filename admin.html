@@ -57,15 +57,7 @@
 
       <div id="control" style="display:none">
         <div id="summary" class="admin-summary"></div>
-<section class="admin-block">
-<div class="card"><div class="kicker">NOLTO MEMBER BENEFIT</div><h3>회원 할인 코드 발급</h3>
-<p>놀토짐 회원 확인 후 해당 회원의 ARC 계정 이메일로 발급하세요. 코드 1개는 해당 회원 1인의 참가비를 50% 할인합니다. 회원은 참가신청 화면에서 본인 코드를 확인할 수 있습니다.</p>
-<form id="noltoCodeForm"><label for="noltoEmail">회원 ARC 이메일</label><input id="noltoEmail" type="email" required autocomplete="off" placeholder="member@example.com">
-<label style="display:flex;gap:10px;align-items:center;margin:16px 0"><input id="noltoVerified" type="checkbox" required style="width:20px;height:20px">놀토짐 회원임을 확인했습니다.</label>
-<button id="issueNoltoCode" class="btn arcade-primary" type="submit">개인 코드 발급</button></form>
-<div id="noltoCodeMsg" class="notice" role="status"></div>
-<div class="table-scroll" style="margin-top:24px"><table><thead><tr><th>회원</th><th>코드</th><th>상태</th><th>관리</th></tr></thead><tbody id="noltoCodeRows"></tbody></table></div>
-</div></section>
+<section class="admin-block"><div class="card"><h3>할인 코드</h3><p>공통 코드 <strong>NOLTO01</strong> · 팀 참가비 50% 할인 · 별도 개인 코드 발급 없이 사용합니다.</p></div></section>
 
         <section class="admin-block fan-wallet-admin-block">
           <div class="admin-block-head">
@@ -253,19 +245,6 @@ function adminError(x){
 }
 
 
-async function codeRpc(action,payload={}){const r=await db.rpc('arc_entry_action',{p_action:action,p_payload:payload});if(r.error)throw r.error;return r.data;}
-async function loadNoltoCodes(){
- const rows=await codeRpc('admin_codes');
- $('noltoCodeRows').innerHTML=rows.length?rows.map(c=>'<tr><td>'+esc(c.name)+'<br>'+esc(c.email)+'</td><td style="overflow-wrap:anywhere">'+esc(c.code)+'</td><td>'+(!c.active?'중지':c.used?'사용됨':'사용 가능')+'</td><td>'+(!c.used&&c.active?'<button class="btn dark" type="button" data-revoke-code="'+esc(c.id)+'">중지</button>':'—')+'</td></tr>').join(''):'<tr><td colspan="4">발급된 코드가 없습니다.</td></tr>';
-}
-$('noltoCodeForm').onsubmit=async e=>{
- e.preventDefault();if(!e.target.reportValidity())return;$('issueNoltoCode').disabled=true;
- try{const r=await codeRpc('admin_issue_code',{email:$('noltoEmail').value.trim()});notice('noltoCodeMsg','발급 완료: '+r.code+' · 회원 참가신청 화면에도 표시됩니다.');$('noltoVerified').checked=false;await loadNoltoCodes();}
- catch(e){notice('noltoCodeMsg',String(e.message).includes('ARC_ACCOUNT_NOT_FOUND')?'해당 이메일의 ARC 계정이 없습니다. 먼저 가입하도록 안내해 주세요.':adminError(e),true);}
- finally{$('issueNoltoCode').disabled=false;}
-};
-$('noltoCodeRows').onclick=async e=>{const b=e.target.closest('[data-revoke-code]');if(!b||!confirm('이 코드를 중지할까요?'))return;b.disabled=true;try{await codeRpc('admin_revoke_code',{code_id:b.dataset.revokeCode});await loadNoltoCodes();notice('noltoCodeMsg','코드를 중지했습니다.');}catch(e){notice('noltoCodeMsg',String(e.message).includes('CODE_ALREADY_USED')?'이미 신청에 사용된 코드입니다.':adminError(e),true);b.disabled=false;}};
-
 async function adminTeams(){
   const q=await db.rpc('tg_admin_list_teams',{p_event_slug:C.eventSlug});
   if(q.error)throw q.error;
@@ -283,7 +262,7 @@ async function refreshAdmin(){
   renderSummary();
   renderAddTeam();
   renderTeamManagement();
-  await Promise.all([loadResults(),loadPredictionControl(),loadFanWalletControl(),loadNoltoCodes()]);
+  await Promise.all([loadResults(),loadPredictionControl(),loadFanWalletControl()]);
 }
 
 async function enterAdmin(){
