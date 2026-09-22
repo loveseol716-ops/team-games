@@ -1,6 +1,8 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.57.4'
 
 const allowedOrigins = new Set([
+  'https://arcstation.kr',
+  'https://www.arcstation.kr',
   'https://arcgames.kr',
   'https://www.arcgames.kr',
   'https://loveseol716-ops.github.io',
@@ -8,7 +10,7 @@ const allowedOrigins = new Set([
 
 function cors(origin: string) {
   return {
-    'Access-Control-Allow-Origin': allowedOrigins.has(origin) ? origin : 'https://arcgames.kr',
+    'Access-Control-Allow-Origin': allowedOrigins.has(origin) ? origin : 'https://arcstation.kr',
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Vary': 'Origin',
