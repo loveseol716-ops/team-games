@@ -1,23 +1,24 @@
 <!doctype html>
-<html lang="ko">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="ARC GAMES ACCOUNT — Create your ARC ID, manage PLAY POINT and prepare for upcoming games.">
-  <meta property="og:site_name" content="ARC GAMES">
-  <meta property="og:title" content="ARC GAMES — ACCOUNT">
-  <meta property="og:description" content="Create your ARC ID and get ready for GAME #01.">
+  <meta name="description" content="ARC STATION ACCOUNT — Create your ARC ID, manage PLAY POINT and prepare for upcoming games.">
+  <meta property="og:site_name" content="ARC STATION">
+  <meta property="og:title" content="ARC STATION — ACCOUNT">
+  <meta property="og:description" content="Create your ARC ID and get ready for PROJECT #1 NOLTO.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://arcgames.kr/account.html">
-  <meta property="og:image" content="https://arcgames.kr/favicon.png">
+  <meta property="og:image" content="https://arcgames.kr/station-social.png">
   <meta name="twitter:card" content="summary">
-  <meta name="theme-color" content="#121212">
-  <title>ACCOUNT · ARC GAMES</title>
+  <meta name="theme-color" content="#111111">
+  <title>ACCOUNT · ARC STATION</title>
   <link rel="stylesheet" href="styles.css?v=20260919-account1">
   <link rel="stylesheet" href="arcade-pages.css?v=20260919-account1">
 <link rel="stylesheet" href="underground.css?v=20260922ug2">
+<link rel="stylesheet" href="station.css?v=20260922s1">
 </head>
-<body class="tg-arcade-page arc-account-page ug-site">
+<body class="tg-arcade-page arc-account-page ug-site station-site">
 <div id="nav"></div>
 <main>
   <section class="arcade-page-hero arc-account-hero">
@@ -25,13 +26,13 @@
       <div class="arc-account-copy">
         <div class="arcade-eyebrow">ARC ACCOUNT / YOUR WAY IN</div>
         <h1>JOIN<br>THE FLOOR.</h1>
-        <p class="lead">참가신청과 FAN PICK은 ARC ACCOUNT 로그인 후 이용할 수 있습니다.</p>
+        <p class="lead">Your ARC account gets you into the game and FAN PICK.</p>
         <div class="arcade-page-chips"><span>ENTER GAME</span><span>FAN PICK</span><span>PLAY POINT</span><span>MY PAGE</span></div>
       </div>
       <div class="arc-auth-shell">
         <div class="arc-auth-tabs">
-          <button id="signupTab" class="btn arcade-primary" type="button">회원가입</button>
-          <button id="loginTab" class="btn dark" type="button">로그인</button>
+          <button id="signupTab" class="btn arcade-primary" type="button">SIGN UP</button>
+          <button id="loginTab" class="btn dark" type="button">LOG IN</button>
         </div>
         <div class="arc-social-login">
           <div class="arc-social-title"><span></span><b>QUICK LOGIN</b><span></span></div>
@@ -50,7 +51,7 @@
 <div id="footer"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
-<script src="app.js?v=20260922ug1"></script>
+<script src="app.js?v=20260922s1"></script>
 <script>
 shell('ACCOUNT');
 
@@ -67,17 +68,17 @@ const authCard=byId('authCard');
 
 function authError(e){
   const m=String(e?.message||e||'');
-  if(m.includes('EMAIL_EXISTS')||m.toLowerCase().includes('already registered'))return '이미 가입된 이메일입니다. LOGIN을 이용해 주세요.';
-  if(m.includes('INVALID_EMAIL'))return '이메일 형식을 확인해 주세요.';
-  if(m.includes('INVALID_PASSWORD'))return '비밀번호는 영문과 숫자를 포함해 8자 이상 입력해 주세요.';
-  if(m.includes('INVALID_NAME'))return '이름은 2자 이상 입력해 주세요.';
-  if(m.includes('INVALID_NICKNAME'))return '닉네임은 2~30자로 입력해 주세요.';
-  if(m.includes('INVALID_PHONE'))return '휴대전화번호를 확인해 주세요.';
-  if(m.includes('CONSENT_REQUIRED'))return '이용약관과 개인정보 수집·이용에 동의해 주세요.';
-  if(m.includes('Invalid login credentials'))return '이메일 또는 비밀번호가 맞지 않습니다.';
-  if(m.includes('Unsupported provider')||m.includes('provider is not enabled')||m.includes('not enabled'))return '아직 해당 간편 로그인 연결 설정이 완료되지 않았습니다.';
-  if(m.includes('ORIGIN_NOT_ALLOWED'))return '현재 도메인에서 회원가입을 사용할 수 없습니다.';
-  return m||'처리 중 오류가 발생했습니다.';
+  if(m.includes('EMAIL_EXISTS')||m.toLowerCase().includes('already registered'))return 'This email is already registered. Log in instead.';
+  if(m.includes('INVALID_EMAIL'))return 'Check your email address.';
+  if(m.includes('INVALID_PASSWORD'))return 'Use at least 8 characters, including a letter and a number.';
+  if(m.includes('INVALID_NAME'))return 'Enter a name with at least 2 characters.';
+  if(m.includes('INVALID_NICKNAME'))return 'Use 2–30 characters for your nickname.';
+  if(m.includes('INVALID_PHONE'))return 'Check your mobile number.';
+  if(m.includes('CONSENT_REQUIRED'))return 'Accept the Terms and Privacy Policy to continue.';
+  if(m.includes('Invalid login credentials'))return 'Email or password is incorrect.';
+  if(m.includes('Unsupported provider')||m.includes('provider is not enabled')||m.includes('not enabled'))return 'This sign-in option is not available yet.';
+  if(m.includes('ORIGIN_NOT_ALLOWED'))return 'Sign-up is unavailable on this domain.';
+  return m||'Something went wrong. Please try again.';
 }
 
 function renderAuth(){
@@ -88,24 +89,24 @@ function renderAuth(){
     <div class="arc-auth-status"><span>${mode==='signup'?'NEW PLAYER':'RETURNING PLAYER'}</span><b>${mode==='signup'?'10,000 P WELCOME CREDIT':'ACCESS YOUR ARC ID'}</b></div>
     <form id="arcAuthForm" class="arc-auth-form">
       ${mode==='signup'?`<div class="arc-auth-field-grid">
-        <label>NICKNAME <em>REQUIRED</em><input id="nickname" minlength="2" maxlength="30" autocomplete="nickname" placeholder="사이트에 표시할 이름" required></label>
-        <label>NAME <em>REQUIRED</em><input id="fullName" minlength="2" maxlength="50" autocomplete="name" placeholder="실명" required></label>
+        <label>NICKNAME <em>REQUIRED</em><input id="nickname" minlength="2" maxlength="30" autocomplete="nickname" placeholder="NAME SHOWN ON SITE" required></label>
+        <label>NAME <em>REQUIRED</em><input id="fullName" minlength="2" maxlength="50" autocomplete="name" placeholder="LEGAL NAME" required></label>
       </div>
       <label>MOBILE <em>REQUIRED</em><input id="phone" type="tel" inputmode="tel" maxlength="20" autocomplete="tel" placeholder="010-1234-5678" required></label>`:''}
       <label>EMAIL<input id="email" type="email" autocomplete="email" required></label>
       <label>PASSWORD<input id="password" type="password" minlength="8" maxlength="72" autocomplete="${mode==='signup'?'new-password':'current-password'}" required></label>
       ${mode==='signup'?`<label>CONFIRM PASSWORD<input id="passwordConfirm" type="password" minlength="8" maxlength="72" autocomplete="new-password" required></label>
-      <p class="arc-password-hint">영문과 숫자를 포함해 8자 이상 입력해 주세요.</p>
+      <p class="arc-password-hint">Use at least 8 characters with a letter and a number.</p>
       <div class="arc-signup-consents">
-        <label><input id="termsConsent" type="checkbox" required><span><b>[필수]</b> <a href="terms.html" target="_blank" rel="noopener">이용약관</a>에 동의합니다.</span></label>
-        <label><input id="privacyConsent" type="checkbox" required><span><b>[필수]</b> <a href="privacy.html" target="_blank" rel="noopener">개인정보 수집·이용</a>에 동의합니다.</span></label>
-        <label><input id="marketingConsent" type="checkbox"><span>[선택] 이벤트 및 서비스 소식 수신에 동의합니다.</span></label>
+        <label><input id="termsConsent" type="checkbox" required><span><b>[REQUIRED]</b> <a href="terms.html" target="_blank" rel="noopener">TERMS OF USE</a> — I AGREE.</span></label>
+        <label><input id="privacyConsent" type="checkbox" required><span><b>[REQUIRED]</b> <a href="privacy.html" target="_blank" rel="noopener">DATA COLLECTION & USE</a> — I AGREE.</span></label>
+        <label><input id="marketingConsent" type="checkbox"><span>[OPTIONAL] I agree to receive event and service updates.</span></label>
       </div>`:''}
       <input id="website" class="arc-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
       <button id="submitAuth" class="btn arcade-primary" type="submit">${mode==='signup'?'CREATE ARC ACCOUNT →':'LOGIN →'}</button>
       <div id="authMsg" class="notice"></div>
     </form>
-    <div class="arc-auth-note">가입 즉시 ARC ACCOUNT가 생성되고 FAN PICK용 PLAY POINT 10,000P가 지급됩니다.</div>`;
+    <div class="arc-auth-note">Create an ARC account and receive 10,000 free PLAY POINT for FAN PICK.</div>`;
 
   byId('arcAuthForm').onsubmit=submitEmail;
 }
@@ -138,7 +139,7 @@ async function submitEmail(e){
       if(fullName.length<2)throw new Error('INVALID_NAME');
       if(!/^\d{8,15}$/.test(phone.replace(/\D/g,'')))throw new Error('INVALID_PHONE');
       if(!/^(?=.*[A-Za-z])(?=.*\d).{8,72}$/.test(pw))throw new Error('INVALID_PASSWORD');
-      if(pw!==pwConfirm)throw new Error('비밀번호와 비밀번호 확인이 일치하지 않습니다.');
+      if(pw!==pwConfirm)throw new Error('Passwords do not match.');
       if(!byId('termsConsent').checked||!byId('privacyConsent').checked)throw new Error('CONSENT_REQUIRED');
       const r=await db.functions.invoke('tg-athlete-signup',{body:{
         email:mail,password:pw,display_name:name,full_name:fullName,phone,

@@ -1,19 +1,9 @@
 
-// ARC GAMES favicon
+// ARC STATION favicon
 (()=> {
-  const head=document.head;
-  if(!head)return;
   const icon=document.createElement('link');
-  icon.rel='icon';
-  icon.type='image/x-icon';
-  icon.href='favicon.ico?v=arcgames-20260918';
-  head.appendChild(icon);
-  const png=document.createElement('link');
-  png.rel='icon';
-  png.type='image/png';
-  png.sizes='64x64';
-  png.href='favicon.png?v=arcgames-20260918';
-  head.appendChild(png);
+  icon.rel='icon';icon.type='image/svg+xml';icon.href='station-mark.svg?v=20260922s1';
+  document.head.appendChild(icon);
 })();
 
 // ARC PARTNERS STRIP
@@ -71,9 +61,9 @@ function esc(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&l
 function nav(active){
   const p=[
     ['GAME','event.html'],['TEAMS','teams.html'],
-    ['FAN PICK','fanpick.html'],['RANKING','ranking.html'],['LIVE','live.html'],['PLAYER','athlete.html']
+    ['FAN PICK','fanpick.html'],['RANKING','ranking.html'],['LIVE','live.html']
   ];
-  return `<header class="nav"><div class="container navin"><a class="brand" href="index.html">ARC GAMES</a><button class="nav-toggle" type="button" aria-expanded="false" aria-controls="arcPrimaryNav"><span aria-hidden="true"></span><span class="nav-toggle-label">MENU</span></button><nav id="arcPrimaryNav" class="links" aria-label="Primary navigation">${p.map(([n,h])=>`<a class="${active===n?'active':''}" href="${h}">${({GAME:'경기 안내',TEAMS:'참가팀','FAN PICK':'FAN PICK',RANKING:'리더보드',LIVE:'라이브',PLAYER:'참가신청'})[n]||n}</a>`).join('')}</nav><a id="arcAccountNav" class="cta arcade-cta ${active==='ACCOUNT'?'active':''}" href="account.html">로그인</a></div></header>`;
+  return `<header class="nav"><div class="container navin"><a class="brand" href="index.html">ARC STATION</a><button class="nav-toggle" type="button" aria-expanded="false" aria-controls="arcPrimaryNav"><span aria-hidden="true"></span><span class="nav-toggle-label">MENU</span></button><nav id="arcPrimaryNav" class="links" aria-label="Primary navigation">${p.map(([n,h])=>`<a class="${active===n?'active':''}" href="${h}">${({GAME:'GAME',TEAMS:'TEAMS','FAN PICK':'FAN PICK',RANKING:'RESULTS',LIVE:'LIVE'})[n]||n}</a>`).join('')}</nav><a id="arcAccountNav" class="cta arcade-cta ${active==='ACCOUNT'?'active':''}" href="account.html">ENTER</a></div></header>`;
 }
 
 function initMobileNav(){
@@ -105,7 +95,7 @@ function adminNav(){
 function shell(active){
   if(active==='ADMIN'){
     document.querySelector('#nav').innerHTML=adminNav();
-    document.querySelector('#footer').innerHTML=`<footer class="footer admin-only-footer"><div class="container arcade-footer"><span>ARC GAMES // GAME MASTER</span><span>PRIVATE CONTROL ROOM</span></div></footer>`;
+    document.querySelector('#footer').innerHTML=`<footer class="footer admin-only-footer"><div class="container arcade-footer"><span>ARC STATION // GAME MASTER</span><span>PRIVATE CONTROL ROOM</span></div></footer>`;
     return;
   }
   document.querySelector('#nav').innerHTML=nav(active);
@@ -114,7 +104,7 @@ function shell(active){
     <section class="arc-partners-strip" aria-label="official partners">
       <div class="container arc-partners-inner">
         <div class="arc-partners-label">
-          <span>ARC GAMES</span>
+          <span>ARC STATION</span>
           <strong>OFFICIAL PARTNERS</strong>
         </div>
         <div class="arc-partners-logos">
@@ -128,22 +118,22 @@ function shell(active){
       <div class="container">
         <div class="arc-footer-top">
           <div class="arc-footer-brand">
-            <b>ARC GAMES</b>
+            <b>ARC STATION</b>
             <span>OPERATED BY BIRD COMPANY LLC</span>
           </div>
           <nav class="arc-footer-links" aria-label="legal">
-            <a href="live.html">라이브</a><a href="terms.html">이용약관</a>
-            <a href="privacy.html">개인정보처리방침</a>
-            <a href="refund.html">환불·취소정책</a>
+            <a href="live.html">LIVE</a><a href="terms.html">TERMS</a>
+            <a href="privacy.html">PRIVACY</a>
+            <a href="refund.html">REFUNDS</a>
           </nav>
         </div>
         <div class="arc-business-info">
-          <span>상호명: 버드컴퍼니 유한회사</span>
-          <span>대표자: 설재현</span>
-          <span>사업자등록번호: 539-81-03765</span>          <span>사업자 주소: 서울특별시 강남구 언주로146길 9 (논현동 98-10), 지하1층</span>          <span>문의: lovesol716@gmail.com</span>
+          <span>OPERATOR: BIRD COMPANY LLC (버드컴퍼니 유한회사)</span>
+          <span>REPRESENTATIVE: SEOL JAEHYUN</span>
+          <span>BUSINESS NO. 539-81-03765</span>          <span>ADDRESS: B1, 9 Eonju-ro 146-gil, Gangnam-gu, Seoul, South Korea</span>          <span>CONTACT: lovesol716@gmail.com</span>
         </div>
         <div class="arc-footer-bottom">
-          <span>© 2026 ARC GAMES. ALL RIGHTS RESERVED.</span>
+          <span>© 2026 ARC STATION. ALL RIGHTS RESERVED.</span>
           <span>PLAY POINT HAS NO CASH VALUE.</span>
         </div>
       </div>
@@ -182,16 +172,16 @@ async function syncArcAccountNav(){
   try{
     const user=await currentUser();
     if(user){
-      el.textContent='내 계정';
+      el.textContent='ACCOUNT';
       el.href='my.html';
       el.dataset.auth='in';
     }else{
-      el.textContent='로그인';
+      el.textContent='LOG IN';
       el.href='account.html';
       el.dataset.auth='out';
     }
   }catch(_){
-    el.textContent='로그인';
+    el.textContent='LOG IN';
     el.href='account.html';
   }
 }

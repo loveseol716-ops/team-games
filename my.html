@@ -1,24 +1,25 @@
 <!doctype html>
-<html lang="ko">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="ARC GAMES MY PAGE — ARC ID, PLAY POINT, PLAYER PROFILE.">
-  <meta property="og:site_name" content="ARC GAMES">
-  <meta property="og:title" content="ARC GAMES — MY PAGE">
+  <meta name="description" content="ARC STATION MY PAGE — ARC ID, PLAY POINT, PLAYER PROFILE.">
+  <meta property="og:site_name" content="ARC STATION">
+  <meta property="og:title" content="ARC STATION — MY PAGE">
   <meta property="og:description" content="Manage your ARC ID, PLAY POINT and game entry profile.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://arcgames.kr/my.html">
-  <meta property="og:image" content="https://arcgames.kr/favicon.png">
+  <meta property="og:image" content="https://arcgames.kr/station-social.png">
   <meta name="twitter:card" content="summary">
-  <meta name="theme-color" content="#121212">
-  <title>MY PAGE · ARC GAMES</title>
+  <meta name="theme-color" content="#111111">
+  <title>MY PAGE · ARC STATION</title>
   <link rel="stylesheet" href="styles.css?v=20260919-account1">
   <link rel="stylesheet" href="arcade-pages.css?v=20260919-account1">
 <link rel="stylesheet" href="arc-refresh.css?v=20260921c">
 <link rel="stylesheet" href="neon-arcade.css?v=20260922a"><link rel="stylesheet" href="underground.css?v=20260922ug2">
+<link rel="stylesheet" href="station.css?v=20260922s1">
 </head>
-<body class="tg-arcade-page arc-my-page ug-site">
+<body class="tg-arcade-page arc-my-page ug-site station-site">
 <div id="nav"></div>
 
 <main>
@@ -27,8 +28,8 @@
       <div class="arc-my-head">
         <div>
           <div class="arcade-eyebrow">YOUR ACCOUNT / YOUR GAME</div>
-          <h1>내 게임.</h1>
-          <p>내 포인트와 예측 통계, 팀 참가 상태를 확인하세요.</p>
+          <h1>YOUR STATION.</h1>
+          <p>Your points, picks and team in one place.</p>
         </div>
         <div class="arc-my-head-status">
           <span>ACCOUNT STATUS</span>
@@ -38,7 +39,7 @@
 
       <div id="myPageError" class="notice err arc-my-error"></div>
 
-      <div class="arc-actions"><a class="arc-button neon-pink" href="fanpick.html">FAN PICK · 포인트와 예측 내역 ↗</a><a class="arc-button" href="ranking.html">리더보드 ↗</a></div><section id="myTeamCard" class="arc-team-summary" aria-live="polite"><p>내 팀 정보를 확인하고 있습니다…</p></section><div class="arc-my-grid">
+      <div class="arc-actions"><a class="arc-button neon-pink" href="fanpick.html">FAN PICK ↗</a><a class="arc-button" href="ranking.html">LEADERBOARD ↗</a></div><section id="myTeamCard" class="arc-team-summary" aria-live="polite"><p>LOADING YOUR TEAM…</p></section><div class="arc-my-grid">
         <article class="arc-my-panel arc-id-card">
           <div class="arc-panel-label">ARC ID</div>
           <div class="arc-panel-main">
@@ -52,43 +53,43 @@
           <div class="arc-panel-label">PLAY POINT WALLET</div>
           <h2 id="arcBalance">— P</h2>
           <div class="arc-stat-row">
-            <div><span>누적 사용 포인트</span><b id="arcTotalBet">— P</b></div>
-            <div><span>적중 / 정산</span><b id="arcWins">—</b></div>
+            <div><span>TOTAL STAKED</span><b id="arcTotalBet">— P</b></div>
+            <div><span>WINS / SETTLED</span><b id="arcWins">—</b></div>
           </div>
           <div class="arc-stat-row">
-            <div><span>적중률</span><b id="arcHitRate">—%</b></div>
-            <div><span>정산 순증감</span><b id="arcNetWin">— P</b></div>
+            <div><span>HIT RATE</span><b id="arcHitRate">—%</b></div>
+            <div><span>NET POINTS</span><b id="arcNetWin">— P</b></div>
           </div>
         </article>
 
         <article class="arc-my-panel arc-access-card">
           <div class="arc-panel-label">GAME ACCESS</div>
           <h3 id="arcPlayerState">CHECKING PLAYER PROFILE...</h3>
-          <p id="arcPlayerCopy">참가신청 시 필요한 PLAYER PROFILE 상태를 확인합니다.</p>
+          <p id="arcPlayerCopy">Check the profile required for team entry.</p>
           <div class="arc-access-list">
             <div><b>FAN PICK</b><span>LOGIN READY</span></div>
             <div><b>GAME ENTRY</b><span id="arcEntryState">COMING SOON</span></div>
           </div>
-          <a class="btn arcade-primary arc-my-action" href="athlete.html">참가신청 · 입금 상태 · 팀 초대 →</a>
+          <a class="btn arcade-primary arc-my-action" href="athlete.html">ENTRY & TEAM STATUS →</a>
           <p id="arcTeamNotice" aria-live="polite"></p>
           <a id="arcProfileButton" class="btn arcade-primary arc-my-action" href="player-profile.html">PLAYER PROFILE</a>
         </article>
 
-        <details class="arc-my-panel arc-settings-card"><summary>계정 설정 · 닉네임 / 비밀번호</summary>
+        <details class="arc-my-panel arc-settings-card"><summary>ACCOUNT SETTINGS</summary>
           <div class="arc-panel-label">ACCOUNT SETTINGS</div>
-          <label>닉네임
+          <label>NICKNAME
             <input id="editNickname" maxlength="30" placeholder="YOUR ARC ID">
           </label>
-          <button id="saveNickname" class="btn arcade-primary" type="button">닉네임 저장</button>
+          <button id="saveNickname" class="btn arcade-primary" type="button">SAVE NICKNAME</button>
           <div class="arc-settings-divider"><span>SECURITY</span></div>
-          <label>새 비밀번호
-            <input id="newPassword" type="password" minlength="8" maxlength="72" autocomplete="new-password" placeholder="영문 + 숫자, 8자 이상">
+          <label>NEW PASSWORD
+            <input id="newPassword" type="password" minlength="8" maxlength="72" autocomplete="new-password" placeholder="8+ CHARACTERS, LETTERS & NUMBERS">
           </label>
-          <label>새 비밀번호 확인
-            <input id="newPasswordConfirm" type="password" minlength="8" maxlength="72" autocomplete="new-password" placeholder="새 비밀번호 다시 입력">
+          <label>CONFIRM NEW PASSWORD
+            <input id="newPasswordConfirm" type="password" minlength="8" maxlength="72" autocomplete="new-password" placeholder="REPEAT NEW PASSWORD">
           </label>
-          <button id="changePassword" class="btn dark" type="button">비밀번호 변경</button>
-          <button id="logoutAccount" class="btn dark" type="button">로그아웃</button>
+          <button id="changePassword" class="btn dark" type="button">CHANGE PASSWORD</button>
+          <button id="logoutAccount" class="btn dark" type="button">LOG OUT</button>
           <div id="settingsMsg" class="notice"></div>
         </details>
       </div>
@@ -99,7 +100,7 @@
 <div id="footer"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
-<script src="app.js?v=20260922ug1"></script>
+<script src="app.js?v=20260922s1"></script>
 <script>
 shell('ACCOUNT');
 
@@ -133,13 +134,13 @@ async function loadMy(){
   el('editNickname').value=a.display_name||'';
 
   if(a.athlete_ready){
-    el('arcPlayerState').textContent='선수 정보 등록 완료';
-    el('arcPlayerCopy').textContent='참가신청과 입금 확인, 팀원 초대를 진행할 수 있습니다.';
-    el('arcProfileButton').textContent='선수 정보 수정';
+    el('arcPlayerState').textContent='PLAYER PROFILE READY';
+    el('arcPlayerCopy').textContent='Manage your entry, payment and team invitation.';
+    el('arcProfileButton').textContent='EDIT PLAYER PROFILE';
   }else{
-    el('arcPlayerState').textContent='선수 정보 입력 전';
-    el('arcPlayerCopy').textContent='참가신청 시 이름, 성별, 전화번호, 인스타, 소속짐을 한 번 입력합니다.';
-    el('arcProfileButton').textContent='선수 정보 작성 →';
+    el('arcPlayerState').textContent='PLAYER PROFILE NEEDED';
+    el('arcPlayerCopy').textContent='Add your name, gender and contact details before entering.';
+    el('arcProfileButton').textContent='COMPLETE PLAYER PROFILE →';
   }
 
   const ev=await db.from('tg_events').select('registration_open').eq('slug',C.eventSlug).maybeSingle();
@@ -148,23 +149,23 @@ async function loadMy(){
   if(!entry.error){
     const s=entry.data,t=s.entry;
     const paid=t?.status==='confirmed',reported=t?.payment_status==='payment_check';
-    const label=t?(paid?'참가 확정':reported?'입금 확인 대기':'입금 대기'):(s.invites?.length?'팀 초대 도착':'아직 신청한 팀이 없어요');
-    const next=t?(paid?(t.roster_complete?'팀 구성이 완료되었습니다. 경기 안내를 확인하고 준비하세요.':'입금이 확인되었습니다. ARC 계정이 있는 팀원을 초대하세요.'):reported?'운영자가 입금을 확인하고 있습니다.':'팀 참가비를 입금한 뒤 입금 완료를 알려 주세요.'):(s.invites?.length?'받은 초대를 확인하고 팀에 합류하세요.':'팀원이 없어도 대표부터 신청할 수 있습니다.');
-    el('myTeamCard').innerHTML='<p class="arc-kicker">MY TEAM · '+esc(label)+'</p><h2>'+esc(t?.team_name||'READY TO PLAY?')+'</h2><p>'+esc(next)+'</p>'+(t?'<p>'+esc(divisionLabel(t.division))+' · '+esc(({MM:'남남',WW:'여여',MIXED:'남녀'})[t.category]||t.category)+'</p>':'')+'<a class="arc-button primary" href="athlete.html">'+(t?(paid?'팀 관리하기':'입금·신청 상태 확인'):s.invites?.length?'초대 확인하기':'참가신청하기')+' →</a>';
+    const label=t?(paid?'ENTRY CONFIRMED':reported?'PAYMENT REVIEW':'AWAITING TRANSFER'):(s.invites?.length?'TEAM INVITATION':'NO TEAM ENTRY YET');
+    const next=t?(paid?(t.roster_complete?'Your team is complete. Get ready for race day.':'Payment confirmed. Invite a partner with an ARC account.'):reported?'Staff is verifying your transfer.':'Transfer the team fee and report your payment.'):(s.invites?.length?'Review your invitation to join the team.':'You can enter as captain before finding a partner.');
+    el('myTeamCard').innerHTML='<p class="arc-kicker">MY TEAM · '+esc(label)+'</p><h2>'+esc(t?.team_name||'READY TO PLAY?')+'</h2><p>'+esc(next)+'</p>'+(t?'<p>'+esc(divisionLabel(t.division))+' · '+esc(({MM:'MEN’S',WW:'WOMEN’S',MIXED:'MIXED'})[t.category]||t.category)+'</p>':'')+'<a class="arc-button primary" href="athlete.html">'+(t?(paid?'MANAGE TEAM':'VIEW ENTRY STATUS'):s.invites?.length?'VIEW INVITATION':'ENTER THE GAME')+' →</a>';
 
-    el('arcTeamNotice').textContent=s.entry?(s.entry.status==='confirmed'?'참가 확정 · ':'입금 확인 진행 중 · ')+s.entry.team_name:(s.invites?.length?'받은 팀 초대 '+s.invites.length+'건 · 참가신청 화면에서 확인하세요.':'대표부터 먼저 신청할 수 있습니다.');
-  }else{el('myTeamCard').innerHTML='<p>팀 정보를 불러오지 못했습니다.</p><a href="athlete.html">참가신청 화면에서 다시 확인 →</a>';}
+    el('arcTeamNotice').textContent=s.entry?(s.entry.status==='confirmed'?'ENTRY CONFIRMED · ':'PAYMENT REVIEW · ')+s.entry.team_name:(s.invites?.length?s.invites.length+' TEAM INVITATION(S) · VIEW YOUR ENTRY PAGE.':'You can enter as captain first.');
+  }else{el('myTeamCard').innerHTML='<p>Could not load your team.</p><a href="athlete.html">CHECK ENTRY PAGE →</a>';}
 }
 
 el('saveNickname').onclick=async()=>{
   const name=el('editNickname').value.trim();
-  if(!name){notice('settingsMsg','닉네임을 입력해 주세요.',true);return}
+  if(!name){notice('settingsMsg','Enter a nickname.',true);return}
 
   el('saveNickname').disabled=true;
   try{
     const q=await db.rpc('arc_update_profile',{p_display_name:name});
     if(q.error)throw q.error;
-    notice('settingsMsg','닉네임을 저장했습니다.');
+    notice('settingsMsg','Nickname saved.');
     await loadMy();
   }catch(e){
     notice('settingsMsg',e.message||String(e),true);
@@ -177,9 +178,9 @@ el('changePassword').onclick=async()=>{
   const password=el('newPassword').value;
   const confirmation=el('newPasswordConfirm').value;
   if(!/^(?=.*[A-Za-z])(?=.*\d).{8,72}$/.test(password)){
-    notice('settingsMsg','비밀번호는 영문과 숫자를 포함해 8자 이상 입력해 주세요.',true);return
+    notice('settingsMsg','Use 8+ characters with a letter and a number.',true);return
   }
-  if(password!==confirmation){notice('settingsMsg','두 비밀번호가 일치하지 않습니다.',true);return}
+  if(password!==confirmation){notice('settingsMsg','Passwords do not match.',true);return}
 
   el('changePassword').disabled=true;
   el('changePassword').textContent='SAVING…';
@@ -188,13 +189,13 @@ el('changePassword').onclick=async()=>{
     if(error)throw error;
     el('newPassword').value='';
     el('newPasswordConfirm').value='';
-    notice('settingsMsg','비밀번호가 변경되었습니다. 다음 로그인부터 새 비밀번호를 사용해 주세요.');
+    notice('settingsMsg','Password changed. Use it next time you log in.');
   }catch(e){
     const message=String(e?.message||e);
-    notice('settingsMsg',/reauth|nonce/i.test(message)?'보안을 위해 다시 로그인한 뒤 비밀번호를 변경해 주세요.':message,true);
+    notice('settingsMsg',/reauth|nonce/i.test(message)?'Log in again before changing your password.':message,true);
   }finally{
     el('changePassword').disabled=false;
-    el('changePassword').textContent='비밀번호 변경';
+    el('changePassword').textContent='CHANGE PASSWORD';
   }
 };
 
@@ -205,7 +206,7 @@ el('logoutAccount').onclick=async()=>{
 
 loadMy().catch(e=>{
   const box=el('myPageError');
-  box.textContent='MY PAGE를 불러오지 못했습니다. 새로고침 후에도 계속되면 다시 로그인해 주세요. ('+(e.message||e)+')';
+  box.textContent='Could not load your account. Refresh or log in again. ('+(e.message||e)+')';
   box.style.display='block';
   el('arcDisplayName').textContent='ARC ACCOUNT';
   el('arcEmail').textContent='LOAD ERROR';

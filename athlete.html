@@ -1,47 +1,48 @@
 <!doctype html>
-<html lang="ko"><head>
+<html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>참가신청 · ARC GAMES</title><meta name="description" content="ARC GAMES #01 참가신청. 10월 31일 오전 10시, 놀토짐. 10월 10일까지 얼리버드 1인 20,000원.">
-<meta name="theme-color" content="#121212">
+<title>ENTER THE GAME · ARC STATION</title><meta name="description" content="ARC STATION #1 NOLTO entry. October 31 at NOLTO GYM. Early bird ₩20,000 per athlete through October 10.">
+<meta name="theme-color" content="#111111">
 <link rel="stylesheet" href="styles.css?v=20260919-account1"><link rel="stylesheet" href="arcade-pages.css?v=20260919-account1"><link rel="stylesheet" href="entry.css?v=20260921b">
 <link rel="stylesheet" href="arc-refresh.css?v=20260921c">
 <link rel="stylesheet" href="underground.css?v=20260922ug2">
-</head><body class="tg-arcade-page arc-entry ug-site"><div id="nav"></div>
+<link rel="stylesheet" href="station.css?v=20260922s1">
+</head><body class="tg-arcade-page arc-entry ug-site station-site"><div id="nav"></div>
 <main class="container entry-main">
-<header class="entry-head"><p class="entry-eyebrow">ARC GAMES #01 · 2026.10.31 · 10:00 · NOLTO GYM</p><h1>둘이서 들어와.<br>함께 끝내.</h1>
-<p>팀원이 아직 없어도 대표부터 신청하세요.<br>팀 참가비 입금 확인 후, ARC 계정이 있는 팀원을 초대할 수 있습니다.</p>
-<a href="event.html">Workout · 디비전 기준 확인 →</a></header>
-<div class="arc-price-strip"><b>얼리버드 1인 20,000원</b><span>10월 10일까지 · 이후 25,000원</span><p>대표가 2인 팀 참가비를 함께 입금합니다. 할인 코드는 참가비 확인 단계에서 입력하세요.</p></div>
-<ol class="arc-steps" aria-label="참가신청 단계"><li data-step="1" aria-current="step"><b>01</b> 선수·팀 정보</li><li data-step="2"><b>02</b> 참가비 확인</li><li data-step="3"><b>03</b> 입금·팀 완성</li></ol>
+<header class="entry-head"><p class="entry-eyebrow">ARC STATION / #1 NOLTO · 2026.10.31 · 10:00 · NOLTO GYM</p><h1>ENTER<br>TOGETHER.</h1>
+<p>Start your team entry now. Invite your partner after your bank transfer is confirmed.</p>
+<a href="event.html">VIEW THE WORKOUT & DIVISIONS →</a></header>
+<div class="arc-price-strip"><b>EARLY BIRD · ₩20,000 PER ATHLETE</b><span>THROUGH OCT 10 · THEN ₩25,000 PER ATHLETE</span><p>One team payment covers both athletes. Add a code at checkout if you have one.</p></div>
+<ol class="arc-steps" aria-label="Entry steps"><li data-step="1" aria-current="step"><b>01</b> PLAYER & TEAM</li><li data-step="2"><b>02</b> REVIEW</li><li data-step="3"><b>03</b> TRANSFER & ROSTER</li></ol>
 <div id="entryMessage" class="notice" role="status" aria-live="polite"></div>
-<section id="entryLoading" class="entry-panel">신청 상태를 확인하고 있습니다…</section>
-<section id="entryLogin" class="entry-panel" hidden><h2>ARC 계정으로 시작하세요.</h2><p>대표와 초대받을 팀원 모두 ARC 계정이 필요합니다.</p><a class="btn arcade-primary" href="account.html?next=athlete.html">로그인 / 회원가입</a></section>
-<section id="entryClosed" class="entry-panel" hidden><h2>현재 신규 신청을 받지 않습니다.</h2><p>기존 신청의 입금·팀 초대 상태는 아래에서 확인할 수 있습니다.</p></section>
+<section id="entryLoading" class="entry-panel">CHECKING YOUR ENTRY…</section>
+<section id="entryLogin" class="entry-panel" hidden><h2>START WITH AN ARC ACCOUNT.</h2><p>Both athletes need an ARC account.</p><a class="btn arcade-primary" href="account.html?next=athlete.html">LOG IN / SIGN UP</a></section>
+<section id="entryClosed" class="entry-panel" hidden><h2>ENTRIES ARE CLOSED.</h2><p>You can still check your payment and team invitation below.</p></section>
 
-<section id="invitePanel" hidden><h2>받은 팀 초대</h2><div id="inviteCards"></div></section>
+<section id="invitePanel" hidden><h2>TEAM INVITATIONS</h2><div id="inviteCards"></div></section>
 <section id="entryStatus" class="entry-panel" hidden></section>
 <section id="entryApplication" class="entry-panel" hidden>
 <form id="entryForm" novalidate><div id="entryStep1">
-<p class="entry-eyebrow">PLAYER PROFILE</p><h2>대표 선수 정보</h2>
-<div class="entry-fields"><label>이름 *<input id="entryName" required minlength="2" maxlength="50" autocomplete="name"></label>
-<label>성별 *<select id="entryGender" required><option value="">선택</option><option value="male">남성</option><option value="female">여성</option></select></label>
-<label>휴대전화 *<input id="entryPhone" type="tel" required maxlength="15" autocomplete="tel" placeholder="010-0000-0000"></label>
-<label>소속짐 (선택)<input id="entryGym" maxlength="80"></label><label>인스타그램 (선택)<input id="entryInstagram" maxlength="80" placeholder="@account"></label></div>
-<p class="entry-eyebrow">TEAM ENTRY</p><h2>팀 구성</h2>
-<div class="entry-fields"><label>팀 이름 *<input id="entryTeam" required maxlength="60" placeholder="팀원은 입금 확정 후 초대"></label>
-<label>디비전 *<select id="entryDivision" required><option value="">선택</option><option value="OPEN">BEGINNER · 남 12.5kg / 여 8kg</option><option value="PRO">ATHLETE · 남 17.5kg / 여 12.5kg</option></select></label>
-<label>카테고리 *<select id="entryCategory" required><option value="">선택</option><option value="MM">MEN’S · MM · 남남</option><option value="WW">WOMEN’S · FF · 여여</option><option value="MIXED">MIXED · MF · 남녀</option></select></label></div>
-<p class="entry-note">디비전·카테고리별 정원 4팀, 총 24팀. 팀원은 선택한 카테고리에 맞는 선수로 초대해 주세요.</p>
-<button id="entryNext" class="btn arcade-primary" type="button">참가비 확인으로 →</button></div><div id="entryStep2" hidden><p class="entry-eyebrow">PAYMENT REVIEW</p><p id="entryReview" class="arc-review"></p><h2>참가비 확인</h2>
-<div class="entry-fields"><label>할인 코드 (선택)<input id="discountCode" maxlength="40" autocomplete="off" spellcheck="false" placeholder="발급받은 코드 입력"></label></div>
-<p class="entry-note">코드가 있다면 입력해 주세요. 적용된 금액을 확인한 뒤 신청을 완료하세요.</p>
-<button id="quoteButton" type="button" class="btn dark">코드 적용</button>
-<div id="priceQuote" class="entry-total" aria-live="polite">참가비를 확인하고 있습니다…</div>
-<label class="entry-consent"><input type="checkbox" id="entryConsent" required><span>[필수] 참가 운영을 위한 이름·성별·연락처 및 신청·입금 확인 정보 수집·이용에 동의하며, <a href="privacy.html" target="_blank" rel="noopener">개인정보처리방침</a>, <a href="terms.html" target="_blank" rel="noopener">이용약관</a>, <a href="refund.html" target="_blank" rel="noopener">환불·취소정책</a>을 확인했습니다. 보유기간은 처리목적 달성 또는 회원 탈퇴 시까지이며 법정 보관 대상은 해당 기간을 따릅니다. 동의하지 않으면 참가신청이 제한됩니다.</span></label>
-<p class="entry-note">신청 후 24시간 내 입금하고 ‘입금 완료 알리기’를 눌러 주세요. 운영자의 실제 입금 확인 후 참가가 확정됩니다. 기한 내 입금 신고가 없는 신청은 만료되며 재신청 시점의 요금이 적용됩니다.</p>
-<button id="submitEntry" class="btn arcade-primary" type="submit" disabled>참가신청 · 입금 안내 받기</button>
-<button id="entryBack" class="btn dark" type="button">← 정보 수정</button></div></form></section>
-<p class="entry-note arc-help">신청 후 안내되는 계좌로 입금해 주세요. 입금 확인 후 팀원을 초대할 수 있습니다.<br>도움이 필요하면 <a href="mailto:lovesol716@gmail.com">운영자에게 문의</a>해 주세요.</p>
+<p class="entry-eyebrow">PLAYER PROFILE</p><h2>CAPTAIN DETAILS</h2>
+<div class="entry-fields"><label>FULL NAME *<input id="entryName" required minlength="2" maxlength="50" autocomplete="name"></label>
+<label>GENDER *<select id="entryGender" required><option value="">SELECT</option><option value="male">MALE</option><option value="female">FEMALE</option></select></label>
+<label>MOBILE *<input id="entryPhone" type="tel" required maxlength="15" autocomplete="tel" placeholder="010-0000-0000"></label>
+<label>GYM (OPTIONAL)<input id="entryGym" maxlength="80"></label><label>INSTAGRAM (OPTIONAL)<input id="entryInstagram" maxlength="80" placeholder="@account"></label></div>
+<p class="entry-eyebrow">TEAM ENTRY</p><h2>TEAM DETAILS</h2>
+<div class="entry-fields"><label>TEAM NAME *<input id="entryTeam" required maxlength="60" placeholder="INVITE YOUR PARTNER AFTER PAYMENT"></label>
+<label>DIVISION *<select id="entryDivision" required><option value="">SELECT</option><option value="OPEN">BEGINNER · MEN 12.5 KG / WOMEN 8 KG</option><option value="PRO">ATHLETE · MEN 17.5 KG / WOMEN 12.5 KG</option></select></label>
+<label>CATEGORY *<select id="entryCategory" required><option value="">SELECT</option><option value="MM">MEN’S · MM</option><option value="WW">WOMEN’S · FF</option><option value="MIXED">MIXED · MF</option></select></label></div>
+<p class="entry-note">4 teams per division and category; 24 teams in total. Invite a partner who fits your category.</p>
+<button id="entryNext" class="btn arcade-primary" type="button">REVIEW FEE →</button></div><div id="entryStep2" hidden><p class="entry-eyebrow">PAYMENT REVIEW</p><p id="entryReview" class="arc-review"></p><h2>REVIEW</h2>
+<div class="entry-fields"><label>DISCOUNT CODE (OPTIONAL)<input id="discountCode" maxlength="40" autocomplete="off" spellcheck="false" placeholder="ENTER YOUR CODE"></label></div>
+<p class="entry-note">Enter your code, then check the final team total.</p>
+<button id="quoteButton" type="button" class="btn dark">APPLY CODE</button>
+<div id="priceQuote" class="entry-total" aria-live="polite">CALCULATING TEAM FEE…</div>
+<label class="entry-consent"><input type="checkbox" id="entryConsent" required><span>[REQUIRED] I consent to the collection and use of my name, gender, contact details, entry and payment information for event operations, and acknowledge the <a href="privacy.html" target="_blank" rel="noopener">PRIVACY POLICY</a>, <a href="terms.html" target="_blank" rel="noopener">TERMS OF USE</a>, <a href="refund.html" target="_blank" rel="noopener">REFUND & CANCELLATION POLICY</a>. Data is retained until the purpose is fulfilled or the account is closed, except where retention is required by law. Consent is required to enter.</span></label>
+<p class="entry-note">Transfer the team total and report payment within 24 hours. Your entry is confirmed only after staff verifies the transfer. Unreported entries expire; the current price applies if you register again.</p>
+<button id="submitEntry" class="btn arcade-primary" type="submit" disabled>SUBMIT ENTRY & VIEW BANK DETAILS</button>
+<button id="entryBack" class="btn dark" type="button">← EDIT DETAILS</button></div></form></section>
+<p class="entry-note arc-help">Transfer the team total to the bank account shown after entry. Invite your partner once payment is confirmed.<br>NEED HELP? <a href="mailto:lovesol716@gmail.com">CONTACT US</a>.</p>
 </main><div id="footer"></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script src="app.js?v=20260922ug1"></script><script src="entry.js?v=20260922-phone1"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script src="app.js?v=20260922s1"></script><script src="entry.js?v=20260922-phone1"></script>
 </body></html>

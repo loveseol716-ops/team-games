@@ -1,23 +1,24 @@
 <!doctype html>
-<html lang="ko">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="ARC GAMES PLAYER PROFILE — Complete your athlete information before entering a game.">
-  <meta property="og:site_name" content="ARC GAMES">
-  <meta property="og:title" content="ARC GAMES — PLAYER PROFILE">
-  <meta property="og:description" content="Complete your PLAYER PROFILE before entering ARC GAMES.">
+  <meta name="description" content="ARC STATION PLAYER PROFILE — Complete your athlete information before entering a game.">
+  <meta property="og:site_name" content="ARC STATION">
+  <meta property="og:title" content="ARC STATION — PLAYER PROFILE">
+  <meta property="og:description" content="Complete your PLAYER PROFILE before entering ARC STATION.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://arcgames.kr/player-profile.html">
-  <meta property="og:image" content="https://arcgames.kr/favicon.png">
+  <meta property="og:image" content="https://arcgames.kr/station-social.png">
   <meta name="twitter:card" content="summary">
-  <meta name="theme-color" content="#121212">
-  <title>PLAYER PROFILE · ARC GAMES</title>
+  <meta name="theme-color" content="#111111">
+  <title>PLAYER PROFILE · ARC STATION</title>
   <link rel="stylesheet" href="styles.css?v=20260919-account1">
   <link rel="stylesheet" href="arcade-pages.css?v=20260919-account1">
 <link rel="stylesheet" href="underground.css?v=20260922ug2">
+<link rel="stylesheet" href="station.css?v=20260922s1">
 </head>
-<body class="tg-arcade-page arc-player-profile-page ug-site">
+<body class="tg-arcade-page arc-player-profile-page ug-site station-site">
 <div id="nav"></div>
 
 <main>
@@ -26,7 +27,7 @@
       <div>
         <div class="arcade-eyebrow">GAME ENTRY // STEP 01</div>
         <h1>PLAYER<br>PROFILE.</h1>
-        <p class="lead">ARC ACCOUNT는 그대로 두고, 실제 대회 참가에 필요한 정보만 한 번 추가합니다.</p>
+        <p class="lead">Add your athlete details once before entering a game.</p>
         <div class="arcade-page-chips">
           <span>NAME</span><span>GENDER</span><span>PHONE</span><span>INSTAGRAM</span><span>GYM</span>
         </div>
@@ -37,7 +38,7 @@
         <form id="playerProfileForm" class="arc-player-form">
           <label>
             NAME <em>REQUIRED</em>
-            <input id="fullName" maxlength="50" autocomplete="name" placeholder="홍길동" required>
+            <input id="fullName" maxlength="50" autocomplete="name" placeholder="YOUR FULL NAME" required>
           </label>
 
           <label>
@@ -66,7 +67,7 @@
 
           <label class="arc-consent">
             <input id="privacyConsent" type="checkbox" required>
-            <span>대회 참가 운영을 위한 개인정보 수집 및 이용에 동의합니다.</span>
+            <span>I consent to the collection and use of my personal data for event operations.</span>
           </label>
 
           <button id="savePlayerProfile" class="btn arcade-primary" type="submit">SAVE PLAYER PROFILE →</button>
@@ -75,7 +76,7 @@
         </form>
 
         <div class="arc-profile-note">
-          전화번호는 공개 프로필에 노출되지 않으며, 대회 운영 및 참가자 연락 목적으로만 저장됩니다.
+          Your phone number is private and used only for event operations and participant contact.
         </div>
       </div>
     </div>
@@ -85,7 +86,7 @@
 <div id="footer"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
-<script src="app.js?v=20260922ug1"></script>
+<script src="app.js?v=20260922s1"></script>
 <script>
 shell('PLAYER');
 
@@ -94,12 +95,12 @@ const next=safeNextUrl(params.get('next'),'athlete.html');
 
 function profileError(e){
   const m=String(e?.message||e||'');
-  if(m.includes('NAME_REQUIRED'))return '이름을 입력해 주세요.';
-  if(m.includes('GENDER_REQUIRED'))return '성별을 선택해 주세요.';
-  if(m.includes('INVALID_PHONE'))return '휴대폰 번호를 확인해 주세요.';
-  if(m.includes('PRIVACY_CONSENT_REQUIRED'))return '개인정보 수집 및 이용 동의가 필요합니다.';
-  if(m.includes('AUTH_REQUIRED'))return '로그인이 필요합니다.';
-  return m||'PLAYER PROFILE 저장 중 오류가 발생했습니다.';
+  if(m.includes('NAME_REQUIRED'))return 'Enter your name.';
+  if(m.includes('GENDER_REQUIRED'))return 'Select your gender.';
+  if(m.includes('INVALID_PHONE'))return 'Check your mobile number.';
+  if(m.includes('PRIVACY_CONSENT_REQUIRED'))return 'Privacy consent is required.';
+  if(m.includes('AUTH_REQUIRED'))return 'Please log in.';
+  return m||'Could not save your profile.';
 }
 
 function digits(v){return String(v||'').replace(/[^0-9]/g,'')}
@@ -126,7 +127,7 @@ async function loadProfile(){
   privacyConsent.checked=!!p.privacy_consent_at;
 
   if(p.profile_complete){
-    notice('profileMsg','PLAYER PROFILE READY. 필요한 경우 수정 후 저장할 수 있습니다.');
+    notice('profileMsg','PLAYER PROFILE READY. You can edit it anytime.');
   }
 }
 

@@ -1,32 +1,33 @@
 <!doctype html>
-<html lang="ko">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="ARC GAMES #01 확정 참가팀. 팀을 확인하고 응원할 팀을 만나보세요.">
-  <meta property="og:site_name" content="ARC GAMES">
-  <meta property="og:title" content="ARC GAMES — 참가팀">
+  <meta name="description" content="Confirmed teams at ARC STATION #1 NOLTO.">
+  <meta property="og:site_name" content="ARC STATION">
+  <meta property="og:title" content="ARC STATION — TEAMS">
   <meta property="og:description" content="TEAM OF 2 · 24 TEAMS · BEGINNER / ATHLETE · MM / FF / MF">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://arcgames.kr/">
-  <meta property="og:image" content="https://arcgames.kr/favicon.png">
+  <meta property="og:image" content="https://arcgames.kr/station-social.png">
   <meta name="twitter:card" content="summary">
-  <meta name="theme-color" content="#121212">
-  <title>TEAMS · ARC GAMES</title>
+  <meta name="theme-color" content="#111111">
+  <title>TEAMS · ARC STATION</title>
   <link rel="stylesheet" href="styles.css?v=20260919-account1">
   <link rel="stylesheet" href="arcade-pages.css?v=20260919-account1">
   
 <link rel="stylesheet" href="underground.css?v=20260922ug2">
+<link rel="stylesheet" href="station.css?v=20260922s1">
 </head>
-<body class="tg-arcade-page teams-arcade coming-soon-page ug-site">
+<body class="tg-arcade-page teams-arcade coming-soon-page ug-site station-site">
 <div id="nav"></div>
-<main class="container ug-roster"><header><p class="ug-label">THE LINE-UP / GAME 01</p><h1>THE<br>TEAMS.</h1><p>출전을 확정한 팀부터 이곳에 공개됩니다.<br>누구를 응원할지 미리 둘러보세요.</p></header><div id="teamList" class="ug-team-list" aria-live="polite">참가팀을 확인하고 있습니다…</div><div class="ug-roster-actions"><a href="athlete.html" class="ug-button ug-primary">우리 팀 참가신청 ↗</a><a href="fanpick.html" class="ug-button">FAN PICK ↗</a></div></main>
+<main class="container ug-roster"><header><p class="ug-label">THE LINE-UP / PROJECT #1 NOLTO</p><h1>THE<br>TEAMS.</h1><p>Confirmed teams appear here. Find your side.</p></header><div id="teamList" class="ug-team-list" aria-live="polite">LOADING TEAMS…</div><div class="ug-roster-actions"><a href="athlete.html" class="ug-button ug-primary">ENTER THE GAME ↗</a><a href="fanpick.html" class="ug-button">FAN PICK ↗</a></div></main>
 <div id="footer"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
-<script src="app.js?v=20260922ug1"></script>
+<script src="app.js?v=20260922s1"></script>
 <script>
 shell('TEAMS');
-(async()=>{const box=document.getElementById('teamList');try{const list=await teams();box.innerHTML=list.length?list.map((t,i)=>'<article class="ug-team-row"><span>'+String(i+1).padStart(2,'0')+'</span><div><h2>'+esc(t.team_name)+'</h2><p>'+esc(divisionLabel(t.division))+' / '+esc(({MM:'남남',WW:'여여',MIXED:'남녀'})[t.category]||t.category||'카테고리 확인 중')+'</p></div><b>CONFIRMED</b></article>').join(''):'<div class="ug-empty"><h2>첫 번째 팀을 기다리고 있습니다.</h2><p>참가가 확정되면 여기서 소개됩니다.</p></div>';}catch(_){box.textContent='참가팀 정보를 불러오지 못했습니다. 새로고침 후 다시 확인해 주세요.';}})();
+(async()=>{const box=document.getElementById('teamList');try{const list=await teams();box.innerHTML=list.length?list.map((t,i)=>'<article class="ug-team-row"><span>'+String(i+1).padStart(2,'0')+'</span><div><h2>'+esc(t.team_name)+'</h2><p>'+esc(divisionLabel(t.division))+' / '+esc(({MM:'MEN’S',WW:'WOMEN’S',MIXED:'MIXED'})[t.category]||t.category||'CATEGORY PENDING')+'</p></div><b>CONFIRMED</b></article>').join(''):'<div class="ug-empty"><h2>WAITING FOR THE FIRST TEAM.</h2><p>Confirmed teams will appear here.</p></div>';}catch(_){box.textContent='Could not load teams. Refresh and try again.';}})();
 </script>
 </body></html>

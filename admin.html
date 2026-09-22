@@ -1,13 +1,14 @@
 <!doctype html>
-<html lang="ko">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>GAME MASTER · ARC GAMES</title>
+  <title>GAME MASTER · ARC STATION</title>
   <link rel="stylesheet" href="styles.css?v=20260919-account1">
   <link rel="stylesheet" href="admin-extra.css?v=20260919-account1">
+<link rel="stylesheet" href="station.css?v=20260922s1">
 </head>
-<body>
+<body class="ug-site station-site">
 <div id="nav"></div>
 <main>
   <section class="section admin-section">
@@ -27,7 +28,7 @@
         <div class="admin-login-copy">
           <div class="kicker">INSERT COIN</div>
           <div class="big">GAME MASTER LOGIN</div>
-          <p class="muted">운영자만 입장 가능.</p>
+          <p class="muted">Authorized staff only.</p>
         </div>
         <div class="formgrid">
           <div class="full"><label>Email</label><input id="email" type="email" autocomplete="email" placeholder="loveseol716@gmail.com"></div>
@@ -46,7 +47,7 @@
         <div class="admin-login-copy">
           <div class="kicker">NEW PASSWORD</div>
           <div class="big">RESET GAME MASTER KEY</div>
-          <p class="muted">새 비밀번호를 8자 이상 입력하세요.</p>
+          <p class="muted">Use a new password of at least 8 characters.</p>
         </div>
         <div class="formgrid">
           <div class="full"><label>New Password</label><input id="newPass" type="password" minlength="8" maxlength="72" autocomplete="new-password"></div>
@@ -57,7 +58,7 @@
 
       <div id="control" style="display:none">
         <div id="summary" class="admin-summary"></div>
-<section class="admin-block"><div class="card"><h3>할인 코드</h3><p>공통 코드 <strong>NOLTO01</strong> · 팀 참가비 50% 할인 · 별도 개인 코드 발급 없이 사용합니다.</p></div></section>
+<section class="admin-block"><div class="card"><h3>DISCOUNT CODE</h3><p>Shared code <strong>NOLTO01</strong> · 50% off the full team fee.</p></div></section>
 
         <section class="admin-block fan-wallet-admin-block">
           <div class="admin-block-head">
@@ -65,13 +66,13 @@
               <div class="kicker">PLAY POINT // WALLET</div>
               <h3>FAN WALLET CONTROL</h3>
             </div>
-            <p class="muted">회원별 잔액·누적 BET·적중률 확인 및 수동 포인트 조정.</p>
+            <p class="muted">Review balances, stakes and hit rates; adjust points manually.</p>
           </div>
 
           <div id="fanWalletSummary" class="fan-wallet-summary"></div>
 
           <div class="fan-wallet-toolbar">
-            <input id="fanWalletSearch" type="search" placeholder="닉네임 / 이메일 검색">
+            <input id="fanWalletSearch" type="search" placeholder="SEARCH NICKNAME / EMAIL">
             <select id="fanWalletSort">
               <option value="activity">RECENT ACTIVITY</option>
               <option value="balance">HIGHEST BALANCE</option>
@@ -102,10 +103,10 @@
             </div>
             <div class="fan-wallet-editor-grid">
               <div><label>Point Adjustment</label><input id="fanAdjustAmount" type="number" step="100" placeholder="+1000 / -500"></div>
-              <div class="wide"><label>Reason / Note</label><input id="fanAdjustNote" maxlength="200" placeholder="예: 현장 운영 보정, CS 보상"></div>
+              <div class="wide"><label>Reason / Note</label><input id="fanAdjustNote" maxlength="200" placeholder="E.G. ON-SITE CORRECTION"></div>
               <div class="action"><button id="submitFanAdjustment" class="btn arcade-primary" type="button">APPLY ADJUSTMENT</button></div>
             </div>
-            <div class="fan-wallet-editor-note">조정 내역은 삭제하지 않고 감사 로그로 영구 기록됩니다. 잔액은 0P 아래로 내려갈 수 없습니다.</div>
+            <div class="fan-wallet-editor-note">Adjustments remain in the audit log and cannot bring a balance below 0 P.</div>
           </div>
 
           <div class="fan-adjustment-history-head">
@@ -119,7 +120,7 @@
           <div class="card admin-add-card">
             <div class="admin-add-head">
               <div><div class="kicker">MANUAL ENTRY</div><h3>ADD TEAM</h3></div>
-              <p class="muted">등록된 PLAYER 2명을 선택해 GAME #01에 직접 추가.</p>
+              <p class="muted">Select two registered players to add to #1 NOLTO.</p>
             </div>
             <div class="admin-add-grid">
               <div class="field wide"><label>Team Name</label><input id="newTeamName" maxlength="60" placeholder="TEAM NAME"></div>
@@ -127,7 +128,7 @@
               <div class="field"><label>Partner</label><select id="newPartner"></select></div>
               <div class="add-button"><button id="addTeamBtn" class="btn arcade-primary" type="button">+ ADD TEAM</button></div>
             </div>
-            <div class="admin-add-note">PLAYER 계정이 먼저 있어야 합니다. 이미 이번 GAME에 LOCKED IN 된 선수는 선택할 수 없습니다.</div>
+            <div class="admin-add-note">Both players need accounts. Athletes already on a confirmed team cannot be selected.</div>
             <div id="addTeamMsg" class="notice"></div>
           </div>
         </section>
@@ -139,7 +140,7 @@
               <h3>TEAM CONTROL</h3>
             </div>
             <div class="admin-filters">
-              <input id="teamSearch" type="search" placeholder="팀명 / 선수 / 연락처 검색">
+              <input id="teamSearch" type="search" placeholder="SEARCH TEAM / PLAYER / CONTACT">
               <select id="statusFilter">
                 <option value="all">ALL TEAMS</option>
                 <option value="payment_check">PAYMENT CHECK</option>
@@ -159,7 +160,7 @@
               <div class="kicker">PLAY POINT</div>
               <h3>PREDICTION CONTROL</h3>
             </div>
-            <p class="muted">6개 마켓 우승팀 확정 → FAN WALLET 자동 정산.</p>
+            <p class="muted">Settle the winning team in each of the 6 markets to update fan wallets.</p>
           </div>
           <div id="predictionAdminMsg" class="notice"></div>
           <div id="predictionAdminGrid" class="prediction-admin-grid"></div>
@@ -171,7 +172,7 @@
               <div class="kicker">SCOREBOARD</div>
               <h3>SCORE INPUT</h3>
             </div>
-            <p class="muted">LOCKED IN 팀만 표시.</p>
+            <p class="muted">Confirmed teams only.</p>
           </div>
           <div class="card admin-results-wrap">
             <div class="table-scroll">
@@ -189,7 +190,7 @@
 <div id="footer"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
-<script src="app.js?v=20260919-account1"></script>
+<script src="app.js?v=20260922s1"></script>
 <script>
 shell('ADMIN');
 
@@ -205,43 +206,43 @@ let selectedFanUserId=null;
 let historyFanUserId=null;
 
 const fmtPhone=v=>String(v||'').replace(/\s+/g,' ').trim();
-const formatWon=v=>`${Number(v||0).toLocaleString('ko-KR')}원`;
-const formatDate=v=>v?new Date(v).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'—';
+const formatWon=v=>`${Number(v||0).toLocaleString('en-US')} KRW`;
+const formatDate=v=>v?new Date(v).toLocaleString('en-US',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'—';
 const categoryLabel=v=>v==='MM'?'MM':v==='WW'?'FF':v==='MIXED'?'MF':'—';
 const statusLabel=t=>t.status==='confirmed'?'LOCKED IN':t.status==='pending_payment'?(t.payment_status==='payment_check'?'PAYMENT CHECK':'WAITING PAYMENT'):'OUT';
 const statusClass=t=>t.status==='confirmed'?'approved':t.status==='pending_payment'?'pending':'cancelled';
 const formatPoint=v=>`${Number(v||0).toLocaleString('en-US')} P`;
 const formatSignedPoint=v=>`${Number(v||0)>0?'+':''}${Number(v||0).toLocaleString('en-US')} P`;
-const formatAdminDate=v=>v?new Date(v).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}):'—';
+const formatAdminDate=v=>v?new Date(v).toLocaleString('en-US',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}):'—';
 
 function adminError(x){
   const m=String(x?.message||x||'');
-  if(m.includes('ADMIN_ONLY')) return 'GAME MASTER 권한이 없는 계정입니다.';
-  if(m.includes('Invalid login credentials')) return '이메일 또는 비밀번호가 맞지 않습니다.';
-  if(m.includes('Email rate limit exceeded')) return '재설정 메일 요청이 너무 많습니다. 잠시 뒤 다시 시도해 주세요.';
-  if(m.includes('DUPLICATE_PHONE')) return '다른 활성 팀에서 이미 사용 중인 연락처입니다.';
-  if(m.includes('SLOT_TAKEN')||m.includes('tg_teams_confirmed_slot_unique')) return '해당 Heat / Station은 이미 사용 중입니다.';
-  if(m.includes('INVALID_HEAT')) return 'Heat는 1~6 사이로 설정해 주세요.';
-  if(m.includes('INVALID_STATION')) return 'Station은 1 또는 2만 가능합니다.';
-  if(m.includes('INVALID_PLAYERS')) return '서로 다른 선수 2명을 선택해 주세요.';
-  if(m.includes('ATHLETE_ALREADY_LOCKED_IN')) return '선택한 선수 중 이미 이번 GAME에 참가 확정된 선수가 있습니다.';
-  if(m.includes('CAPTAIN_PHONE_REQUIRED')) return 'Captain PLAYER 프로필에 연락처가 필요합니다.';
-  if(m.includes('ATHLETE_PHOTO_REQUIRED')||m.includes('TEAM_PHOTO_REQUIRED')) return '선수 프로필 사진이 필요합니다.';
-  if(m.includes('REGISTRATION_FULL')) return '전체 참가 정원이 모두 찼습니다.';
-  if(m.includes('CATEGORY_FULL')) return '해당 BEGINNER/ATHLETE · 팀 구성 정원이 모두 찼습니다.';
-  if(m.includes('PAYMENT_NOT_PENDING')) return '현재 입금 확인 대기 상태가 아닙니다.';
-  if(m.includes('MARKET_STILL_OPEN')) return 'GAME 시작 전에는 예측 마켓을 정산할 수 없습니다.';
-  if(m.includes('MARKET_ALREADY_SETTLED')) return '이미 정산이 완료된 마켓입니다.';
-  if(m.includes('MARKET_NOT_FOUND')) return '예측 마켓을 찾을 수 없습니다.';
-  if(m.includes('TEAM_NOT_IN_MARKET')) return '해당 마켓에 속한 팀이 아닙니다.';
-  if(m.includes('ADJUSTMENT_ZERO')) return '조정할 포인트를 입력해 주세요.';
-  if(m.includes('ADJUSTMENT_TOO_LARGE')) return '한 번에 조정할 수 있는 범위를 초과했습니다.';
-  if(m.includes('ADJUSTMENT_NOTE_REQUIRED')) return '수동 조정 사유를 입력해 주세요.';
-  if(m.includes('BALANCE_CANNOT_BE_NEGATIVE')) return '조정 후 잔액은 0P 아래로 내려갈 수 없습니다.';
-  if(m.includes('FAN_WALLET_NOT_FOUND')) return '해당 FAN WALLET을 찾을 수 없습니다.';
-  if(m.includes('TEAM_NAME_REQUIRED')) return '팀 이름을 입력해 주세요.';
-  if(m.includes('TEAM_NOT_FOUND')) return '팀을 찾을 수 없습니다. 새로고침 후 다시 시도해 주세요.';
-  return m || '처리 중 오류가 발생했습니다.';
+  if(m.includes('ADMIN_ONLY')) return 'This account does not have Game Master access.';
+  if(m.includes('Invalid login credentials')) return 'Email or password is incorrect.';
+  if(m.includes('Email rate limit exceeded')) return 'Too many reset requests. Try again later.';
+  if(m.includes('DUPLICATE_PHONE')) return 'This phone number belongs to another active team.';
+  if(m.includes('SLOT_TAKEN')||m.includes('tg_teams_confirmed_slot_unique')) return 'This heat / station is already in use.';
+  if(m.includes('INVALID_HEAT')) return 'Set heat between 1 and 6.';
+  if(m.includes('INVALID_STATION')) return 'Station must be 1 or 2.';
+  if(m.includes('INVALID_PLAYERS')) return 'Select two different players.';
+  if(m.includes('ATHLETE_ALREADY_LOCKED_IN')) return 'One of these players is already on a confirmed team.';
+  if(m.includes('CAPTAIN_PHONE_REQUIRED')) return 'The captain needs a phone number in their profile.';
+  if(m.includes('ATHLETE_PHOTO_REQUIRED')||m.includes('TEAM_PHOTO_REQUIRED')) return 'A player profile photo is required.';
+  if(m.includes('REGISTRATION_FULL')) return 'The event is full.';
+  if(m.includes('CATEGORY_FULL')) return 'This division / category is full.';
+  if(m.includes('PAYMENT_NOT_PENDING')) return 'This transfer is not awaiting confirmation.';
+  if(m.includes('MARKET_STILL_OPEN')) return 'Markets cannot be settled before the game starts.';
+  if(m.includes('MARKET_ALREADY_SETTLED')) return 'This market is already settled.';
+  if(m.includes('MARKET_NOT_FOUND')) return 'Market not found.';
+  if(m.includes('TEAM_NOT_IN_MARKET')) return 'Team does not belong to this market.';
+  if(m.includes('ADJUSTMENT_ZERO')) return 'Enter a point adjustment.';
+  if(m.includes('ADJUSTMENT_TOO_LARGE')) return 'Adjustment exceeds the allowed range.';
+  if(m.includes('ADJUSTMENT_NOTE_REQUIRED')) return 'Enter a reason for the adjustment.';
+  if(m.includes('BALANCE_CANNOT_BE_NEGATIVE')) return 'Balance cannot fall below 0 P.';
+  if(m.includes('FAN_WALLET_NOT_FOUND')) return 'Fan wallet not found.';
+  if(m.includes('TEAM_NAME_REQUIRED')) return 'Enter a team name.';
+  if(m.includes('TEAM_NOT_FOUND')) return 'Team not found. Refresh and retry.';
+  return m || 'Something went wrong.';
 }
 
 
@@ -308,7 +309,7 @@ function renderAddTeam(){
   $('newPartner').innerHTML=base;
   $('addTeamBtn').disabled=free.length<2;
   if(free.length<2){
-    notice('addTeamMsg','현재 선택 가능한 PLAYER가 2명 미만입니다. 새 PLAYER가 프로필을 만든 뒤 추가할 수 있습니다.',false);
+    notice('addTeamMsg','Fewer than two players are available. Ask another player to complete a profile.',false);
   }else{
     $('addTeamMsg').style.display='none';
   }
@@ -325,7 +326,7 @@ $('addTeamBtn').onclick=async()=>{
   const teamName=$('newTeamName').value.trim();
   const captain=$('newCaptain').value;
   const partner=$('newPartner').value;
-  if(!teamName||!captain||!partner){notice('addTeamMsg','팀 이름과 PLAYER 2명을 모두 선택해 주세요.',true);return}
+  if(!teamName||!captain||!partner){notice('addTeamMsg','Enter a team name and select two players.',true);return}
   $('addTeamBtn').disabled=true;$('addTeamBtn').textContent='ADDING…';
   try{
     const r=await db.rpc('tg_admin_add_team',{p_event_slug:C.eventSlug,p_team_name:teamName,p_captain_id:captain,p_partner_id:partner});
@@ -354,9 +355,9 @@ function renderTeamManagement(){
     const paymentInfo=(t.amount_due||t.pricing_tier)?`
       <div class="admin-payment-box ${check?'needs-check':''}">
         <div><span>ENTRY</span><b>${esc(divisionLabel(t.division))} · ${categoryLabel(t.category)}</b></div>
-        <div><span>TEAM TOTAL · 2인 합계</span><b>${formatWon(t.amount_due)}</b><small>${t.pricing_tier==='early_bird'?'EARLY BIRD':'REGULAR'}</small></div>
-        <div><span>DEPOSITOR</span><b>${esc(t.depositor_name||'—')}</b><small>${t.payment_reported_at?'신고 '+formatDate(t.payment_reported_at):'입금 신고 전'}</small></div>
-        <div><span>PAYMENT</span><b>${t.payment_status==='paid'?'PAID':check?'CHECK NOW':'WAITING'}</b><small>${t.paid_at?'확인 '+formatDate(t.paid_at):t.payment_deadline?'마감 '+formatDate(t.payment_deadline):''}</small></div>
+        <div><span>TEAM TOTAL · 2 ATHLETES</span><b>${formatWon(t.amount_due)}</b><small>${t.pricing_tier==='early_bird'?'EARLY BIRD':'REGULAR'}</small></div>
+        <div><span>DEPOSITOR</span><b>${esc(t.depositor_name||'—')}</b><small>${t.payment_reported_at?'REPORTED '+formatDate(t.payment_reported_at):'NOT REPORTED'}</small></div>
+        <div><span>PAYMENT</span><b>${t.payment_status==='paid'?'PAID':check?'CHECK NOW':'WAITING'}</b><small>${t.paid_at?'CONFIRMED '+formatDate(t.paid_at):t.payment_deadline?'DEADLINE '+formatDate(t.payment_deadline):''}</small></div>
       </div>`:''; 
     return `
     <article class="admin-team-card ${t.status==='cancelled'?'is-cancelled':''} ${check?'is-payment-check':''}" data-team="${t.id}">
@@ -411,7 +412,7 @@ window.saveTeam=async id=>{
 
 window.confirmPayment=async id=>{
   const t=allAdminTeams.find(x=>x.id===id);if(!t)return;
-  if(!confirm(`${t.team_name}\n입금자: ${t.depositor_name||'—'}\n금액: ${formatWon(t.amount_due)}\n\n법인계좌 입금을 확인했나요?`))return;
+  if(!confirm(`${t.team_name}\nDEPOSITOR: ${t.depositor_name||'—'}\nAMOUNT: ${formatWon(t.amount_due)}\n\nHave you verified the transfer in the company bank account?`))return;
   const btn=$(`confirm-${id}`);
   if(btn){btn.disabled=true;btn.textContent='CONFIRMING…'}
   try{
@@ -427,7 +428,7 @@ window.confirmPayment=async id=>{
 
 window.deleteTeam=async id=>{
   const t=allAdminTeams.find(x=>x.id===id);if(!t)return;
-  const ok=confirm(`DELETE ${t.team_name}?\n\n팀, 경기 결과, 연결된 개인 포인트와 해당 팀이 포함된 FAN PICK 데이터가 삭제됩니다. 이 작업은 되돌릴 수 없습니다.`);
+  const ok=confirm(`DELETE ${t.team_name}?\n\nThis deletes the team, its results, linked points and related FAN PICK data. This cannot be undone.`);
   if(!ok)return;
   try{
     const r=await db.rpc('tg_admin_delete_team',{p_team_id:id});
@@ -524,12 +525,12 @@ async function submitFanAdjustment(){
   if(!x)return;
   const amount=Number($('fanAdjustAmount').value);
   const note=$('fanAdjustNote').value.trim();
-  if(!Number.isInteger(amount)||amount===0){notice('fanWalletMsg','+ 또는 - 포인트를 정수로 입력해 주세요.',true);return}
-  if(note.length<2){notice('fanWalletMsg','조정 사유를 입력해 주세요.',true);return}
+  if(!Number.isInteger(amount)||amount===0){notice('fanWalletMsg','Enter a non-zero whole-number point adjustment.',true);return}
+  if(note.length<2){notice('fanWalletMsg','Enter a reason for this adjustment.',true);return}
   const after=Number(x.balance||0)+amount;
-  if(after<0){notice('fanWalletMsg','조정 후 잔액은 0P 아래로 내려갈 수 없습니다.',true);return}
+  if(after<0){notice('fanWalletMsg','Balance cannot fall below 0 P.',true);return}
   const verb=amount>0?'ADD':'DEDUCT';
-  if(!confirm(`${x.display_name}\n${verb} ${formatPoint(Math.abs(amount))}\n${formatPoint(x.balance)} → ${formatPoint(after)}\n\n사유: ${note}\n\n이 조정은 감사 로그에 영구 기록됩니다.`))return;
+  if(!confirm(`${x.display_name}\n${verb} ${formatPoint(Math.abs(amount))}\n${formatPoint(x.balance)} → ${formatPoint(after)}\n\nREASON: ${note}\n\nThis adjustment is recorded permanently in the audit log.`))return;
 
   $('submitFanAdjustment').disabled=true;$('submitFanAdjustment').textContent='APPLYING…';
   try{
@@ -610,7 +611,7 @@ async function loadPredictionControl(){
               <select id="prediction-winner-${m.market_id}" ${!m.teams.length?'disabled':''}>${options}</select>
               <button class="btn arcade-primary" type="button" onclick="settlePredictionMarket('${m.market_id}')" ${stillOpen||!m.teams.length?'disabled':''}>SETTLE MARKET</button>
             </div>
-            <small class="prediction-admin-lock-note">${stillOpen?'GAME 시작 후 정산 가능':'우승팀 선택 후 정산하면 모든 FAN WALLET이 즉시 반영됩니다.'}</small>`}
+            <small class="prediction-admin-lock-note">${stillOpen?'SETTLEMENT OPENS AFTER THE GAME':'Settlement immediately updates all fan wallets.'}</small>`}
       </article>`;
   }).join('')||'<div class="card admin-empty">NO PREDICTION MARKETS.</div>';
 }
@@ -618,9 +619,9 @@ async function loadPredictionControl(){
 window.settlePredictionMarket=async marketId=>{
   const select=$(`prediction-winner-${marketId}`);
   const teamId=select?.value;
-  if(!teamId){notice('predictionAdminMsg','우승팀을 선택해 주세요.',true);return}
+  if(!teamId){notice('predictionAdminMsg','Select a winning team.',true);return}
   const teamName=select.options[select.selectedIndex]?.textContent||'SELECTED TEAM';
-  if(!confirm(`${teamName}\n\n이 팀을 우승팀으로 확정하고 PLAY POINT를 정산할까요?\n정산 후에는 되돌릴 수 없습니다.`))return;
+  if(!confirm(`${teamName}\n\nConfirm this winner and settle PLAY POINT?\nSettlement cannot be undone.`))return;
   try{
     const q=await db.rpc('tg_admin_settle_prediction_market',{p_market_id:marketId,p_winning_team_id:teamId});
     if(q.error)throw q.error;
@@ -664,7 +665,7 @@ async function rank(eventId){
 }
 
 $('login').onclick=async()=>{
-  if(!$('email').value.trim()||!$('pass').value){notice('adminMsg','이메일과 비밀번호를 모두 입력해 주세요.',true);return}
+  if(!$('email').value.trim()||!$('pass').value){notice('adminMsg','Enter email and password.',true);return}
   $('login').disabled=true;$('login').textContent='CHECKING…';
   try{
     const {error}=await db.auth.signInWithPassword({email:$('email').value.trim(),password:$('pass').value});
@@ -676,22 +677,22 @@ $('login').onclick=async()=>{
 };
 
 $('forgotPassword').onclick=async()=>{
-  const mail=$('email').value.trim();if(!mail){notice('adminMsg','먼저 관리자 이메일을 입력해 주세요.',true);return}
+  const mail=$('email').value.trim();if(!mail){notice('adminMsg','Enter your admin email first.',true);return}
   $('forgotPassword').disabled=true;$('forgotPassword').textContent='SENDING…';
   try{
     const redirectTo=location.origin+location.pathname;
     const {error}=await db.auth.resetPasswordForEmail(mail,{redirectTo});if(error)throw error;
-    notice('adminMsg',`${mail}로 비밀번호 재설정 메일을 보냈습니다. 메일의 링크를 눌러 돌아오세요.`);
+    notice('adminMsg',`${mail} — a password reset email was sent. Follow the link to return.`);
   }catch(e){notice('adminMsg',adminError(e),true)}
   finally{$('forgotPassword').disabled=false;$('forgotPassword').textContent='FORGOT PASSWORD'}
 };
 
 $('saveNewPassword').onclick=async()=>{
   const a=$('newPass').value,b=$('newPassConfirm').value;
-  if(a.length<8){notice('resetMsg','비밀번호는 8자 이상으로 설정해 주세요.',true);return}
-  if(a!==b){notice('resetMsg','두 비밀번호가 일치하지 않습니다.',true);return}
+  if(a.length<8){notice('resetMsg','Use a password of at least 8 characters.',true);return}
+  if(a!==b){notice('resetMsg','Passwords do not match.',true);return}
   $('saveNewPassword').disabled=true;$('saveNewPassword').textContent='SAVING…';
-  try{const {error}=await db.auth.updateUser({password:a});if(error)throw error;notice('resetMsg','비밀번호가 변경되었습니다.');await enterAdmin()}
+  try{const {error}=await db.auth.updateUser({password:a});if(error)throw error;notice('resetMsg','Password changed.');await enterAdmin()}
   catch(e){notice('resetMsg',adminError(e),true)}
   finally{$('saveNewPassword').disabled=false;$('saveNewPassword').textContent='SAVE NEW PASSWORD'}
 };
