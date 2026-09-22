@@ -16,7 +16,7 @@
   <link rel="stylesheet" href="styles.css?v=20260919-account1">
   <link rel="stylesheet" href="arcade-pages.css?v=20260919-account1">
 <link rel="stylesheet" href="arc-refresh.css?v=20260921c">
-</head>
+<link rel="stylesheet" href="neon-arcade.css?v=20260922a"></head>
 <body class="tg-arcade-page arc-my-page">
 <div id="nav"></div>
 
@@ -27,7 +27,7 @@
         <div>
           <div class="arcade-eyebrow">ARC ACCOUNT // PLAYER TERMINAL</div>
           <h1>내 게임.</h1>
-          <p>신청 상태를 확인하고, 함께할 팀원을 초대하세요.</p>
+          <p>내 포인트와 예측 통계, 팀 참가 상태를 확인하세요.</p>
         </div>
         <div class="arc-my-head-status">
           <span>ACCOUNT STATUS</span>
@@ -37,7 +37,7 @@
 
       <div id="myPageError" class="notice err arc-my-error"></div>
 
-      <section id="myTeamCard" class="arc-team-summary" aria-live="polite"><p>내 팀 정보를 확인하고 있습니다…</p></section><div class="arc-my-grid">
+      <div class="arc-actions"><a class="arc-button neon-pink" href="fanpick.html">FAN PICK · 포인트와 예측 내역 ↗</a><a class="arc-button" href="ranking.html">리더보드 ↗</a></div><section id="myTeamCard" class="arc-team-summary" aria-live="polite"><p>내 팀 정보를 확인하고 있습니다…</p></section><div class="arc-my-grid">
         <article class="arc-my-panel arc-id-card">
           <div class="arc-panel-label">ARC ID</div>
           <div class="arc-panel-main">
@@ -51,12 +51,12 @@
           <div class="arc-panel-label">PLAY POINT WALLET</div>
           <h2 id="arcBalance">— P</h2>
           <div class="arc-stat-row">
-            <div><span>TOTAL BET</span><b id="arcTotalBet">— P</b></div>
-            <div><span>WINS</span><b id="arcWins">—</b></div>
+            <div><span>누적 사용 포인트</span><b id="arcTotalBet">— P</b></div>
+            <div><span>적중 / 정산</span><b id="arcWins">—</b></div>
           </div>
           <div class="arc-stat-row">
-            <div><span>HIT RATE</span><b id="arcHitRate">—%</b></div>
-            <div><span>NET WIN</span><b id="arcNetWin">— P</b></div>
+            <div><span>적중률</span><b id="arcHitRate">—%</b></div>
+            <div><span>정산 순증감</span><b id="arcNetWin">— P</b></div>
           </div>
         </article>
 
@@ -98,7 +98,7 @@
 <div id="footer"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
-<script src="app.js?v=20260921c"></script>
+<script src="app.js?v=20260922a"></script>
 <script>
 shell('ACCOUNT');
 

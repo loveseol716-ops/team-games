@@ -1,13 +1,1 @@
-<!doctype html>
-<html lang="ko">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta http-equiv="refresh" content="0;url=athlete.html">
-  <title>PLAYER · ARC GAMES</title>
-  <link rel="stylesheet" href="styles.css?v=20260919-account1">
-</head>
-<body>
-  <main class="section"><div class="container"><div class="card"><div class="kicker">PLAYER DATA</div><h2>PRIVATE PLAYER HUB</h2><p class="muted">개인 순위와 누적 기록은 로그인한 PLAYER 본인 프로필에서 확인합니다.</p><a class="btn arcade-primary" href="athlete.html">OPEN PLAYER HUB</a></div></div></main>
-</body>
-</html>
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#080512"><title>LEADERBOARD · ARC GAMES</title><link rel="stylesheet" href="styles.css?v=20260919-account1"><link rel="stylesheet" href="arc-refresh.css?v=20260921c"><link rel="stylesheet" href="neon-arcade.css?v=20260922a"></head><body class="neon-arcade"><div id="nav"></div><main class="container fan-main"><header class="fan-head"><p class="arc-kicker">ARC GAMES 01 / SCOREBOARD</p><h1>HIGH<br><em>SCORES.</em></h1><p>같은 디비전·카테고리의 기록으로 경쟁합니다.<br>경기 당일 공개되는 운영자 등록 순위와 기록을 확인하세요.</p><div class="arc-actions"><a class="arc-button neon-pink" href="fanpick.html">FAN PICK · 내 포인트 ↗</a><a class="arc-button" href="live.html">라이브 ↗</a></div></header><section class="neon-panel"><div class="rank-filters"><label>디비전<select id="rankDivision"><option value="OPEN">BEGINNER</option><option value="PRO">ATHLETE</option></select></label><label>카테고리<select id="rankCategory"><option value="MM">MEN’S · 남남</option><option value="MIXED">MIXED · 남녀</option><option value="WW">WOMEN’S · 여여</option></select></label><button id="refreshRank" class="arc-button" type="button">새로고침 ↻</button></div><div id="rankRows" aria-live="polite">기록을 확인하고 있습니다…</div><p class="fan-note">경기 결과 순위입니다. 개인 PLAY POINT 및 예측 통계는 FAN PICK에서 확인할 수 있습니다.</p></section></main><div id="footer"></div><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script src="app.js?v=20260922a"></script><script>shell('RANKING');</script><script src="ranking.js?v=20260922a"></script></body></html>
