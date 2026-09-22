@@ -7,3 +7,4 @@
 @media(max-width:380px){.events-heading h1{font-size:15.5vw!important}.event-poster{min-height:445px}.poster-center strong{font-size:21vw}.event-info-actions{flex-direction:column}.event-info-actions a{min-height:44px}}
 @media(prefers-reduced-motion:no-preference){.poster-center strong{transition:transform .22s ease}}
 body.station-site.station-events .event-info-actions a:last-child:hover{background:#ddd;color:#111!important}
+body.station-site.station-events a.event-poster:hover{color:#111!important}
