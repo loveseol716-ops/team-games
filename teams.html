@@ -11,27 +11,22 @@
   <meta property="og:url" content="https://arcgames.kr/">
   <meta property="og:image" content="https://arcgames.kr/favicon.png">
   <meta name="twitter:card" content="summary">
-  <meta name="theme-color" content="#050508">
+  <meta name="theme-color" content="#121212">
   <title>TEAMS · ARC GAMES</title>
   <link rel="stylesheet" href="styles.css?v=20260919-account1">
   <link rel="stylesheet" href="arcade-pages.css?v=20260919-account1">
   
+<link rel="stylesheet" href="underground.css?v=20260922ug1">
 </head>
-<body class="tg-arcade-page teams-arcade coming-soon-page">
+<body class="tg-arcade-page teams-arcade coming-soon-page ug-site">
 <div id="nav"></div>
-<main>
-  <section class="arcade-page-hero coming-soon-hero">
-    <div class="container">
-      <div class="arcade-eyebrow">ARC GAMES #01 // TEAM LINE-UP</div>
-      <h1>TEAMS<br>COMING SOON.</h1>
-      <p class="lead">24개 팀의 라인업은 참가 신청 오픈 이후 공개됩니다.</p>
-      <div class="arcade-page-chips"><span>24 TEAMS</span><span>TEAM OF 2</span><span>BEGINNER / ATHLETE</span><span>MM / FF / MF</span></div>
-    </div>
-  </section>
-</main>
+<main class="container ug-roster"><header><p class="ug-label">THE LINE-UP / GAME 01</p><h1>THE<br>TEAMS.</h1><p>출전을 확정한 팀부터 이곳에 공개됩니다.<br>누구를 응원할지 미리 둘러보세요.</p></header><div id="teamList" class="ug-team-list" aria-live="polite">참가팀을 확인하고 있습니다…</div><div class="ug-roster-actions"><a href="athlete.html" class="ug-button ug-primary">우리 팀 참가신청 ↗</a><a href="fanpick.html" class="ug-button">FAN PICK ↗</a></div></main>
 <div id="footer"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
-<script src="app.js?v=20260919-account1"></script>
-<script>shell('TEAMS');</script>
+<script src="app.js?v=20260922ug1"></script>
+<script>
+shell('TEAMS');
+(async()=>{const box=document.getElementById('teamList');try{const list=await teams();box.innerHTML=list.length?list.map((t,i)=>'<article class="ug-team-row"><span>'+String(i+1).padStart(2,'0')+'</span><div><h2>'+esc(t.team_name)+'</h2><p>'+esc(divisionLabel(t.division))+' / '+esc(({MM:'남남',WW:'여여',MIXED:'남녀'})[t.category]||t.category||'카테고리 확인 중')+'</p></div><b>CONFIRMED</b></article>').join(''):'<div class="ug-empty"><h2>첫 번째 팀을 기다리고 있습니다.</h2><p>참가가 확정되면 여기서 소개됩니다.</p></div>';}catch(_){box.textContent='참가팀 정보를 불러오지 못했습니다. 새로고침 후 다시 확인해 주세요.';}})();
+</script>
 </body></html>
