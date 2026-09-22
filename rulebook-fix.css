@@ -1,0 +1,4 @@
+.rulebook-arcade .arcade-page-chips{display:flex;flex-wrap:wrap;gap:8px;margin:24px 0 0}
+.rulebook-arcade .game-hero-actions{display:flex;position:relative;align-items:flex-start;margin-top:26px;min-height:48px}
+.rulebook-arcade .game-hero-actions .btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;line-height:1.2;max-width:100%;white-space:normal}
+@media(max-width:650px){.rulebook-arcade .game-hero-actions{margin-top:22px!important}.rulebook-arcade .game-hero-actions .btn{width:100%}}

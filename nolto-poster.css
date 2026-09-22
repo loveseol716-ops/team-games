@@ -1,0 +1,19 @@
+/* NOLTO GYM's dark green and Saturday spirit, distinct from the ARC STATION shell. */
+body.station-site.station-events .event-poster{background:#0b3d2e;color:#f8f7ee!important;border-color:#0b3d2e;min-height:clamp(530px,59vw,730px)}
+body.station-site.station-events .event-poster::before{inset:0;background:repeating-linear-gradient(0deg,transparent 0 5px,#ffffff07 5px 6px),linear-gradient(135deg,#082a20 0%,#0b3d2e 44%,#15543e 100%)}
+body.station-site.station-events .event-poster::after{inset:0;background:linear-gradient(132deg,transparent 0 55%,#c8d5b029 55.2% 62%,transparent 62.2%),linear-gradient(132deg,transparent 0 64%,#e3e8d122 64.2% 66%,transparent 66.2%),repeating-linear-gradient(90deg,transparent 0 18%,#e3e8d10b 18.1% 18.2%,transparent 18.3% 26%);opacity:1}
+.station-events .poster-top,.station-events .poster-bottom{color:#eeeede;border-color:#e4e8d0;z-index:2}
+.station-events .poster-top{font:800 clamp(13px,1.8vw,20px)/1.2 var(--font-display);letter-spacing:-.035em}
+.station-events .poster-top span:last-child{font:700 11px/1.4 var(--font-body);letter-spacing:.12em}
+.station-events .poster-center{z-index:2;align-items:flex-start;text-align:left;margin:35px 0}
+.station-events .poster-edition{background:#e3e8d1;color:#0b3d2e;font:800 clamp(12px,1.5vw,17px)/1.2 var(--font-body);letter-spacing:.1em;padding:9px 13px}
+.station-events .poster-center strong{font:900 clamp(95px,21.3vw,286px)/.77 var(--font-display);letter-spacing:-.105em;color:#f4f3e9;text-shadow:none!important;transform:none;margin:26px 0 31px;max-width:100%}
+.station-events .poster-period{color:#b0cb83}
+.station-events .poster-sub{background:transparent;color:#f5f5e8;padding:0;font:700 clamp(16px,2.7vw,34px)/1.08 var(--font-display);letter-spacing:-.05em;max-width:700px}
+.station-events .poster-side{z-index:2;right:27px;color:#e3e8d1}
+.station-events .event-poster:hover .poster-center strong{transform:none}
+body.station-site.station-events a.event-poster:hover{color:#f8f7ee!important}
+body.station-site.station-events .event-poster:focus-visible{outline-color:#b0cb83}
+@media(max-width:900px){.station-events .poster-center strong{font-size:clamp(91px,20vw,190px)}}
+@media(max-width:620px){body.station-site.station-events .event-poster{min-height:490px}.station-events .poster-top{font-size:13px}.station-events .poster-top span:last-child{font-size:8px;text-align:right}.station-events .poster-center{margin:30px 0}.station-events .poster-center strong{font-size:clamp(70px,21vw,126px);margin:22px 0 26px}.station-events .poster-sub{font-size:clamp(15px,4.3vw,23px);max-width:250px}.station-events .poster-side{right:8px;font-size:8px}.station-events .poster-bottom{font-size:10px}}
+@media(max-width:380px){.station-events .poster-center strong{font-size:20vw}.station-events .poster-sub{max-width:215px}}
