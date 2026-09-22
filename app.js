@@ -59,11 +59,12 @@ function divisionLabel(v){return v==='OPEN'?'BEGINNER':v==='PRO'?'ATHLETE':v||'â
 function esc(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
 
 function nav(active){
-  const p=[
-    ['EVENTS','events.html'],['GAME','event.html'],['TEAMS','teams.html'],
-    ['FAN PICK','fanpick.html'],['RANKING','ranking.html'],['LIVE','live.html']
-  ];
-  return `<header class="nav"><div class="container navin"><a class="brand" href="index.html">ARC STATION</a><button class="nav-toggle" type="button" aria-expanded="false" aria-controls="arcPrimaryNav"><span aria-hidden="true"></span><span class="nav-toggle-label">MENU</span></button><nav id="arcPrimaryNav" class="links" aria-label="Primary navigation">${p.map(([n,h])=>`<a class="${active===n?'active':''}" href="${h}">${({GAME:'GAME',TEAMS:'TEAMS','FAN PICK':'FAN PICK',RANKING:'RESULTS',LIVE:'LIVE'})[n]||n}</a>`).join('')}</nav><a id="arcAccountNav" class="cta arcade-cta ${active==='ACCOUNT'?'active':''}" href="account.html">ENTER</a></div></header>`;
+  const page=location.pathname.split('/').pop();
+  const eventPages=['event.html','athlete.html','rulebook.html','teams.html','fanpick.html','ranking.html','live.html','player.html','player-profile.html'];
+  const inEvent=eventPages.includes(page);
+  const links=[['GAME','event.html'],['REGISTER','athlete.html'],['RULEBOOK','rulebook.html'],['TEAMS','teams.html'],['FAN PICK','fanpick.html'],['RESULTS','ranking.html'],['LIVE','live.html']];
+  const eventNav=inEvent?`<div class="station-event-nav"><div class="container station-event-nav-inner"><a class="station-event-name" href="event.html">#1 NOLTO</a><nav aria-label="#1 NOLTO navigation">${links.map(([label,href])=>`<a href="${href}"${page===href?' aria-current="page"':''}>${label}</a>`).join('')}</nav></div></div>`:'';
+  return `<header class="nav station-brand-nav"><div class="container navin"><a class="brand" href="index.html">ARC STATION</a><nav class="station-brand-links" aria-label="Primary navigation"><a href="events.html"${active==='EVENTS'?' aria-current="page"':''}>EVENTS</a></nav><a id="arcAccountNav" class="cta arcade-cta ${active==='ACCOUNT'?'active':''}" href="account.html">LOG IN</a></div></header>${eventNav}`;
 }
 
 function initMobileNav(){
@@ -122,7 +123,7 @@ function shell(active){
             <span>OPERATED BY BIRD COMPANY LLC</span>
           </div>
           <nav class="arc-footer-links" aria-label="legal">
-            <a href="live.html">LIVE</a><a href="terms.html">TERMS</a>
+            <a href="terms.html">TERMS</a>
             <a href="privacy.html">PRIVACY</a>
             <a href="refund.html">REFUNDS</a>
           </nav>

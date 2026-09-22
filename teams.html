@@ -18,6 +18,7 @@
   
 <link rel="stylesheet" href="underground.css?v=20260922ug2">
 <link rel="stylesheet" href="station.css?v=20260922s2">
+<link rel="stylesheet" href="station-navigation.css?v=20260922nav1">
 </head>
 <body class="tg-arcade-page teams-arcade coming-soon-page ug-site station-site">
 <div id="nav"></div>
@@ -25,7 +26,7 @@
 <div id="footer"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
-<script src="app.js?v=20260922events1"></script>
+<script src="app.js?v=20260922nav1"></script>
 <script>
 shell('TEAMS');
 (async()=>{const box=document.getElementById('teamList');try{const list=await teams();box.innerHTML=list.length?list.map((t,i)=>'<article class="ug-team-row"><span>'+String(i+1).padStart(2,'0')+'</span><div><h2>'+esc(t.team_name)+'</h2><p>'+esc(divisionLabel(t.division))+' / '+esc(({MM:'MEN’S',WW:'WOMEN’S',MIXED:'MIXED'})[t.category]||t.category||'CATEGORY PENDING')+'</p></div><b>CONFIRMED</b></article>').join(''):'<div class="ug-empty"><h2>WAITING FOR THE FIRST TEAM.</h2><p>Confirmed teams will appear here.</p></div>';}catch(_){box.textContent='Could not load teams. Refresh and try again.';}})();

@@ -1,0 +1,13 @@
+/* Brand navigation, followed by event navigation only inside an event. */
+body.station-site .station-brand-nav .navin{display:flex;align-items:center;gap:26px;padding-top:0;min-height:76px}
+.station-brand-links{margin-left:auto;display:flex;align-items:center}
+.station-brand-links a{color:#eee;font:700 12px/1.4 var(--font-body);letter-spacing:.04em;padding:15px 0}
+.station-brand-links a[aria-current]{border-bottom:2px solid #eee}
+.station-event-nav{background:#191919;border-bottom:1px solid #484848}
+.station-event-nav-inner{display:flex;align-items:center;justify-content:space-between;gap:24px;padding-top:14px;padding-bottom:14px}
+.station-event-name{font:800 18px/1 var(--font-display);color:#fff;white-space:nowrap}
+.station-event-nav nav{display:flex;flex-wrap:wrap;gap:8px 23px}
+.station-event-nav nav a{font:600 11px/1.4 var(--font-body);letter-spacing:.04em;padding:9px 0;color:#bbb}
+.station-event-nav nav a[aria-current]{color:#fff;border-bottom:1px solid #fff}
+@media(max-width:900px){body.station-site .station-brand-nav .navin{min-height:65px;gap:18px}.station-event-nav-inner{align-items:flex-start;flex-direction:column;gap:10px}.station-event-nav nav{gap:4px 20px;width:100%}}
+@media(max-width:400px){body.station-site .station-brand-nav .navin{gap:13px}body.station-site .station-brand-nav .brand{font-size:17px!important}.station-brand-links a{font-size:10px}.station-event-nav nav{gap:4px 18px}}
