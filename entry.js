@@ -5,6 +5,8 @@ const categoryName=v=>({MM:'MEN’S · 남남',WW:'WOMEN’S · 여여',MIXED:'M
 let entryState=null,playerProfile=null,entryQuote=null,entryBusy=false;
 const entryErrors={
 AUTH_REQUIRED:'로그인 후 다시 시도해 주세요.',ADMIN_ONLY:'운영자만 사용할 수 있습니다.',ARC_ACCOUNT_NOT_FOUND:'해당 이메일의 ARC 계정이 없습니다. 팀원에게 회원가입 또는 계정 이메일 확인을 요청해 주세요.',
+DUPLICATE_PHONE:'입력한 휴대전화번호로 이미 신청한 팀이 있습니다. 다른 로그인 방식(카카오·구글·이메일)으로 신청했는지 확인해 주세요. 기존 신청 계정으로 로그인하거나, 번호를 잘못 입력했다면 정보 수정에서 바로잡아 주세요.',
+GENDER_REQUIRED:'선수 성별을 선택해 주세요.',TEAM_PHOTO_REQUIRED:'선수 프로필 이미지를 확인해 주세요. 문제가 계속되면 운영자에게 문의해 주세요.',
 INVALID_DISCOUNT_CODE:'유효하지 않은 할인 코드입니다. 다시 확인해 주세요.',
 PROFILE_REQUIRED:'선수 정보를 먼저 완성해 주세요.',CONSENT_REQUIRED:'필수 동의 항목을 확인해 주세요.',TEAM_NAME_REQUIRED:'팀 이름을 입력해 주세요.',INVALID_DIVISION:'디비전을 선택해 주세요.',INVALID_CATEGORY:'카테고리를 선택해 주세요.',
 CATEGORY_GENDER_MISMATCH:'선수 성별이 선택한 팀 카테고리와 맞지 않습니다.',CATEGORY_FULL:'해당 디비전·카테고리 정원이 마감되었습니다.',REGISTRATION_FULL:'전체 참가 정원이 마감되었습니다.',REGISTRATION_CLOSED:'현재 신규 참가신청 또는 팀원 추가 기간이 아닙니다.',
