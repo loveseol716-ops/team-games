@@ -62,7 +62,8 @@ Deno.serve(async (req: Request) => {
       email,
       password,
       email_confirm: true,
-      user_metadata: { signup_source: 'arc_games', display_name: displayName },
+      // Match the shared database's existing NTAC profile exclusion.
+      user_metadata: { signup_source: 'team_games', display_name: displayName },
     })
 
     if (error) {
