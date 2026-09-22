@@ -60,7 +60,7 @@ function esc(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&l
 
 function nav(active){
   const p=[
-    ['GAME','event.html'],['TEAMS','teams.html'],
+    ['EVENTS','events.html'],['GAME','event.html'],['TEAMS','teams.html'],
     ['FAN PICK','fanpick.html'],['RANKING','ranking.html'],['LIVE','live.html']
   ];
   return `<header class="nav"><div class="container navin"><a class="brand" href="index.html">ARC STATION</a><button class="nav-toggle" type="button" aria-expanded="false" aria-controls="arcPrimaryNav"><span aria-hidden="true"></span><span class="nav-toggle-label">MENU</span></button><nav id="arcPrimaryNav" class="links" aria-label="Primary navigation">${p.map(([n,h])=>`<a class="${active===n?'active':''}" href="${h}">${({GAME:'GAME',TEAMS:'TEAMS','FAN PICK':'FAN PICK',RANKING:'RESULTS',LIVE:'LIVE'})[n]||n}</a>`).join('')}</nav><a id="arcAccountNav" class="cta arcade-cta ${active==='ACCOUNT'?'active':''}" href="account.html">ENTER</a></div></header>`;
