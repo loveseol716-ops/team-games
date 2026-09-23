@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="admin-extra.css?v=20260919-account1">
 <link rel="stylesheet" href="station.css?v=20260922s2">
 <link rel="stylesheet" href="station-navigation.css?v=20260922nav1">
+<link rel="stylesheet" href="admin-accounts.css?v=20260923-1">
 </head>
 <body class="ug-site station-site">
 <div id="nav"></div>
@@ -117,19 +118,49 @@
           <div id="fanAdjustmentHistory" class="fan-adjustment-history"></div>
         </section>
 
+        <section class="admin-block" id="accountControl">
+          <div class="admin-block-head"><div><div class="kicker">ACCOUNTS</div><h3>ACCOUNT CONTROL</h3></div><p class="muted">Search accounts, edit profiles and review changes.</p></div>
+          <form id="accountSearchForm" class="account-toolbar"><input id="accountSearch" type="search" aria-label="Search accounts" placeholder="NAME / EMAIL / PHONE"><button class="btn dark" type="submit">SEARCH</button></form>
+          <div id="accountMsg" class="notice"></div><div id="accountList"></div>
+          <div class="account-pagination"><button id="accountPrev" class="btn dark" type="button">PREVIOUS</button><span id="accountCount" class="account-count"></span><button id="accountNext" class="btn dark" type="button">NEXT</button></div>
+          <div id="accountEditor" class="account-editor" hidden>
+            <div class="account-editor-head"><h4 id="accountEditorTitle"></h4><button id="accountClose" class="btn dark" type="button">CLOSE</button></div>
+            <form id="accountProfileForm">
+              <div class="account-fields">
+                <label>Nickname<input id="acct_nickname" maxlength="30" required></label>
+                <label>Player name<input id="acct_full_name" maxlength="50"></label>
+                <label>Category gender<select id="acct_gender"><option value="">NO PLAYER PROFILE</option><option value="male">MALE</option><option value="female">FEMALE</option></select></label>
+                <label>Phone<input id="acct_phone" type="tel" autocomplete="off"></label>
+                <label>Gym<input id="acct_gym" maxlength="80"></label>
+                <label>Instagram<input id="acct_instagram" maxlength="80"></label>
+                <label class="wide">Reason for change / deletion<input id="acct_reason" minlength="3" maxlength="300" required placeholder="WHY IS THIS CHANGE NEEDED?"></label>
+              </div>
+              <p class="muted">Player name, gender and phone are required for event participation. Email and sign-in identities stay unchanged.</p>
+              <button id="accountSave" class="btn" type="submit">SAVE PROFILE</button>
+            </form>
+            <div id="accountEditMsg" class="notice"></div>
+            <details class="account-delete"><summary>DELETE ACCOUNT</summary><p id="accountDeleteHint"></p><label>Type the account email to confirm<input id="acct_delete_email" type="email" autocomplete="off"></label><button id="accountDelete" type="button" class="btn danger">PERMANENTLY DELETE</button></details>
+          </div>
+          <details><summary class="account-audit-summary">RECENT ACCOUNT &amp; ROSTER CHANGES</summary><div id="accountAudit" class="account-audit-list"></div></details>
+        </section>
+
         <section class="admin-block">
           <div class="card admin-add-card">
             <div class="admin-add-head">
               <div><div class="kicker">MANUAL ENTRY</div><h3>ADD TEAM</h3></div>
-              <p class="muted">Select two registered players to add to #1 NOLTO.</p>
+              <p class="muted">Register two account holders without a ticket or bank transfer.</p>
             </div>
             <div class="admin-add-grid">
               <div class="field wide"><label>Team Name</label><input id="newTeamName" maxlength="60" placeholder="TEAM NAME"></div>
+              <div class="field wide"><label>Event</label><select id="newEvent"></select></div>
+              <div class="field"><label>Division</label><select id="newDivision"><option value="OPEN">BEGINNER</option><option value="PRO">ATHLETE</option></select></div>
+              <div class="field"><label>Category</label><select id="newCategory"><option value="MM">MEN’S · MM</option><option value="WW">WOMEN’S · FF</option><option value="MIXED">MIXED · MF</option></select></div>
               <div class="field"><label>Captain</label><select id="newCaptain"></select></div>
               <div class="field"><label>Partner</label><select id="newPartner"></select></div>
+              <div class="field wide"><label>Reason</label><input id="newEntryReason" minlength="3" maxlength="300" placeholder="E.G. STAFF-APPROVED COMPLIMENTARY ENTRY"></div>
               <div class="add-button"><button id="addTeamBtn" class="btn arcade-primary" type="button">+ ADD TEAM</button></div>
             </div>
-            <div class="admin-add-note">Both players need accounts. Athletes already on a confirmed team cannot be selected.</div>
+            <div class="admin-add-note">Recorded as COMPLIMENTARY · 0 KRW. Complete both player profiles in Account Control first. Category and capacity limits still apply.</div>
             <div id="addTeamMsg" class="notice"></div>
           </div>
         </section>
@@ -192,6 +223,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script src="app.js?v=20260922nav1"></script>
+<script src="admin-accounts.js?v=20260923-1"></script>
 <script>
 shell('ADMIN');
 
@@ -248,13 +280,13 @@ function adminError(x){
 
 
 async function adminTeams(){
-  const q=await db.rpc('tg_admin_list_teams',{p_event_slug:C.eventSlug});
+  const q=await db.rpc('arc_admin_action',{p_action:'teams',p_payload:{event_slug:C.eventSlug}});
   if(q.error)throw q.error;
   return q.data||[];
 }
 
 async function adminPlayers(){
-  const q=await db.rpc('tg_admin_list_athletes',{p_event_slug:C.eventSlug});
+  const q=await db.rpc('tg_admin_list_athletes',{p_event_slug:$('newEvent').value||C.eventSlug});
   if(q.error)throw q.error;
   return q.data||[];
 }
@@ -264,7 +296,7 @@ async function refreshAdmin(){
   renderSummary();
   renderAddTeam();
   renderTeamManagement();
-  await Promise.all([loadResults(),loadPredictionControl(),loadFanWalletControl()]);
+  await Promise.all([loadResults(),loadPredictionControl(),loadFanWalletControl(),loadAccountControls()]);
 }
 
 async function enterAdmin(){
@@ -323,19 +355,22 @@ $('newPartner').addEventListener('change',()=>{
   [...$('newCaptain').options].forEach(o=>{if(o.value)o.disabled=adminAthletes.find(a=>a.athlete_id===o.value)?.locked_in||o.value===$('newPartner').value});
 });
 
+$('newEvent').addEventListener('change',async()=>{try{adminAthletes=await adminPlayers();renderAddTeam();}catch(e){notice('addTeamMsg',accountError(e),true);}});
+
 $('addTeamBtn').onclick=async()=>{
   const teamName=$('newTeamName').value.trim();
   const captain=$('newCaptain').value;
   const partner=$('newPartner').value;
   if(!teamName||!captain||!partner){notice('addTeamMsg','Enter a team name and select two players.',true);return}
+  if($('newEntryReason').value.trim().length<3){notice('addTeamMsg','Enter a reason for the complimentary entry.',true);return}
+  if(!confirm(`Add ${teamName} to ${$('newEvent').value} as a complimentary team (0 KRW)?`))return;
   $('addTeamBtn').disabled=true;$('addTeamBtn').textContent='ADDING…';
   try{
-    const r=await db.rpc('tg_admin_add_team',{p_event_slug:C.eventSlug,p_team_name:teamName,p_captain_id:captain,p_partner_id:partner});
-    if(r.error)throw r.error;
+    await accountRpc('add_team',{event_slug:$('newEvent').value,team_name:teamName,captain_id:captain,partner_id:partner,division:$('newDivision').value,category:$('newCategory').value,reason:$('newEntryReason').value.trim()});
     $('newTeamName').value='';
-    notice('addTeamMsg','TEAM ADDED.');
     await refreshAdmin();
-  }catch(e){notice('addTeamMsg',adminError(e),true)}
+    notice('addTeamMsg','COMPLIMENTARY TEAM ADDED.');
+  }catch(e){notice('addTeamMsg',accountError(e),true)}
   finally{$('addTeamBtn').textContent='+ ADD TEAM';if(adminAthletes.filter(a=>!a.locked_in).length>=2)$('addTeamBtn').disabled=false}
 };
 
@@ -346,7 +381,7 @@ function renderTeamManagement(){
     if(sf==='payment_check'&&!(t.status==='pending_payment'&&t.payment_status==='payment_check'))return false;
     if(sf!=='all'&&sf!=='payment_check'&&t.status!==sf)return false;
     if(!q)return true;
-    return [t.team_name,t.player_1,t.player_2,t.phone,t.depositor_name,t.division,t.category].some(v=>String(v||'').toLowerCase().includes(q));
+    return [t.team_name,t.player_1,t.player_2,t.pending_invite?.name,t.phone,t.depositor_name,t.division,t.category].some(v=>String(v||'').toLowerCase().includes(q));
   });
   if(!list.length){$('adminTeams').innerHTML='<div class="card admin-empty">NO TEAMS FOUND.</div>';return}
   $('adminTeams').innerHTML=list.map(t=>{
@@ -356,9 +391,9 @@ function renderTeamManagement(){
     const paymentInfo=(t.amount_due||t.pricing_tier)?`
       <div class="admin-payment-box ${check?'needs-check':''}">
         <div><span>ENTRY</span><b>${esc(divisionLabel(t.division))} · ${categoryLabel(t.category)}</b></div>
-        <div><span>TEAM TOTAL · 2 ATHLETES</span><b>${formatWon(t.amount_due)}</b><small>${t.pricing_tier==='early_bird'?'EARLY BIRD':'REGULAR'}</small></div>
+        <div><span>TEAM TOTAL · 2 ATHLETES</span><b>${formatWon(t.amount_due)}</b><small>${t.pricing_tier==='admin'?'COMPLIMENTARY':t.pricing_tier==='early_bird'?'EARLY BIRD':'REGULAR'}</small></div>
         <div><span>DEPOSITOR</span><b>${esc(t.depositor_name||'—')}</b><small>${t.payment_reported_at?'REPORTED '+formatDate(t.payment_reported_at):'NOT REPORTED'}</small></div>
-        <div><span>PAYMENT</span><b>${t.payment_status==='paid'?'PAID':check?'CHECK NOW':'WAITING'}</b><small>${t.paid_at?'CONFIRMED '+formatDate(t.paid_at):t.payment_deadline?'DEADLINE '+formatDate(t.payment_deadline):''}</small></div>
+        <div><span>PAYMENT</span><b>${t.pricing_tier==='admin'?'WAIVED':t.payment_status==='paid'?'PAID':check?'CHECK NOW':'WAITING'}</b><small>${t.paid_at?'CONFIRMED '+formatDate(t.paid_at):t.payment_deadline?'DEADLINE '+formatDate(t.payment_deadline):''}</small></div>
       </div>`:''; 
     return `
     <article class="admin-team-card ${t.status==='cancelled'?'is-cancelled':''} ${check?'is-payment-check':''}" data-team="${t.id}">
@@ -373,7 +408,7 @@ function renderTeamManagement(){
         <div class="admin-edit-grid">
           <div class="full"><label>Team Name</label><input id="team-${t.id}" value="${esc(t.team_name)}" maxlength="60" ${pending?'disabled':''}></div>
           <div><label>Player 1</label><input value="${esc(t.player_1)}" disabled></div>
-          <div><label>Player 2</label><input value="${esc(t.player_2)}" disabled></div>
+          <div><label>Player 2</label><input value="${esc(t.pending_invite?.name||t.player_2)}" disabled>${t.pending_invite?'<small class="pending-partner">INVITED · AWAITING CONFIRMATION</small>':''}</div>
           <div class="full"><label>Contact</label><input id="phone-${t.id}" value="${esc(t.phone)}" inputmode="tel" ${pending?'disabled':''}></div>
           ${pending?'<div class="full"><label>Roster Status</label><input value="PAYMENT PENDING" disabled></div>':`
           <div><label>Heat</label><input id="heat-${t.id}" type="number" min="1" max="12" value="${t.heat_no}"></div>

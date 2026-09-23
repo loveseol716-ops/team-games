@@ -1,0 +1,58 @@
+-- Synthetic identities only; every change is rolled back.
+begin;
+create temporary table arc_admin_test_results(label text);
+do $test$
+declare adm uuid:=gen_random_uuid(); a uuid:=gen_random_uuid(); b uuid:=gen_random_uuid(); c uuid:=gen_random_uuid(); d uuid:=gen_random_uuid();
+ ev uuid; slug text:='qa-'||gen_random_uuid(); tid uuid; inv uuid; j jsonb; saved_consent timestamptz;
+begin
+ insert into auth.users(id,email,raw_user_meta_data) values(adm,adm||'@example.invalid','{}'),(a,a||'@example.invalid','{}'),(b,b||'@example.invalid','{}'),(c,c||'@example.invalid','{}'),(d,d||'@example.invalid','{}');
+ insert into public.tg_admins(user_id) values(adm);
+ insert into public.tg_events(slug,title,event_date,max_teams) values(slug,'QA ONLY',now()+interval '30 days',24) returning id into ev;
+ perform set_config('request.jwt.claim.sub',a::text,true);
+ begin perform public.arc_admin_action('accounts'); raise exception 'FAIL_ADMIN_GUARD'; exception when others then if sqlerrm<>'ADMIN_ONLY' then raise; end if; end;
+ perform set_config('request.jwt.claim.sub',adm::text,true);
+ j:=public.arc_admin_action('save_profile',jsonb_build_object('user_id',a,'nickname','QA Captain','full_name','QA Captain','gender','male','phone','01000000001','reason','QA profile'));
+ perform public.arc_admin_action('save_profile',jsonb_build_object('user_id',b,'nickname','QA Partner','full_name','QA Partner','gender','female','phone','01000000002','reason','QA profile'));
+ if (select privacy_consent_at from public.tg_athlete_private where athlete_id=a) is not null then raise exception 'FAIL_CONSENT_FABRICATED'; end if;
+ j:=public.arc_admin_action('accounts',jsonb_build_object('search',a::text));
+ if (j->>'total')::int<>1 then raise exception 'FAIL_ACCOUNT_SEARCH'; end if;
+ begin perform public.arc_admin_action('add_team',jsonb_build_object('event_slug',slug,'team_name','QA Wrong','captain_id',a,'partner_id',b,'division','OPEN','category','MM','reason','QA mismatch'));raise exception 'FAIL_GENDER_GUARD';exception when others then if sqlerrm<>'CATEGORY_GENDER_MISMATCH' then raise; end if;end;
+ j:=public.arc_admin_action('add_team',jsonb_build_object('event_slug',slug,'team_name','QA Manual','captain_id',a,'partner_id',b,'division','OPEN','category','MIXED','reason','QA complimentary'));
+ tid:=(j->>'team_id')::uuid;
+ if not exists(select 1 from public.tg_teams where id=tid and amount_due=0 and pricing_tier='admin' and paid_at is null and status='confirmed') then raise exception 'FAIL_MANUAL_ENTRY';end if;
+ if(select count(*) from public.tg_team_members where team_id=tid and active)<>2 then raise exception 'FAIL_MANUAL_ROSTER';end if;
+ begin perform public.arc_admin_action('add_team',jsonb_build_object('event_slug',slug,'team_name','QA Duplicate','captain_id',a,'partner_id',b,'division','OPEN','category','MIXED','reason','QA duplicate'));raise exception 'FAIL_DUPLICATE_GUARD';exception when others then if sqlerrm<>'ATHLETE_ALREADY_LOCKED_IN' then raise; end if;end;
+ begin perform public.arc_admin_action('save_profile',jsonb_build_object('user_id',b,'nickname','QA Partner','full_name','QA Partner','gender','male','phone','01000000002','reason','QA mismatch'));raise exception 'FAIL_PROFILE_CATEGORY_GUARD';exception when others then if sqlerrm<>'CATEGORY_GENDER_MISMATCH' then raise; end if;end;
+ perform public.arc_admin_action('save_profile',jsonb_build_object('user_id',a,'nickname','QA Updated','full_name','QA Updated','gender','male','phone','01000000003','reason','QA correction'));
+ if not exists(select 1 from public.tg_teams where id=tid and player_1='QA Updated' and phone='01000000003') then raise exception 'FAIL_TEAM_SYNC';end if;
+ begin perform public.arc_admin_action('delete_check',jsonb_build_object('user_id',adm,'email',adm||'@example.invalid','reason','QA delete'));raise exception 'FAIL_SELF_DELETE_GUARD';exception when others then if sqlerrm<>'CANNOT_DELETE_SELF' then raise; end if;end;
+ begin perform public.arc_admin_action('delete_check',jsonb_build_object('user_id',a,'email',a||'@example.invalid','reason','QA delete'));raise exception 'FAIL_HISTORY_GUARD';exception when others then if sqlerrm<>'ACCOUNT_HAS_TEAM_HISTORY' then raise; end if;end;
+ begin delete from auth.users where id=a;raise exception 'FAIL_ATOMIC_DELETE_GUARD';exception when others then if sqlerrm<>'ACCOUNT_HAS_TEAM_HISTORY' then raise;end if;end;
+ begin perform public.arc_admin_action('delete_check',jsonb_build_object('user_id',d,'email','wrong@example.invalid','reason','QA delete'));raise exception 'FAIL_EMAIL_GUARD';exception when others then if sqlerrm<>'EMAIL_CONFIRMATION_MISMATCH' then raise;end if;end;
+ perform public.arc_admin_action('delete_check',jsonb_build_object('user_id',d,'email',d||'@example.invalid','reason','QA delete'));
+ delete from auth.users where id=d;
+ if not exists(select 1 from private.arc_admin_audit where target_id=d and action='delete_account' and actor_id=adm) then raise exception 'FAIL_DELETE_AUDIT';end if;
+ -- A paid captain with a pending invitation, before partner acceptance.
+ delete from public.tg_team_members where team_id=tid and athlete_id=b;
+ update public.tg_teams set player_2='INVITE PENDING' where id=tid;
+ insert into private.arc_entry_invites(team_id,invitee_id) values(tid,b) returning id into inv;
+ j:=public.arc_admin_action('teams',jsonb_build_object('event_slug',slug));
+ if j->0->'pending_invite'->>'name'<>'QA Partner' then raise exception 'FAIL_ADMIN_PENDING_NAME';end if;
+ perform set_config('request.jwt.claim.sub',c::text,true);
+ begin perform public.arc_confirm_partner(inv);raise exception 'FAIL_CAPTAIN_GUARD';exception when others then if sqlerrm<>'CAPTAIN_ONLY' then raise;end if;end;
+ perform set_config('request.jwt.claim.sub',a::text,true);
+ execute 'set local role authenticated';
+ j:=public.arc_confirm_partner(inv);
+ execute 'reset role';
+ if not exists(select 1 from private.arc_entry_invites where id=inv and status='accepted' and confirmation_method='captain' and confirmed_by=a) then raise exception 'FAIL_CAPTAIN_CONFIRM';end if;
+ if (select count(*) from public.tg_team_members where team_id=tid and active)<>2 then raise exception 'FAIL_CAPTAIN_ROSTER';end if;
+ begin perform public.arc_confirm_partner(inv);raise exception 'FAIL_REPLAY_GUARD';exception when others then if sqlerrm<>'INVITE_NOT_PENDING' then raise;end if;end;
+ if has_function_privilege('anon','public.arc_admin_action(text,jsonb)','execute') or has_function_privilege('anon','public.arc_confirm_partner(uuid)','execute') then raise exception 'FAIL_ANON_GRANTS';end if;
+ if has_table_privilege('authenticated','private.arc_admin_audit','select') then raise exception 'FAIL_PRIVATE_AUDIT';end if;
+ perform set_config('request.jwt.claim.sub',c::text,true);execute 'set local role authenticated';
+ begin perform public.arc_admin_action('accounts');raise exception 'FAIL_AUTHENTICATED_ROLE_GUARD';exception when others then if sqlerrm<>'ADMIN_ONLY' then raise;end if;end;
+ execute 'reset role';
+ insert into arc_admin_test_results values('PASS: admin role; account search; profile save; no fabricated consent; category checks; team-name/contact sync; complimentary event registration; duplicate guard; protected self/history deletion; atomic deletion guard; typed email; deletion audit; pending partner visibility; captain-only confirmation; replay guard; authenticated execution; anonymous/table grants');
+end $test$;
+select * from arc_admin_test_results;
+rollback;
