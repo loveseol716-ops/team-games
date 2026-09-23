@@ -1,5 +1,5 @@
 const fp=id=>document.getElementById(id),points=v=>Number(v||0).toLocaleString('ko-KR')+' P';
-const pickCategory=v=>({MM:'MEN’S',WW:'WOMEN’S',MIXED:'MIXED'}[v]||v);
+const pickCategory=v=>({MM:'MEN’S DOUBLES',WW:'WOMEN’S DOUBLES',MIXED:'MIXED DOUBLES'}[v]||v);
 const pickStatus=v=>({pending:'PENDING',won:'WIN',lost:'LOSS',refunded:'REFUNDED'}[v]||'PENDING');
 let fanUser=null,fanAccount=null,pickRows=[],selectedPick=null,pickBusy=false,refreshBusy=false;
 async function pickRpc(name,args){const q=await db.rpc(name,args);if(q.error)throw q.error;return q.data;}

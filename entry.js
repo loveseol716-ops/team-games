@@ -1,7 +1,7 @@
 shell('PLAYER');
 const entryEl=id=>document.getElementById(id);
 const won=v=>Number(v||0).toLocaleString('en-US')+' KRW';
-const categoryName=v=>({MM:'MEN’S',WW:'WOMEN’S',MIXED:'MIXED'}[v]||v);
+const categoryName=v=>({MM:'MEN’S DOUBLES',WW:'WOMEN’S DOUBLES',MIXED:'MIXED DOUBLES'}[v]||v);
 let entryState=null,playerProfile=null,entryQuote=null,entryBusy=false;
 const entryErrors={
 AUTH_REQUIRED:'Log in and try again.',ADMIN_ONLY:'Staff access only.',ARC_ACCOUNT_NOT_FOUND:'No ARC account was found for that email. Ask your partner to sign up or check their account email.',
