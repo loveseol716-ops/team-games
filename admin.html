@@ -133,13 +133,13 @@
                 <label>Phone<input id="acct_phone" type="tel" autocomplete="off"></label>
                 <label>Gym<input id="acct_gym" maxlength="80"></label>
                 <label>Instagram<input id="acct_instagram" maxlength="80"></label>
-                <label class="wide">Reason for change / deletion<input id="acct_reason" minlength="3" maxlength="300" required placeholder="WHY IS THIS CHANGE NEEDED?"></label>
+                <label class="wide">Reason for profile change<input id="acct_reason" minlength="3" maxlength="300" required placeholder="WHY IS THIS CHANGE NEEDED?"></label>
               </div>
               <p class="muted">Player name, gender and phone are required for event participation. Email and sign-in identities stay unchanged.</p>
               <button id="accountSave" class="btn" type="submit">SAVE PROFILE</button>
             </form>
             <div id="accountEditMsg" class="notice"></div>
-            <details class="account-delete"><summary>DELETE ACCOUNT</summary><p id="accountDeleteHint"></p><label>Type the account email to confirm<input id="acct_delete_email" type="email" autocomplete="off"></label><button id="accountDelete" type="button" class="btn danger">PERMANENTLY DELETE</button></details>
+            <details class="account-delete"><summary>DELETE ACCOUNT</summary><p id="accountDeleteHint"></p><label>Type the account email to confirm<input id="acct_delete_email" type="email" autocomplete="off"></label><label>Reason for deletion (required)<input id="acct_delete_reason" minlength="3" maxlength="300" placeholder="E.G. DUPLICATE OR TEST ACCOUNT"></label><div id="accountDeleteMsg" class="notice" role="status" aria-live="polite"></div><button id="accountDelete" type="button" class="btn danger">PERMANENTLY DELETE</button></details>
           </div>
           <details><summary class="account-audit-summary">RECENT ACCOUNT &amp; ROSTER CHANGES</summary><div id="accountAudit" class="account-audit-list"></div></details>
         </section>
@@ -160,7 +160,7 @@
               <div class="field wide"><label>Reason</label><input id="newEntryReason" minlength="3" maxlength="300" placeholder="E.G. STAFF-APPROVED COMPLIMENTARY ENTRY"></div>
               <div class="add-button"><button id="addTeamBtn" class="btn arcade-primary" type="button">+ ADD TEAM</button></div>
             </div>
-            <div class="admin-add-note">Recorded as COMPLIMENTARY · 0 KRW. Complete both player profiles in Account Control first. Category and capacity limits still apply.</div>
+            <div class="admin-add-note">Recorded as COMPLIMENTARY · 0 KRW. Complete both player profiles first. 24 teams total across all divisions and categories.</div>
             <div id="addTeamMsg" class="notice"></div>
           </div>
         </section>
@@ -223,7 +223,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script src="app.js?v=20260922nav1"></script>
-<script src="admin-accounts.js?v=20260923-1"></script>
+<script src="admin-accounts.js?v=20260923-delete2"></script>
 <script>
 shell('ADMIN');
 
@@ -302,6 +302,8 @@ async function refreshAdmin(){
 async function enterAdmin(){
   try{
     currentEvent=await event();
+    const timing=await db.rpc('arc_event_status',{p_event_slug:C.eventSlug});
+    if(!timing.error&&timing.data)currentEvent.registration_open=timing.data.registration_open;
     const {data:{user}}=await db.auth.getUser();
     await refreshAdmin();
     $('loginBox').style.display='none';

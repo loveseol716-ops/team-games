@@ -144,8 +144,8 @@ async function loadMy(){
     el('arcProfileButton').textContent='COMPLETE PLAYER PROFILE →';
   }
 
-  const ev=await db.from('tg_events').select('registration_open').eq('slug',C.eventSlug).maybeSingle();
-  if(!ev.error&&ev.data?.registration_open)el('arcEntryState').textContent='OPEN';
+  const ev=await db.rpc('arc_event_status',{p_event_slug:C.eventSlug});
+  if(!ev.error&&ev.data)el('arcEntryState').textContent=!ev.data.registration_open?'CLOSED':ev.data.filled>=ev.data.max_teams?'FULL':'OPEN';
   const entry=await db.rpc('arc_entry_action',{p_action:'state',p_payload:{}});
   if(!entry.error){
     const s=entry.data,t=s.entry;

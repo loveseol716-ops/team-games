@@ -35,4 +35,5 @@
 @media(max-width:620px){.events-heading{padding-top:25px}.events-topline,.events-heading-bottom{font-size:9px}.events-heading h1{font-size:clamp(59px,16vw,96px)!important;margin:55px 0 40px}.events-heading-bottom{padding-bottom:17px}.events-program{padding-top:30px;padding-bottom:70px}.events-grid{grid-template-columns:1fr;gap:34px}.event-poster{padding:18px 19px 20px}.poster-center strong{font-size:clamp(91px,31vw,144px);margin:25px 0 29px}.poster-sub{font-size:clamp(19px,6.5vw,28px)}.event-info{padding:17px 0 20px}.event-info h3{font-size:39px!important}}
 @media(max-width:380px){.events-heading h1{font-size:15.5vw!important}.poster-center strong{font-size:30vw}.event-info{grid-template-columns:1fr}.event-info-actions a{width:max-content}}
 @media(prefers-reduced-motion:reduce){.poster-center strong{transition:none}}
-
+.event-sale-badge{display:flex;align-items:center;flex-wrap:wrap;gap:6px 12px;background:#f3f3ed;color:#111;padding:12px 14px;font:800 12px/1.5 var(--font-body);letter-spacing:.04em;border-left:4px solid #999}
+.event-sale-badge[hidden]{display:none}.event-sale-badge small{font-size:10px;font-weight:600}.event-sale-badge.is-closed{background:#292929;color:#ccc}.event-entry-deadline{font:600 10px/1.6 var(--font-body);color:#ccc;margin:10px 0 0;letter-spacing:.03em}

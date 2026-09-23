@@ -43,7 +43,7 @@ function openAccount(id){
  accountEditing=accountRows.find(a=>a.id===id);if(!accountEditing)return;
  const a=accountEditing;
  for(const key of ['nickname','full_name','gender','phone','gym','instagram'])document.getElementById(`acct_${key}`).value=a[key]||'';
- document.getElementById('acct_reason').value='';document.getElementById('acct_delete_email').value='';
+ document.getElementById('acct_reason').value='';document.getElementById('acct_delete_email').value='';document.getElementById('acct_delete_reason').value='';document.getElementById('accountDeleteMsg').style.display='none';
  document.getElementById('accountEditorTitle').textContent=a.email||'ACCOUNT';
  document.getElementById('accountEditor').hidden=false;
  document.getElementById('accountDelete').disabled=!!a.delete_blocker;
@@ -53,7 +53,7 @@ function openAccount(id){
 }
 async function runAccountChange(button,fn){
  if(accountBusy)return;accountBusy=true;button.disabled=true;
- try{await fn();}catch(e){notice('accountEditMsg',accountError(e),true);}finally{accountBusy=false;button.disabled=button.id==='accountDelete'&&!!accountEditing?.delete_blocker;}
+ try{await fn();}catch(e){notice(button.id==='accountDelete'?'accountDeleteMsg':'accountEditMsg',accountError(e),true);}finally{accountBusy=false;button.disabled=button.id==='accountDelete'&&!!accountEditing?.delete_blocker;}
 }
 document.getElementById('accountSearchForm').onsubmit=async e=>{e.preventDefault();accountOffset=0;try{await loadAccounts();}catch(err){notice('accountMsg',accountError(err),true);}};
 document.getElementById('accountPrev').onclick=async()=>{accountOffset=Math.max(0,accountOffset-25);try{await loadAccounts();}catch(e){notice('accountMsg',accountError(e),true);}};
@@ -70,9 +70,9 @@ document.getElementById('accountProfileForm').onsubmit=e=>{
 };
 document.getElementById('accountDelete').onclick=()=>{
  if(!accountEditing)return;
- const target=accountEditing.id,email=document.getElementById('acct_delete_email').value.trim(),reason=document.getElementById('acct_reason').value.trim();
- if(email.toLowerCase()!==(accountEditing.email||'').toLowerCase()){notice('accountEditMsg',accountErrors.EMAIL_CONFIRMATION_MISMATCH,true);return;}
- if(reason.length<3){notice('accountEditMsg',accountErrors.REASON_REQUIRED,true);return;}
+ const target=accountEditing.id,email=document.getElementById('acct_delete_email').value.trim(),reason=document.getElementById('acct_delete_reason').value.trim();
+ if(email.toLowerCase()!==(accountEditing.email||'').toLowerCase()){notice('accountDeleteMsg',accountErrors.EMAIL_CONFIRMATION_MISMATCH,true);document.getElementById('acct_delete_email').focus();return;}
+ if(reason.length<3||reason.length>300){notice('accountDeleteMsg',accountErrors.REASON_REQUIRED,true);document.getElementById('acct_delete_reason').focus();return;}
  if(!confirm(`Permanently delete ${email}? This cannot be undone.`))return;
  runAccountChange(document.getElementById('accountDelete'),async()=>{
   const {data,error}=await db.functions.invoke('arc-admin-accounts',{body:{action:'delete',user_id:target,email,reason}});
