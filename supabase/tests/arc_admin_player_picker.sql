@@ -1,0 +1,30 @@
+begin;
+create temporary table picker_test_result(label text);
+do $test$
+declare adm uuid:=gen_random_uuid(); a uuid:=gen_random_uuid(); b uuid:=gen_random_uuid(); ev uuid; slug text:='qa-picker-'||gen_random_uuid(); j jsonb; tid uuid;
+begin
+ insert into auth.users(id,email,raw_user_meta_data) values(adm,adm||'@example.invalid','{}'),(a,a||'@example.invalid','{}'),(b,b||'@example.invalid','{}');
+ insert into public.tg_admins(user_id) values(adm);
+ insert into public.tg_events(slug,title,event_date,max_teams) values(slug,'QA ONLY',now()+interval '30 days',24) returning id into ev;
+ perform set_config('request.jwt.claim.sub',a::text,true);
+ begin perform public.arc_admin_action('players',jsonb_build_object('event_slug',slug));raise exception 'FAIL_AUTH';exception when others then if sqlerrm<>'ADMIN_ONLY' then raise;end if;end;
+ perform set_config('request.jwt.claim.sub',adm::text,true);
+ execute 'set local role authenticated';
+ j:=public.arc_admin_action('players',jsonb_build_object('event_slug',slug));
+ if not exists(select 1 from jsonb_array_elements(j) x where x->>'athlete_id'=a::text and (x->>'needs_profile')::boolean) then raise exception 'FAIL_NEW_ACCOUNT_MISSING';end if;
+ perform public.arc_admin_action('save_profile',jsonb_build_object('user_id',a,'nickname','QA Captain','full_name','QA Captain','gender','male','phone','01000000001'));
+ perform public.arc_admin_action('save_profile',jsonb_build_object('user_id',b,'nickname','QA Partner','full_name','QA Partner','gender','female','phone','01000000002'));
+ j:=public.arc_admin_action('players',jsonb_build_object('event_slug',slug));
+ if not exists(select 1 from jsonb_array_elements(j) x where x->>'athlete_id'=a::text and not (x->>'needs_profile')::boolean) then raise exception 'FAIL_READY';end if;
+ j:=public.arc_admin_action('add_team',jsonb_build_object('event_slug',slug,'team_name','QA Team','captain_id',a,'partner_id',b,'division','OPEN','category','MIXED','reason','QA test'));
+ tid:=(j->>'team_id')::uuid;
+ j:=public.arc_admin_action('players',jsonb_build_object('event_slug',slug));
+ if not exists(select 1 from jsonb_array_elements(j) x where x->>'athlete_id'=a::text and (x->>'locked_in')::boolean) then raise exception 'FAIL_LOCKED';end if;
+ execute 'reset role';
+ if (select count(*) from public.tg_team_members where team_id=tid and active)<>2 then raise exception 'FAIL_ROSTER';end if;
+ if not exists(select 1 from private.arc_admin_audit where target_id=a and action='save_profile' and reason is null) then raise exception 'FAIL_AUDIT';end if;
+ if has_function_privilege('anon','public.arc_admin_action(text,jsonb)','execute') then raise exception 'FAIL_ANON';end if;
+ insert into picker_test_result values('PASS: signup-only accounts listed; non-admin blocked; profile saved without reason; completed profile selectable; two-player team created; event membership locked; audit retained; anonymous denied');
+end $test$;
+select * from picker_test_result;
+rollback;

@@ -133,7 +133,6 @@
                 <label>Phone<input id="acct_phone" type="tel" autocomplete="off"></label>
                 <label>Gym<input id="acct_gym" maxlength="80"></label>
                 <label>Instagram<input id="acct_instagram" maxlength="80"></label>
-                <label class="wide">Reason for profile change<input id="acct_reason" minlength="3" maxlength="300" required placeholder="WHY IS THIS CHANGE NEEDED?"></label>
               </div>
               <p class="muted">Player name, gender and phone are required for event participation. Email and sign-in identities stay unchanged.</p>
               <button id="accountSave" class="btn" type="submit">SAVE PROFILE</button>
@@ -155,12 +154,12 @@
               <div class="field wide"><label>Event</label><select id="newEvent"></select></div>
               <div class="field"><label>Division</label><select id="newDivision"><option value="OPEN">BEGINNER</option><option value="PRO">ATHLETE</option></select></div>
               <div class="field"><label>Category</label><select id="newCategory"><option value="MM">MEN’S · MM</option><option value="WW">WOMEN’S · FF</option><option value="MIXED">MIXED · MF</option></select></div>
-              <div class="field"><label>Captain</label><select id="newCaptain"></select></div>
-              <div class="field"><label>Partner</label><select id="newPartner"></select></div>
+              <div class="field"><label>Captain</label><select id="newCaptain"></select><small id="newCaptainHint" aria-live="polite"></small><button id="newCaptainEdit" type="button" class="btn dark" hidden>EDIT PROFILE</button></div>
+              <div class="field"><label>Partner</label><select id="newPartner"></select><small id="newPartnerHint" aria-live="polite"></small><button id="newPartnerEdit" type="button" class="btn dark" hidden>EDIT PROFILE</button></div>
               <div class="field wide"><label>Reason</label><input id="newEntryReason" minlength="3" maxlength="300" placeholder="E.G. STAFF-APPROVED COMPLIMENTARY ENTRY"></div>
               <div class="add-button"><button id="addTeamBtn" class="btn arcade-primary" type="button">+ ADD TEAM</button></div>
             </div>
-            <div class="admin-add-note">Recorded as COMPLIMENTARY · 0 KRW. Complete both player profiles first. 24 teams total across all divisions and categories.</div>
+            <div class="admin-add-note">Recorded as COMPLIMENTARY · 0 KRW. All registered accounts are listed. Use EDIT PROFILE to complete missing player details. 24 teams total across all divisions and categories.</div>
             <div id="addTeamMsg" class="notice"></div>
           </div>
         </section>
@@ -223,7 +222,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script src="app.js?v=20260922nav1"></script>
-<script src="admin-accounts.js?v=20260923-delete2"></script>
+<script src="admin-accounts.js?v=20260928-players"></script>
 <script>
 shell('ADMIN');
 
@@ -286,7 +285,7 @@ async function adminTeams(){
 }
 
 async function adminPlayers(){
-  const q=await db.rpc('tg_admin_list_athletes',{p_event_slug:$('newEvent').value||C.eventSlug});
+  const q=await db.rpc('arc_admin_action',{p_action:'players',p_payload:{event_slug:$('newEvent').value||C.eventSlug}});
   if(q.error)throw q.error;
   return q.data||[];
 }
@@ -333,28 +332,47 @@ function renderSummary(){
 }
 
 function athleteOption(a){
-  const meta=[a.handle?`@${a.handle}`:'',a.gym||''].filter(Boolean).join(' · ');
-  return `<option value="${a.athlete_id}" ${a.locked_in?'disabled':''}>${esc(a.display_name)}${meta?` — ${esc(meta)}`:''}${a.locked_in?' · LOCKED IN':''}</option>`;
+  const meta=[a.email||'',a.gym||''].filter(Boolean).join(' · ');
+  return `<option value="${a.athlete_id}" ${a.locked_in?'disabled':''}>${esc(a.display_name)}${meta?` — ${esc(meta)}`:''}${a.locked_in?' · LOCKED IN':a.needs_profile?' · PROFILE NEEDED':''}</option>`;
 }
 
 function renderAddTeam(){
+  const selected=[$('newCaptain').value,$('newPartner').value];
   const free=adminAthletes.filter(a=>!a.locked_in);
   const base='<option value="">SELECT PLAYER</option>'+adminAthletes.map(athleteOption).join('');
   $('newCaptain').innerHTML=base;
   $('newPartner').innerHTML=base;
+  ['newCaptain','newPartner'].forEach((id,i)=>{if(adminAthletes.some(a=>a.athlete_id===selected[i]&&!a.locked_in))$(id).value=selected[i];});
+  syncPlayerSelections();
   $('addTeamBtn').disabled=free.length<2;
   if(free.length<2){
-    notice('addTeamMsg','Fewer than two players are available. Ask another player to complete a profile.',false);
+    notice('addTeamMsg','Fewer than two players are available. Register at least two accounts to create a team.',false);
   }else{
     $('addTeamMsg').style.display='none';
   }
 }
 
-$('newCaptain').addEventListener('change',()=>{
-  [...$('newPartner').options].forEach(o=>{if(o.value)o.disabled=adminAthletes.find(a=>a.athlete_id===o.value)?.locked_in||o.value===$('newCaptain').value});
-});
-$('newPartner').addEventListener('change',()=>{
-  [...$('newCaptain').options].forEach(o=>{if(o.value)o.disabled=adminAthletes.find(a=>a.athlete_id===o.value)?.locked_in||o.value===$('newPartner').value});
+function syncPlayerSelections(){
+  [['newCaptain','newPartner'],['newPartner','newCaptain']].forEach(([id,other])=>{
+    [...$(id).options].forEach(o=>{if(o.value)o.disabled=!!adminAthletes.find(a=>a.athlete_id===o.value)?.locked_in||o.value===$(other).value;});
+    const player=adminAthletes.find(a=>a.athlete_id===$(id).value);
+    $(id+'Edit').hidden=!player;
+    $(id+'Hint').textContent=player?.needs_profile?'Name, gender and phone are needed. Click EDIT PROFILE below.':'';
+  });
+}
+async function editSelectedPlayer(id){
+  const player=adminAthletes.find(a=>a.athlete_id===$(id).value);if(!player)return;
+  try{
+    const data=await accountRpc('accounts',{search:player.email||player.display_name,limit:100});
+    const account=data.accounts.find(a=>a.id===player.athlete_id);
+    if(!account)throw new Error('ACCOUNT_NOT_FOUND');
+    if(!accountRows.some(a=>a.id===account.id))accountRows.push(account);
+    openAccount(account.id);
+  }catch(e){notice('addTeamMsg',accountError(e),true);}
+}
+['newCaptain','newPartner'].forEach(id=>{
+  $(id).addEventListener('change',syncPlayerSelections);
+  $(id+'Edit').onclick=()=>editSelectedPlayer(id);
 });
 
 $('newEvent').addEventListener('change',async()=>{try{adminAthletes=await adminPlayers();renderAddTeam();}catch(e){notice('addTeamMsg',accountError(e),true);}});
@@ -364,6 +382,7 @@ $('addTeamBtn').onclick=async()=>{
   const captain=$('newCaptain').value;
   const partner=$('newPartner').value;
   if(!teamName||!captain||!partner){notice('addTeamMsg','Enter a team name and select two players.',true);return}
+  if([captain,partner].some(id=>adminAthletes.find(a=>a.athlete_id===id)?.needs_profile)){notice('addTeamMsg','Complete each selected player’s name, gender and phone using EDIT PROFILE.',true);return}
   if($('newEntryReason').value.trim().length<3){notice('addTeamMsg','Enter a reason for the complimentary entry.',true);return}
   if(!confirm(`Add ${teamName} to ${$('newEvent').value} as a complimentary team (0 KRW)?`))return;
   $('addTeamBtn').disabled=true;$('addTeamBtn').textContent='ADDING…';

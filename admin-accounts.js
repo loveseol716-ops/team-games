@@ -43,7 +43,7 @@ function openAccount(id){
  accountEditing=accountRows.find(a=>a.id===id);if(!accountEditing)return;
  const a=accountEditing;
  for(const key of ['nickname','full_name','gender','phone','gym','instagram'])document.getElementById(`acct_${key}`).value=a[key]||'';
- document.getElementById('acct_reason').value='';document.getElementById('acct_delete_email').value='';document.getElementById('acct_delete_reason').value='';document.getElementById('accountDeleteMsg').style.display='none';
+ document.getElementById('acct_delete_email').value='';document.getElementById('acct_delete_reason').value='';document.getElementById('accountDeleteMsg').style.display='none';
  document.getElementById('accountEditorTitle').textContent=a.email||'ACCOUNT';
  document.getElementById('accountEditor').hidden=false;
  document.getElementById('accountDelete').disabled=!!a.delete_blocker;
@@ -62,7 +62,7 @@ document.getElementById('accountList').onclick=e=>{const b=e.target.closest('[da
 document.getElementById('accountClose').onclick=()=>{if(!accountBusy)document.getElementById('accountEditor').hidden=true;};
 document.getElementById('accountProfileForm').onsubmit=e=>{
  e.preventDefault();if(!accountEditing)return;
- const payload={user_id:accountEditing.id};for(const key of ['nickname','full_name','gender','phone','gym','instagram','reason'])payload[key]=document.getElementById(`acct_${key}`).value.trim();
+ const payload={user_id:accountEditing.id};for(const key of ['nickname','full_name','gender','phone','gym','instagram'])payload[key]=document.getElementById(`acct_${key}`).value.trim();
  runAccountChange(document.getElementById('accountSave'),async()=>{
   await accountRpc('save_profile',payload);await refreshAdmin();
   notice('accountEditMsg','PROFILE SAVED. Team names and captain contact were updated.');
