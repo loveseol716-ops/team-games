@@ -140,6 +140,7 @@ function shell(active){
       </div>
     </footer>`;
   syncArcAccountNav();
+  enforceAccountSetup().catch(()=>{location.replace('account.html?mode=login&next='+encodeURIComponent(safeNextUrl(location.pathname.split('/').pop()+location.search,'my.html')));});
 }
 
 function revealGameMaster(){/* admin is intentionally isolated from participant navigation */}
@@ -190,7 +191,7 @@ async function syncArcAccountNav(){
 function safeNextUrl(raw,fallback='my.html'){
   const v=String(raw||'').trim();
   if(!v)return fallback;
-  if(/^https?:/i.test(v)||v.startsWith('//')||v.includes('..'))return fallback;
+  if(!/^[a-z0-9-]+\.html(?:[?#].*)?$/i.test(v)||v.includes('..')||/[\\\r\n]/.test(v))return fallback;
   return v;
 }
 
@@ -229,4 +230,15 @@ function countdown(){
   const el=document.getElementById('countdown');if(!el)return;
   const target=new Date(C.eventDateISO);
   const tick=()=>{let d=Math.max(0,target-new Date()),days=Math.floor(d/864e5);d%=864e5;let h=Math.floor(d/36e5);d%=36e5;let m=Math.floor(d/6e4),s=Math.floor((d%6e4)/1e3);el.innerHTML=[['DAYS',days],['HOURS',h],['MIN',m],['SEC',s]].map(([l,v])=>`<div class="card"><b>${String(v).padStart(2,'0')}</b><span>${l}</span></div>`).join('')};tick();setInterval(tick,1000);
+}
+
+// Existing sessions must complete the same required account details as new sign-ins.
+async function enforceAccountSetup(){
+  const page=location.pathname.split('/').pop()||'index.html';
+  if(['account.html','player-profile.html','admin.html','privacy.html','terms.html','reset-password.html'].includes(page))return true;
+  const user=await currentUser();if(!user)return true;
+  const q=await db.rpc('arc_account_setup_state');if(q.error)throw q.error;
+  if(q.data?.complete)return true;
+  location.replace('player-profile.html?next='+encodeURIComponent(safeNextUrl(page+location.search,'my.html')));
+  return false;
 }

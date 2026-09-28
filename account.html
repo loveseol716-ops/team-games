@@ -14,7 +14,7 @@
   <meta name="theme-color" content="#111111">
   <title>ACCOUNT · ARC STATION</title>
   <link rel="stylesheet" href="styles.css?v=20260919-account1">
-  <link rel="stylesheet" href="arcade-pages.css?v=20260919-account1">
+  <link rel="stylesheet" href="arcade-pages.css?v=20260928-setup">
 <link rel="stylesheet" href="underground.css?v=20260922ug2">
 <link rel="stylesheet" href="station.css?v=20260922s2">
 <link rel="stylesheet" href="station-navigation.css?v=20260922nav1">
@@ -52,13 +52,14 @@
 <div id="footer"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
-<script src="app.js?v=20260922nav1"></script>
+<script src="app.js?v=20260928-setup"></script>
 <script>
 shell('ACCOUNT');
 
 const params=new URLSearchParams(location.search);
 const storedNext=safeNextUrl(sessionStorage.getItem('arc_oauth_next'),'my.html');
-const next=safeNextUrl(params.get('next')||sessionStorage.getItem('arc_oauth_next'),'my.html');
+let next=safeNextUrl(params.get('next')||sessionStorage.getItem('arc_oauth_next'),'my.html');
+if(next.startsWith('player-profile.html'))next=safeNextUrl(new URL(next,location.origin).searchParams.get('next'),'my.html');
 let mode=params.get('mode')==='login'?'login':'signup';
 let emailSubmitting=false;
 
@@ -74,6 +75,7 @@ function authError(e){
   if(m.includes('INVALID_PASSWORD'))return 'Use at least 8 characters, including a letter and a number.';
   if(m.includes('INVALID_NAME'))return 'Enter a name with at least 2 characters.';
   if(m.includes('INVALID_NICKNAME'))return 'Use 2–30 characters for your nickname.';
+  if(m.includes('GENDER_REQUIRED'))return 'Select your gender.';
   if(m.includes('INVALID_PHONE'))return 'Check your mobile number.';
   if(m.includes('CONSENT_REQUIRED'))return 'Accept the Terms and Privacy Policy to continue.';
   if(m.includes('Invalid login credentials'))return 'Email or password is incorrect.';
@@ -93,6 +95,7 @@ function renderAuth(){
         <label>NICKNAME <em>REQUIRED</em><input id="nickname" minlength="2" maxlength="30" autocomplete="nickname" placeholder="NAME SHOWN ON SITE" required></label>
         <label>NAME <em>REQUIRED</em><input id="fullName" minlength="2" maxlength="50" autocomplete="name" placeholder="LEGAL NAME" required></label>
       </div>
+      <label>GENDER <em>REQUIRED</em><select id="signupGender" required><option value="">SELECT</option><option value="male">MALE</option><option value="female">FEMALE</option></select></label>
       <label>MOBILE <em>REQUIRED</em><input id="phone" type="tel" inputmode="tel" maxlength="20" autocomplete="tel" placeholder="010-1234-5678" required></label>`:''}
       <label>EMAIL<input id="email" type="email" autocomplete="email" required></label>
       <label>PASSWORD<input id="password" type="password" minlength="8" maxlength="72" autocomplete="${mode==='signup'?'new-password':'current-password'}" required></label>
@@ -115,8 +118,10 @@ function renderAuth(){
 async function finishLogin(name=null){
   const boot=await db.rpc('arc_account_bootstrap',{p_display_name:name});
   if(boot.error)throw boot.error;
+  const setup=await db.rpc('arc_account_setup_state');
+  if(setup.error)throw setup.error;
   sessionStorage.removeItem('arc_oauth_next');
-  location.href=next;
+  location.href=setup.data?.complete?next:'player-profile.html?next='+encodeURIComponent(next);
 }
 
 async function submitEmail(e){
@@ -129,21 +134,23 @@ async function submitEmail(e){
   try{
     const mail=byId('email').value.trim().toLowerCase();
     const pw=byId('password').value;
-    let name=null;
+    let name=null,signupProfile=null;
 
     if(mode==='signup'){
       name=byId('nickname').value.trim();
       const fullName=byId('fullName').value.trim();
       const phone=byId('phone').value.trim();
+      const gender=byId('signupGender').value;
+      if(!['male','female'].includes(gender))throw new Error('GENDER_REQUIRED');
       const pwConfirm=byId('passwordConfirm').value;
       if(name.length<2)throw new Error('INVALID_NICKNAME');
       if(fullName.length<2)throw new Error('INVALID_NAME');
-      if(!/^\d{8,15}$/.test(phone.replace(/\D/g,'')))throw new Error('INVALID_PHONE');
+      if(!/^\d{10,11}$/.test(phone.replace(/\D/g,'')))throw new Error('INVALID_PHONE');
       if(!/^(?=.*[A-Za-z])(?=.*\d).{8,72}$/.test(pw))throw new Error('INVALID_PASSWORD');
       if(pw!==pwConfirm)throw new Error('Passwords do not match.');
       if(!byId('termsConsent').checked||!byId('privacyConsent').checked)throw new Error('CONSENT_REQUIRED');
       const r=await db.functions.invoke('tg-athlete-signup',{body:{
-        email:mail,password:pw,display_name:name,full_name:fullName,phone,
+        email:mail,password:pw,display_name:name,full_name:fullName,phone,gender,
         terms_consent:true,privacy_consent:true,marketing_consent:byId('marketingConsent').checked,
         website:byId('website').value
       }});
@@ -153,10 +160,12 @@ async function submitEmail(e){
         throw new Error(serverError||r.error.message);
       }
       if(!r.data?.ok)throw new Error(r.data?.error||'SIGNUP_FAILED');
+      signupProfile={p_nickname:name,p_full_name:fullName,p_gender:gender,p_phone:phone,p_terms_consent:true,p_privacy_consent:true};
     }
 
     const login=await db.auth.signInWithPassword({email:mail,password:pw});
     if(login.error)throw login.error;
+    if(signupProfile){const setup=await db.rpc('arc_complete_account',signupProfile);if(setup.error){location.href='player-profile.html?next='+encodeURIComponent(next);return;}}
     await finishLogin(name);
   }catch(err){
     emailSubmitting=false;
@@ -208,7 +217,7 @@ async function handleExistingSession(){
 }
 
 db.auth.onAuthStateChange((event,session)=>{
-  if(session?.user&&(event==='SIGNED_IN'||event==='INITIAL_SESSION'))handleExistingSession();
+  if(session?.user&&(event==='SIGNED_IN'||event==='INITIAL_SESSION'))setTimeout(handleExistingSession,0);
 });
 
 renderAuth();

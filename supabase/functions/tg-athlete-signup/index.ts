@@ -37,6 +37,7 @@ Deno.serve(async (req: Request) => {
     const password = String(body.password || '')
     const displayName = String(body.display_name || '').trim().slice(0, 30)
     const fullName = String(body.full_name || '').trim().slice(0, 50)
+    const gender = String(body.gender || '').trim()
     const phone = String(body.phone || '').trim()
     const phoneDigits = phone.replace(/[^0-9]/g, '')
     const termsConsent = body.terms_consent === true
@@ -47,7 +48,8 @@ Deno.serve(async (req: Request) => {
     if (!/^(?=.*[A-Za-z])(?=.*\d).{8,72}$/.test(password)) return json({ ok: false, error: 'INVALID_PASSWORD' }, 400, origin)
     if (displayName.length < 2) return json({ ok: false, error: 'INVALID_NICKNAME' }, 400, origin)
     if (fullName.length < 2) return json({ ok: false, error: 'INVALID_NAME' }, 400, origin)
-    if (phoneDigits.length < 8 || phoneDigits.length > 15) return json({ ok: false, error: 'INVALID_PHONE' }, 400, origin)
+    if (!['male', 'female'].includes(gender)) return json({ ok: false, error: 'GENDER_REQUIRED' }, 400, origin)
+    if (phoneDigits.length < 10 || phoneDigits.length > 11) return json({ ok: false, error: 'INVALID_PHONE' }, 400, origin)
     if (!termsConsent || !privacyConsent) return json({ ok: false, error: 'CONSENT_REQUIRED' }, 400, origin)
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL') || ''
@@ -62,7 +64,7 @@ Deno.serve(async (req: Request) => {
       email,
       password,
       email_confirm: true,
-      user_metadata: { signup_source: 'arc_station', display_name: displayName },
+      user_metadata: { signup_source: 'arc_station', display_name: displayName, gender },
     })
 
     if (error) {

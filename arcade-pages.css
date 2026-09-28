@@ -855,7 +855,7 @@
 .arc-auth-form{display:grid;gap:11px;padding:16px;border:1px solid #272a33;border-top:0;background:#090a0f}
 .arc-auth-form label,.arc-settings-card label{display:grid;gap:6px;font-size:8px;color:#737a84;letter-spacing:.07em}
 .arc-auth-form label em{font-style:normal;color:var(--tg-pink);font-size:7px}
-.arc-auth-form input,.arc-settings-card input{width:100%;padding:13px 12px;border:1px solid #30333d;background:#07080c;color:#fff}
+.arc-auth-form input,.arc-auth-form select,.arc-settings-card input{width:100%;padding:13px 12px;border:1px solid #30333d;background:#07080c;color:#fff}
 .arc-auth-form .btn{min-height:50px;margin-top:4px}
 .arc-auth-field-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
 .arc-password-hint{margin:-4px 0 0;color:#69717c;font-size:9px;line-height:1.5}
@@ -1174,7 +1174,7 @@ radial-gradient(circle at 88% 8%,rgba(45,226,255,.05),transparent 25%),
   .arc-auth-status,.arc-profile-step{
     align-items:flex-start;flex-direction:column
   }
-  .arc-auth-form input,.arc-player-form input,.arc-player-form select{
+  .arc-auth-form input,.arc-auth-form select,.arc-player-form input,.arc-player-form select{
     font-size:16px
   }
 

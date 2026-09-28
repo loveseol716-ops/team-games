@@ -14,7 +14,7 @@
   <meta name="theme-color" content="#111111">
   <title>PLAYER PROFILE · ARC STATION</title>
   <link rel="stylesheet" href="styles.css?v=20260919-account1">
-  <link rel="stylesheet" href="arcade-pages.css?v=20260919-account1">
+  <link rel="stylesheet" href="arcade-pages.css?v=20260928-setup">
 <link rel="stylesheet" href="underground.css?v=20260922ug2">
 <link rel="stylesheet" href="station.css?v=20260922s2">
 <link rel="stylesheet" href="station-navigation.css?v=20260922nav1">
@@ -26,17 +26,18 @@
   <section class="arcade-page-hero arc-player-profile-hero">
     <div class="container arc-player-profile-layout">
       <div>
-        <div class="arcade-eyebrow">GAME ENTRY // STEP 01</div>
-        <h1>PLAYER<br>PROFILE.</h1>
-        <p class="lead">Add your athlete details once before entering a game.</p>
+        <div class="arcade-eyebrow">ARC ACCOUNT // REQUIRED DETAILS</div>
+        <h1>COMPLETE<br>YOUR ID.</h1>
+        <p class="lead">Complete your account details to continue. Required for all sign-in methods.</p>
         <div class="arcade-page-chips">
-          <span>NAME</span><span>GENDER</span><span>PHONE</span><span>INSTAGRAM</span><span>GYM</span>
+          <span>NICKNAME</span><span>NAME</span><span>GENDER</span><span>PHONE</span><span>INSTAGRAM</span><span>GYM</span>
         </div>
       </div>
 
       <div class="arc-player-form-card">
-        <div class="arc-profile-step"><span>01 / PLAYER ID</span><b>REQUIRED BEFORE ENTRY</b></div>
+        <div class="arc-profile-step"><span>01 / PLAYER ID</span><b>REQUIRED TO CONTINUE</b></div>
         <form id="playerProfileForm" class="arc-player-form">
+          <label>NICKNAME <em>REQUIRED</em><input id="nickname" minlength="2" maxlength="30" autocomplete="nickname" required></label>
           <label>
             NAME <em>REQUIRED</em>
             <input id="fullName" maxlength="50" autocomplete="name" placeholder="YOUR FULL NAME" required>
@@ -66,13 +67,14 @@
             <input id="gym" maxlength="80" placeholder="NOLTO GYM">
           </label>
 
+          <label class="arc-consent"><input id="termsConsent" type="checkbox" required><span>I agree to the <a href="terms.html" target="_blank" rel="noopener">Terms of Use</a>.</span></label>
           <label class="arc-consent">
             <input id="privacyConsent" type="checkbox" required>
-            <span>I consent to the collection and use of my personal data for event operations.</span>
+            <span>I agree to the <a href="privacy.html" target="_blank" rel="noopener">collection and use of my personal data</a> for account and event operations.</span>
           </label>
 
-          <button id="savePlayerProfile" class="btn arcade-primary" type="submit">SAVE PLAYER PROFILE →</button>
-          <button id="cancelPlayerProfile" class="btn dark" type="button">BACK</button>
+          <button id="savePlayerProfile" class="btn arcade-primary" type="submit">SAVE & CONTINUE →</button>
+          <button id="cancelPlayerProfile" class="btn dark" type="button">LOG OUT</button>
           <div id="profileMsg" class="notice"></div>
         </form>
 
@@ -87,15 +89,18 @@
 <div id="footer"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
-<script src="app.js?v=20260922nav1"></script>
+<script src="app.js?v=20260928-setup"></script>
 <script>
 shell('PLAYER');
 
 const params=new URLSearchParams(location.search);
-const next=safeNextUrl(params.get('next'),'athlete.html');
+const next=safeNextUrl(params.get('next'),'my.html');
 
 function profileError(e){
   const m=String(e?.message||e||'');
+  if(m.includes('INVALID_NICKNAME'))return 'Use 2–30 characters for your nickname.';
+  if(m.includes('CONSENT_REQUIRED'))return 'Accept the Terms and Privacy Policy to continue.';
+  if(m.includes('CATEGORY_GENDER_MISMATCH'))return 'Your gender must match your registered team category. Contact staff for help.';
   if(m.includes('NAME_REQUIRED'))return 'Enter your name.';
   if(m.includes('GENDER_REQUIRED'))return 'Select your gender.';
   if(m.includes('INVALID_PHONE'))return 'Check your mobile number.';
@@ -116,18 +121,20 @@ async function loadProfile(){
   const boot=await db.rpc('arc_account_bootstrap',{p_display_name:null});
   if(boot.error)throw boot.error;
 
-  const q=await db.rpc('arc_player_profile');
+  const q=await db.rpc('arc_account_setup_state');
   if(q.error)throw q.error;
-  const p=q.data?.[0]||{};
+  const p=q.data||{};
+  nickname.value=p.nickname||'';
+  termsConsent.checked=!!p.terms_accepted;
 
   fullName.value=p.full_name||'';
-  gender.value=p.gender||'';
+  gender.value=p.gender||user.user_metadata?.gender||'';
   phone.value=p.phone||'';
   instagram.value=p.instagram||'';
   gym.value=p.gym||'';
-  privacyConsent.checked=!!p.privacy_consent_at;
+  privacyConsent.checked=!!p.privacy_accepted;
 
-  if(p.profile_complete){
+  if(p.complete){
     notice('profileMsg','PLAYER PROFILE READY. You can edit it anytime.');
   }
 }
@@ -138,7 +145,9 @@ playerProfileForm.onsubmit=async e=>{
   savePlayerProfile.textContent='SAVING…';
 
   try{
-    const q=await db.rpc('arc_save_player_profile',{
+    const q=await db.rpc('arc_complete_account',{
+      p_nickname:nickname.value.trim(),
+      p_terms_consent:termsConsent.checked,
       p_full_name:fullName.value.trim(),
       p_gender:gender.value,
       p_phone:digits(phone.value),
@@ -152,11 +161,11 @@ playerProfileForm.onsubmit=async e=>{
   }catch(err){
     notice('profileMsg',profileError(err),true);
     savePlayerProfile.disabled=false;
-    savePlayerProfile.textContent='SAVE PLAYER PROFILE →';
+    savePlayerProfile.textContent='SAVE & CONTINUE →';
   }
 };
 
-cancelPlayerProfile.onclick=()=>{location.href=next};
+cancelPlayerProfile.onclick=async()=>{await db.auth.signOut();location.href='index.html'};
 loadProfile().catch(e=>notice('profileMsg',profileError(e),true));
 </script>
 </body>
