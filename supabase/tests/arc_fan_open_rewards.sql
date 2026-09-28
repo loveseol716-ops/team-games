@@ -1,0 +1,33 @@
+begin;
+do $$
+declare a uuid:=gen_random_uuid(); b uuid:=gen_random_uuid(); ev uuid; tid uuid; mid uuid; sid uuid; wallet_before int;
+begin
+ select season_id into sid from public.tg_events where slug='team-games-001';
+ insert into auth.users(id,email,raw_user_meta_data) values(a,a||'@example.invalid','{}'),(b,b||'@example.invalid','{}');
+ insert into public.tg_athletes(id,display_name,gender,handle,photo_url) values(a,'QA A','male','qa_'||left(replace(a::text,'-',''),20),'https://arcstation.kr/favicon.png'),(b,'QA B','male','qa_'||left(replace(b::text,'-',''),20),'https://arcstation.kr/favicon.png');
+ insert into public.tg_events(slug,title,event_date,max_teams,season_id,picks_open) values('qa-points-'||a,'QA ONLY',now()+interval '30 days',24,sid,true) returning id into ev;
+ insert into public.tg_teams(event_id,team_name,player_1,player_2,phone,photo_url,status,division,category,payment_status,pricing_tier,amount_due) values(ev,'QA Team','QA A','QA B','01000000001','https://arcstation.kr/favicon.png','confirmed','OPEN','MM','paid','admin',0) returning id into tid;
+ insert into public.tg_team_members(team_id,event_id,athlete_id,member_role) values(tid,ev,a,'captain'),(tid,ev,b,'partner');
+ insert into public.tg_results(event_id,team_id,status,rank) values(ev,tid,'Finished',1);
+ if (select count(*) from public.tg_athlete_points where event_id=ev and points=3000)<>2 then raise exception 'FAIL_BOTH_PLAYERS'; end if;
+ update public.tg_results set rank=2 where event_id=ev;
+ if (select sum(points) from public.tg_athlete_points where event_id=ev)<>4000 then raise exception 'FAIL_CORRECTION'; end if;
+ update public.tg_results set rank=24,status='Time Cap' where event_id=ev;
+ if (select sum(points) from public.tg_athlete_points where event_id=ev)<>1000 then raise exception 'FAIL_TIME_CAP'; end if;
+ update public.tg_team_members set active=false where team_id=tid and athlete_id=b;
+ update public.tg_results set rank=3 where event_id=ev;
+ if (select count(*) from public.tg_athlete_points where event_id=ev)<>1 then raise exception 'FAIL_INACTIVE'; end if;
+ update public.tg_results set rank=null,status='Running' where event_id=ev;
+ if exists(select 1 from public.tg_athlete_points where event_id=ev) then raise exception 'FAIL_UNRANKED'; end if;
+ insert into public.tg_prediction_markets(event_id,division,category,status,lock_at) values(ev,'OPEN','MM','open',now()+interval '1 day') returning id into mid;
+ insert into public.tg_fan_wallets(user_id,balance) values(a,1000);
+ perform set_config('request.jwt.claim.sub',a::text,true);
+ perform public.tg_place_prediction_bet(mid,tid,100);
+ if (select balance from public.tg_fan_wallets where user_id=a)<>900 then raise exception 'FAIL_STAKE'; end if;
+ begin perform public.tg_place_prediction_bet(mid,tid,100); raise exception 'FAIL_DUPLICATE'; exception when others then if sqlerrm<>'BET_ALREADY_PLACED' then raise;end if;end;
+ update public.tg_prediction_markets set lock_at=now()-interval '1 second' where id=mid;
+ begin perform public.tg_place_prediction_bet(mid,tid,100); raise exception 'FAIL_CLOSE'; exception when others then if sqlerrm<>'MARKET_LOCKED' then raise;end if;end;
+ if (select balance from public.tg_fan_wallets where user_id=a)<>900 then raise exception 'FAIL_CLOSED_BALANCE'; end if;
+end $$;
+rollback;
+select 'PASS: both teammates, correction without duplicates, time cap, inactive exclusion, unranked removal, pick submission, duplicate prevention, server-side deadline' as result;

@@ -63,6 +63,7 @@
           </div>
         </article>
 
+        <article class="arc-my-panel"><div class="arc-panel-label">ATHLETE POINTS</div><h2 id="arcAthletePoints">— P</h2><p>Earned through official race placings. Separate from PLAY POINT.</p><a class="arc-button" href="event.html#athlete-rewards">VIEW POINT RULES →</a><p>Ticket and product redemption is not available yet.</p></article>
         <article class="arc-my-panel arc-access-card">
           <div class="arc-panel-label">GAME ACCESS</div>
           <h3 id="arcPlayerState">CHECKING PLAYER PROFILE...</h3>
@@ -143,6 +144,9 @@ async function loadMy(){
     el('arcPlayerCopy').textContent='Add your name, gender and contact details before entering.';
     el('arcProfileButton').textContent='COMPLETE PLAYER PROFILE →';
   }
+
+  const earned=await db.from('tg_athlete_points').select('points').eq('athlete_id',user.id);
+  el('arcAthletePoints').textContent=earned.error?'UNAVAILABLE':fmtP((earned.data||[]).reduce((sum,x)=>sum+Number(x.points||0),0));
 
   const ev=await db.rpc('arc_event_status',{p_event_slug:C.eventSlug});
   if(!ev.error&&ev.data)el('arcEntryState').textContent=!ev.data.registration_open?'CLOSED':ev.data.filled>=ev.data.max_teams?'FULL':'OPEN';
