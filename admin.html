@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="station.css?v=20260922s2">
 <link rel="stylesheet" href="station-navigation.css?v=20260922nav1">
 <link rel="stylesheet" href="admin-accounts.css?v=20260923-1">
-</head>
+<style>.admin-results-wrap table{min-width:1100px}.admin-results-wrap label{display:block;font-size:11px;margin:6px 0}.admin-results-wrap input{min-width:100px}.admin-results-wrap .table-scroll{overflow-x:auto}</style></head>
 <body class="ug-site station-site">
 <div id="nav"></div>
 <main>
@@ -60,7 +60,7 @@
 
       <div id="control" style="display:none">
         <div id="summary" class="admin-summary"></div>
-<section class="admin-block"><div class="card"><h3>DISCOUNT CODE</h3><p>Shared code <strong>NOLTO01</strong> · 50% off the full team fee.</p></div></section>
+<section class="admin-block"><div class="card"><h3>DISCOUNT CODE</h3><p>Shared codes <strong>NOLTO01</strong> / <strong>UNG01</strong> · 50% off the full team fee.</p></div></section>
 
         <section class="admin-block fan-wallet-admin-block">
           <div class="admin-block-head">
@@ -203,12 +203,12 @@
               <div class="kicker">SCOREBOARD</div>
               <h3>SCORE INPUT</h3>
             </div>
-            <p class="muted">Confirmed teams only.</p>
+            <p class="muted">Record A and B separately. Enter official workout ranks and points; the total is calculated automatically. Enter the final placing after applying the official points and tie rules.</p>
           </div>
           <div class="card admin-results-wrap">
             <div class="table-scroll">
               <table>
-                <thead><tr><th>TEAM</th><th>SLOT</th><th>TIME</th><th>REPS</th><th>GAME STATUS</th><th></th></tr></thead>
+                <thead><tr><th>TEAM</th><th>SLOT</th><th>WORKOUT A</th><th>WORKOUT B</th><th>TOTAL / FINAL PLACE</th><th>GAME STATUS</th><th></th></tr></thead>
                 <tbody id="resultRows"></tbody>
               </table>
             </div>
@@ -222,6 +222,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script src="app.js?v=20260928-setup"></script>
+<script src="score-utils.js?v=20260928-ab"></script>
 <script src="admin-accounts.js?v=20260928-players"></script>
 <script>
 shell('ADMIN');
@@ -411,7 +412,7 @@ function renderTeamManagement(){
     const slot=t.status==='confirmed'?`H${t.heat_no} · S${t.station_no}`:'SLOT AFTER PAYMENT';
     const paymentInfo=(t.amount_due||t.pricing_tier)?`
       <div class="admin-payment-box ${check?'needs-check':''}">
-        <div><span>ENTRY</span><b>${esc(divisionLabel(t.division))} · ${categoryLabel(t.category)}</b></div>
+        <div><span>ENTRY</span><b>${esc(divisionLabel(t.division))} · ${({MM:'MEN’S DOUBLES',WW:'WOMEN’S DOUBLES',MIXED:'MIXED DOUBLES'})[t.category]||t.category}</b></div>
         <div><span>TEAM TOTAL · 2 ATHLETES</span><b>${formatWon(t.amount_due)}</b><small>${t.pricing_tier==='admin'?'COMPLIMENTARY':t.pricing_tier==='early_bird'?'EARLY BIRD':'REGULAR'}</small></div>
         <div><span>DEPOSITOR</span><b>${esc(t.depositor_name||'—')}</b><small>${t.payment_reported_at?'REPORTED '+formatDate(t.payment_reported_at):'NOT REPORTED'}</small></div>
         <div><span>PAYMENT</span><b>${t.pricing_tier==='admin'?'WAIVED':t.payment_status==='paid'?'PAID':check?'CHECK NOW':'WAITING'}</b><small>${t.paid_at?'CONFIRMED '+formatDate(t.paid_at):t.payment_deadline?'DEADLINE '+formatDate(t.payment_deadline):''}</small></div>
@@ -692,34 +693,30 @@ async function loadResults(){
   const r=await db.from('tg_results').select('*').eq('event_id',currentEvent.id);
   if(r.error)throw r.error;
   const map={};(r.data||[]).forEach(x=>map[x.team_id]=x);
+  const workout=(t,x,k)=>`<label>TIME<input id="${k}-time-${t.id}" value="${esc(ArcScore.time(x[`workout_${k}_seconds`]))}" placeholder="4:35.20" aria-label="Workout ${k.toUpperCase()} completion time"></label><label>RANK<input id="${k}-rank-${t.id}" type="number" min="1" step="1" value="${x[`workout_${k}_rank`]??''}"></label><label>POINTS<input id="${k}-points-${t.id}" type="number" min="0" step="0.01" oninput="updateScoreTotal('${t.id}')" value="${x[`workout_${k}_points`]??''}"></label>`;
   $('resultRows').innerHTML=approved.map(t=>{
     const x=map[t.id]||{};
-    const tm=x.finish_seconds!=null?`${Math.floor(x.finish_seconds/60)}:${String(Math.floor(x.finish_seconds%60)).padStart(2,'0')}`:'';
-    return `<tr><td><strong>${esc(t.team_name)}</strong><div class="table-sub">${esc(t.player_1)} × ${esc(t.player_2)}</div></td><td>H${t.heat_no} · S${t.station_no}</td><td><input id="time-${t.id}" value="${tm}" placeholder="07:42"></td><td><input id="reps-${t.id}" type="number" value="${x.reps_completed??''}"></td><td><select id="status-${t.id}"><option ${x.status==='Not Started'?'selected':''}>Not Started</option><option ${x.status==='Running'?'selected':''}>Running</option><option ${x.status==='Finished'?'selected':''}>Finished</option><option ${x.status==='Time Cap'?'selected':''}>Time Cap</option></select></td><td><button class="btn dark" type="button" onclick="saveResult('${t.id}')">SAVE SCORE</button></td></tr>`;
-  }).join('')||'<tr><td colspan="6" class="muted">NO LOCKED-IN TEAMS.</td></tr>';
+    return `<tr><td><strong>${esc(t.team_name)}</strong><div class="table-sub">${esc(t.player_1)} × ${esc(t.player_2)}</div><small>${esc(divisionLabel(t.division))} / ${esc(({MM:'MEN’S DOUBLES',WW:'WOMEN’S DOUBLES',MIXED:'MIXED DOUBLES'})[t.category]||t.category)}</small></td><td>H${t.heat_no??'—'} · S${t.station_no??'—'}</td><td>${workout(t,x,'a')}</td><td>${workout(t,x,'b')}</td><td><strong id="total-${t.id}">${x.total_points??'—'} PTS</strong><label>FINAL PLACE<input id="final-rank-${t.id}" type="number" min="1" step="1" value="${x.rank??''}"></label></td><td><select id="status-${t.id}">${['Not Started','Running','Finished','Time Cap'].map(v=>`<option ${x.status===v?'selected':''}>${v}</option>`).join('')}</select></td><td><button class="btn dark" type="button" onclick="saveResult('${t.id}')">SAVE SCORE</button></td></tr>`;
+  }).join('')||'<tr><td colspan="7" class="muted">NO LOCKED-IN TEAMS.</td></tr>';
 }
-
+window.updateScoreTotal=id=>{
+ try{const a=ArcScore.number($(`a-points-${id}`).value,'A points'),b=ArcScore.number($(`b-points-${id}`).value,'B points');$(`total-${id}`).textContent=(ArcScore.total(a,b)??'—')+' PTS';}catch(e){$(`total-${id}`).textContent='CHECK POINTS';}
+};
 window.saveResult=async id=>{
   try{
-    const v=$(`time-${id}`).value.trim();const p=v?v.split(':').map(Number):[];const sec=p.length===2?p[0]*60+p[1]:null;
-    const reps=$(`reps-${id}`).value;const status=$(`status-${id}`).value;
-    const r=await db.from('tg_results').upsert({event_id:currentEvent.id,team_id:id,finish_seconds:sec,reps_completed:reps?Number(reps):null,status,updated_at:new Date().toISOString()},{onConflict:'event_id,team_id'});
+    const payload={event_id:currentEvent.id,team_id:id,finish_seconds:null,reps_completed:null,status:$(`status-${id}`).value,rank:ArcScore.number($(`final-rank-${id}`).value,'final place',true),updated_at:new Date().toISOString()};
+    for(const k of ['a','b']){
+      payload[`workout_${k}_seconds`]=ArcScore.parseTime($(`${k}-time-${id}`).value);
+      payload[`workout_${k}_rank`]=ArcScore.number($(`${k}-rank-${id}`).value,k+' rank',true);
+      payload[`workout_${k}_points`]=ArcScore.number($(`${k}-points-${id}`).value,k+' points');
+    }
+    if(payload.status==='Finished'&&(payload.workout_a_seconds==null||payload.workout_b_seconds==null))throw Error('Enter both completion times for a finished team.');
+    if(payload.rank!=null&&(payload.workout_a_points==null||payload.workout_b_points==null||!['Finished','Time Cap'].includes(payload.status)))throw Error('Enter both official workout scores and a completed status before the final place.');
+    const r=await db.from('tg_results').upsert(payload,{onConflict:'event_id,team_id'});
     if(r.error)throw r.error;
-    await rank(currentEvent.id);await loadResults();
-  }catch(e){alert(adminError(e))}
+    await loadResults();
+  }catch(e){alert(e.message||adminError(e))}
 };
-
-async function rank(eventId){
-  const q=await db.from('tg_results').select('id,team_id,status,finish_seconds,reps_completed').eq('event_id',eventId);
-  if(q.error)throw q.error;
-  const approvedIds=new Set(allAdminTeams.filter(t=>t.status==='confirmed').map(t=>t.id));
-  await db.from('tg_results').update({rank:null}).eq('event_id',eventId);
-  const a=(q.data||[]).filter(x=>approvedIds.has(x.team_id)&&['Finished','Time Cap'].includes(x.status)).sort((x,y)=>{
-    if(x.status!==y.status)return x.status==='Finished'?-1:1;
-    return x.status==='Finished'?(x.finish_seconds??99999)-(y.finish_seconds??99999):(y.reps_completed??-1)-(x.reps_completed??-1)
-  });
-  for(let i=0;i<a.length;i++){const u=await db.from('tg_results').update({rank:i+1}).eq('id',a[i].id);if(u.error)throw u.error}
-}
 
 $('login').onclick=async()=>{
   if(!$('email').value.trim()||!$('pass').value){notice('adminMsg','Enter email and password.',true);return}
