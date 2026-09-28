@@ -1,0 +1,18 @@
+const {parseHTML}=require('linkedom');
+const vm=require('vm'),fs=require('fs'),assert=require('assert');
+const html=fs.readFileSync('admin.html','utf8'),{document}=parseHTML(html),ctx={document,console,URL,Set,sessionStorage:{getItem:()=>null,setItem:()=>{}},confirm:()=>true};ctx.window=ctx;vm.createContext(ctx);
+vm.runInContext(`const $=id=>document.getElementById(id);const esc=x=>String(x??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('"','&quot;');const divisionLabel=x=>x;const categoryLabel=x=>x;const fmtPhone=x=>x;const formatWon=x=>String(x);const formatDate=x=>String(x);const statusClass=t=>t.status;const statusLabel=t=>t.status;const allAdminTeams=[{id:'t',team_name:'Team <test>',player_1:'Captain',player_2:'팀원 초대 예정',captain_id:'c',partner_id:null,status:'confirmed',payment_status:'paid',division:'OPEN',category:'MM',photo_url:'https://bad.example/broken.jpg'},{id:'full',team_name:'Full',player_1:'One',player_2:'Two',partner_id:'b',status:'confirmed',division:'PRO',category:'MM'}];const adminRosterPlayers=[{athlete_id:'p',display_name:'Partner',email:'p@example.invalid',locked_in:false},{athlete_id:'x',display_name:'Taken',locked_in:true}];const notice=()=>{};const adminError=e=>e.message;let saved;const db={rpc:async (name,args)=>{saved={name,args};return {data:{},error:null}}};async function refreshAdmin(){};`,ctx);
+vm.runInContext(fs.readFileSync('admin-layout.js','utf8'),ctx);
+assert.equal(document.querySelectorAll('.admin-tab-panel').length,4);
+assert(!document.getElementById('admin-panel-teams').hidden);
+assert(document.getElementById('admin-panel-accounts').hidden);
+ctx.showAdminPanel('accounts');assert(!document.getElementById('admin-panel-accounts').hidden);assert(document.getElementById('admin-panel-teams').hidden);
+ctx.showAdminPanel('teams');
+vm.runInContext(html.slice(html.indexOf('function renderTeamManagement(){'),html.indexOf('window.saveTeam=')),ctx);
+Object.defineProperty(document.getElementById('statusFilter'),'value',{value:'all',writable:true});ctx.renderTeamManagement();
+assert.equal(document.querySelectorAll('details.admin-team-card').length,2);assert.equal(document.querySelectorAll('#adminTeams img').length,0);assert(document.getElementById('adminTeams').innerHTML.includes('Team &lt;test&gt;'));assert(document.getElementById('adminTeams').textContent.includes('PARTNER NEEDED'));assert.equal(document.querySelectorAll('.admin-partner-add').length,1);
+assert(!document.getElementById('partner-select-t').textContent.includes('Taken'));
+document.querySelector('details.admin-team-card').setAttribute('open','');ctx.renderTeamManagement();assert(document.querySelector('details.admin-team-card').hasAttribute('open'));
+document.getElementById('statusFilter').value='needs_partner';ctx.renderTeamManagement();assert.equal(document.querySelectorAll('details.admin-team-card').length,1);
+Object.defineProperty(document.getElementById('partner-select-t'),'value',{value:'p',writable:true});
+(async()=>{await ctx.addAdminPartner('t');assert.equal(vm.runInContext('saved.name',ctx),'arc_admin_add_partner');assert.equal(vm.runInContext('saved.args.p_partner_id',ctx),'p');console.log('PASS: four isolated tabs, compact no-image rows, missing-partner filter, edit state, eligible picker and add-partner request');})();

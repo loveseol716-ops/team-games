@@ -9,8 +9,8 @@
 <link rel="stylesheet" href="station.css?v=20260922s2">
 <link rel="stylesheet" href="station-navigation.css?v=20260922nav1">
 <link rel="stylesheet" href="admin-accounts.css?v=20260923-1">
-<style>.admin-results-wrap table{min-width:1100px}.admin-results-wrap label{display:block;font-size:11px;margin:6px 0}.admin-results-wrap input{min-width:100px}.admin-results-wrap .table-scroll{overflow-x:auto}</style></head>
-<body class="ug-site station-site">
+<style>.admin-results-wrap table{min-width:1100px}.admin-results-wrap label{display:block;font-size:11px;margin:6px 0}.admin-results-wrap input{min-width:100px}.admin-results-wrap .table-scroll{overflow-x:auto}</style><link rel="stylesheet" href="admin-workspace.css?v=20260928-clean"></head>
+<body class="ug-site station-site admin-workspace">
 <div id="nav"></div>
 <main>
   <section class="section admin-section">
@@ -18,7 +18,7 @@
       <div class="sectionhead admin-head">
         <div>
           <div class="kicker">GAME MASTER</div>
-          <h2>CONTROL ROOM</h2>
+          <h2>CONTROL ROOM</h2><p class="admin-subtitle">ARC STATION / NOLTO · OCT 31, 2026</p>
         </div>
         <div id="sessionTools" class="admin-session" style="display:none">
           <span id="sessionEmail" class="muted"></span>
@@ -173,7 +173,7 @@
             <div class="admin-filters">
               <input id="teamSearch" type="search" placeholder="SEARCH TEAM / PLAYER / CONTACT">
               <select id="statusFilter">
-                <option value="all">ALL TEAMS</option>
+                <option value="all">ALL TEAMS</option><option value="needs_partner">PARTNER NEEDED</option>
                 <option value="payment_check">PAYMENT CHECK</option>
                 <option value="pending_payment">WAITING PAYMENT</option>
                 <option value="confirmed">LOCKED IN</option>
@@ -223,13 +223,15 @@
 <script src="config.js"></script>
 <script src="app.js?v=20260928-setup"></script>
 <script src="score-utils.js?v=20260928-ab"></script>
-<script src="admin-accounts.js?v=20260928-players"></script>
+<script src="admin-layout.js?v=20260928-clean"></script>
+<script src="admin-accounts.js?v=20260928-clean"></script>
 <script>
 shell('ADMIN');
 
 const $=id=>document.getElementById(id);
 let allAdminTeams=[];
 let adminAthletes=[];
+let adminRosterPlayers=[];
 let currentEvent=null;
 let predictionAdminSummary=[];
 let predictionAdminBoard=[];
@@ -250,6 +252,11 @@ const formatAdminDate=v=>v?new Date(v).toLocaleString('en-US',{month:'2-digit',d
 
 function adminError(x){
   const m=String(x?.message||x||'');
+  if(m.includes('PARTNER_ALREADY_REGISTERED')) return 'This player is already on another team.';
+  if(m.includes('PARTNER_PROFILE_REQUIRED')) return 'Complete this player’s name, gender and phone under EDIT PROFILE first.';
+  if(m.includes('PAYMENT_NOT_CONFIRMED')) return 'Confirm the team payment before adding a partner.';
+  if(m.includes('CATEGORY_GENDER_MISMATCH')) return 'This player does not match the team category.';
+  if(m.includes('TEAM_FULL')) return 'This team already has two players.';
   if(m.includes('ADMIN_ONLY')) return 'This account does not have Game Master access.';
   if(m.includes('Invalid login credentials')) return 'Email or password is incorrect.';
   if(m.includes('Email rate limit exceeded')) return 'Too many reset requests. Try again later.';
@@ -280,23 +287,23 @@ function adminError(x){
 
 
 async function adminTeams(){
-  const q=await db.rpc('arc_admin_action',{p_action:'teams',p_payload:{event_slug:C.eventSlug}});
-  if(q.error)throw q.error;
-  return q.data||[];
+  const [q,r]=await Promise.all([db.rpc('arc_admin_action',{p_action:'teams',p_payload:{event_slug:C.eventSlug}}),db.rpc('arc_admin_rosters',{p_event_slug:C.eventSlug})]);
+  if(q.error)throw q.error;if(r.error)throw r.error;
+  return (q.data||[]).map(t=>({...t,...(r.data||[]).find(m=>m.team_id===t.id)}));
 }
 
-async function adminPlayers(){
-  const q=await db.rpc('arc_admin_action',{p_action:'players',p_payload:{event_slug:$('newEvent').value||C.eventSlug}});
+async function adminPlayers(eventSlug){
+  const q=await db.rpc('arc_admin_action',{p_action:'players',p_payload:{event_slug:eventSlug||$('newEvent').value||C.eventSlug}});
   if(q.error)throw q.error;
   return q.data||[];
 }
 
 async function refreshAdmin(){
-  [allAdminTeams,adminAthletes]=await Promise.all([adminTeams(),adminPlayers()]);
+  [allAdminTeams,adminAthletes,adminRosterPlayers]=await Promise.all([adminTeams(),adminPlayers(),adminPlayers(C.eventSlug)]);
   renderSummary();
   renderAddTeam();
   renderTeamManagement();
-  await Promise.all([loadResults(),loadPredictionControl(),loadFanWalletControl(),loadAccountControls()]);
+  await Promise.allSettled([loadResults(),loadPredictionControl(),loadFanWalletControl(),loadAccountControls()]).then(rs=>{const failures=rs.filter(r=>r.status==='rejected');if(failures.length)notice('adminLoadMsg','Some sections could not be refreshed. Use REFRESH to retry.',true);else $('adminLoadMsg').style.display='none';});
 }
 
 async function enterAdmin(){
@@ -325,6 +332,7 @@ function renderSummary(){
   const paymentCheck=allAdminTeams.filter(t=>t.status==='pending_payment'&&t.payment_status==='payment_check').length;
   const waiting=allAdminTeams.filter(t=>t.status==='pending_payment'&&t.payment_status!=='payment_check').length;
   const max=currentEvent?.max_teams||24;
+  if($('partnerCount'))$('partnerCount').textContent=allAdminTeams.filter(t=>t.status==='confirmed'&&!t.partner_id).length;
   $('summary').innerHTML=`
     <div class="admin-stat"><span>LOCKED IN</span><strong>${approved}</strong><small>/ ${max} TEAMS</small></div>
     <div class="admin-stat admin-stat-alert"><span>PAYMENT CHECK</span><strong>${paymentCheck}</strong><small>TO CONFIRM</small></div>
@@ -399,9 +407,11 @@ $('addTeamBtn').onclick=async()=>{
 function renderTeamManagement(){
   const q=$('teamSearch').value.trim().toLowerCase();
   const sf=$('statusFilter').value;
+  const opened=new Set([...document.querySelectorAll('details.admin-team-card[open]')].map(el=>el.dataset.team));
   const list=allAdminTeams.filter(t=>{
+    if(sf==='needs_partner'&&!(t.status==='confirmed'&&!t.partner_id))return false;
     if(sf==='payment_check'&&!(t.status==='pending_payment'&&t.payment_status==='payment_check'))return false;
-    if(sf!=='all'&&sf!=='payment_check'&&t.status!==sf)return false;
+    if(sf!=='all'&&sf!=='payment_check'&&sf!=='needs_partner'&&t.status!==sf)return false;
     if(!q)return true;
     return [t.team_name,t.player_1,t.player_2,t.pending_invite?.name,t.phone,t.depositor_name,t.division,t.category].some(v=>String(v||'').toLowerCase().includes(q));
   });
@@ -409,7 +419,9 @@ function renderTeamManagement(){
   $('adminTeams').innerHTML=list.map(t=>{
     const pending=t.status==='pending_payment';
     const check=pending&&t.payment_status==='payment_check';
-    const slot=t.status==='confirmed'?`H${t.heat_no} · S${t.station_no}`:'SLOT AFTER PAYMENT';
+    const slot=t.status==='confirmed'&&t.heat_no&&t.station_no?`H${t.heat_no} · S${t.station_no}`:'SLOT NOT SET';
+    const partner=t.partner_id?t.player_2:'PARTNER NEEDED';
+    const photo=adminPhotoUrl(t.photo_url);
     const paymentInfo=(t.amount_due||t.pricing_tier)?`
       <div class="admin-payment-box ${check?'needs-check':''}">
         <div><span>ENTRY</span><b>${esc(divisionLabel(t.division))} · ${({MM:'MEN’S DOUBLES',WW:'WOMEN’S DOUBLES',MIXED:'MIXED DOUBLES'})[t.category]||t.category}</b></div>
@@ -418,11 +430,8 @@ function renderTeamManagement(){
         <div><span>PAYMENT</span><b>${t.pricing_tier==='admin'?'WAIVED':t.payment_status==='paid'?'PAID':check?'CHECK NOW':'WAITING'}</b><small>${t.paid_at?'CONFIRMED '+formatDate(t.paid_at):t.payment_deadline?'DEADLINE '+formatDate(t.payment_deadline):''}</small></div>
       </div>`:''; 
     return `
-    <article class="admin-team-card ${t.status==='cancelled'?'is-cancelled':''} ${check?'is-payment-check':''}" data-team="${t.id}">
-      <div class="admin-team-photo">
-        ${t.photo_url?`<img src="${esc(t.photo_url)}" alt="${esc(t.team_name)}">`:'<div class="admin-photo-empty">NO PHOTO</div>'}
-        <div class="admin-status-badge ${statusClass(t)}">${statusLabel(t)}</div>
-      </div>
+    <details class="admin-team-card ${t.status==='cancelled'?'is-cancelled':''} ${check?'is-payment-check':''}" data-team="${t.id}" ${opened.has(t.id)?'open':''}>
+      <summary class="admin-team-summary"><div><h4>${esc(t.team_name)}</h4><p>${esc(divisionLabel(t.division))} / ${esc(categoryLabel(t.category))}</p></div><div class="admin-roster-inline"><span><small>CAPTAIN</small>${esc(t.player_1)}</span><span class="${t.partner_id?'':'partner-needed'}"><small>PARTNER</small>${esc(partner)}</span></div><div class="admin-row-state"><span class="admin-status-badge ${statusClass(t)}">${statusLabel(t)}</span><small>${slot}</small></div><span class="admin-manage-label">MANAGE +</span></summary>
       <div class="admin-team-body">
         <div class="admin-team-title-row"><div><div class="entry-label">TEAM</div><h4>${esc(t.team_name)}</h4></div><div class="admin-slot-mini">${slot}</div></div>
         <div class="admin-contact"><a href="tel:${esc(fmtPhone(t.phone))}">${esc(fmtPhone(t.phone))}</a></div>
@@ -430,20 +439,21 @@ function renderTeamManagement(){
         <div class="admin-edit-grid">
           <div class="full"><label>Team Name</label><input id="team-${t.id}" value="${esc(t.team_name)}" maxlength="60" ${pending?'disabled':''}></div>
           <div><label>Player 1</label><input value="${esc(t.player_1)}" disabled></div>
-          <div><label>Player 2</label><input value="${esc(t.pending_invite?.name||t.player_2)}" disabled>${t.pending_invite?'<small class="pending-partner">INVITED · AWAITING CONFIRMATION</small>':''}</div>
+          <div><label>Partner</label><input value="${esc(partner)}" disabled>${!t.partner_id&&t.pending_invite?`<small class="pending-partner">PENDING REQUEST: ${esc(t.pending_invite.name)}</small>`:''}</div>
           <div class="full"><label>Contact</label><input id="phone-${t.id}" value="${esc(t.phone)}" inputmode="tel" ${pending?'disabled':''}></div>
           ${pending?'<div class="full"><label>Roster Status</label><input value="PAYMENT PENDING" disabled></div>':`
           <div><label>Heat</label><input id="heat-${t.id}" type="number" min="1" max="12" value="${t.heat_no}"></div>
           <div><label>Station</label><select id="station-${t.id}"><option value="1" ${t.station_no===1?'selected':''}>1</option><option value="2" ${t.station_no===2?'selected':''}>2</option></select></div>
           <div class="full"><label>Roster Status</label><select id="teamstatus-${t.id}"><option value="confirmed" ${t.status==='confirmed'?'selected':''}>LOCKED IN</option><option value="cancelled" ${t.status==='cancelled'?'selected':''}>OUT</option></select></div>`}
         </div>
+        ${t.status==='confirmed'&&!t.partner_id?`<div class="admin-partner-add"><h5>ADD PARTNER</h5><p>Select a registered account. The player joins immediately, without a separate acceptance step.</p><label for="partner-search-${t.id}">FIND PLAYER<input id="partner-search-${t.id}" type="search" placeholder="Name or email" oninput="filterAdminPartners('${t.id}')"></label><label for="partner-select-${t.id}">PLAYER<select id="partner-select-${t.id}" onchange="adminPartnerHint('${t.id}')">${adminPartnerOptions(t)}</select></label><small id="partner-hint-${t.id}" aria-live="polite"></small><div class="admin-actions-row"><button class="btn dark" onclick="editAdminPartner('${t.id}')" type="button">EDIT PROFILE</button><button class="btn arcade-primary" id="partner-add-${t.id}" onclick="addAdminPartner('${t.id}')" type="button">ADD TO TEAM</button></div><div id="partner-msg-${t.id}" class="notice" role="status"></div></div>`:''}
         <div class="admin-team-actions">
           <button class="btn danger delete-spacer" type="button" onclick="deleteTeam('${t.id}')">DELETE TEAM</button>
-          ${t.photo_url?`<a class="btn dark" href="${esc(t.photo_url)}" target="_blank" rel="noopener">OPEN PHOTO</a>`:''}
+          ${photo?`<a class="btn dark" href="${esc(photo)}" target="_blank" rel="noopener">OPEN PHOTO</a>`:''}
           ${check?`<button id="confirm-${t.id}" class="btn arcade-primary payment-confirm-btn" type="button" onclick="confirmPayment('${t.id}')">CONFIRM PAYMENT</button>`:pending?'<button class="btn dark" type="button" disabled>WAITING BANK</button>':`<button id="save-${t.id}" class="btn arcade-primary" type="button" onclick="saveTeam('${t.id}')">SAVE TEAM</button>`}
         </div>
       </div>
-    </article>`;
+    </details>`;
   }).join('');
 }
 

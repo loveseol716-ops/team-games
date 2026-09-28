@@ -39,6 +39,7 @@ async function loadAccountAudit(){
  document.getElementById('accountAudit').innerHTML=rows.length?rows.map(r=>`<div class="account-audit-row"><strong>${esc(r.action.replaceAll('_',' ').toUpperCase())}</strong><small>${new Date(r.created_at).toLocaleString('en-GB')}</small>${r.reason?`<p>${esc(r.reason)}</p>`:''}<small>ACTOR ${esc(r.actor_id||'SYSTEM')}<br>TARGET ${esc(r.target_id||'—')}</small></div>`).join(''):'<p class="muted">NO CHANGES YET.</p>';
 }
 function openAccount(id){
+ window.showAdminPanel?.('accounts');
  if(accountBusy)return;
  accountEditing=accountRows.find(a=>a.id===id);if(!accountEditing)return;
  const a=accountEditing;
