@@ -40,6 +40,7 @@
       display:block;width:min(190px,100%);max-width:100%;height:auto;aspect-ratio:190/68;
       object-fit:contain;object-position:left center
     }
+    .arc-partner-item--arih img{filter:brightness(0) invert(1);aspect-ratio:572.61/253.53}
     @media(max-width:720px){
       .arc-partners-strip{padding:32px 0 34px}
       .arc-partners-label strong{font-size:13px;line-height:1.25}
@@ -112,6 +113,9 @@ function shell(active){
           <a class="arc-partner-item" href="https://www.instagram.com/welwelwel.official/" target="_blank" rel="noopener noreferrer" aria-label="WELWELWEL Instagram">
             <img src="wel-logo.svg?v=20260919-account1" alt="WEL">
           </a>
+          <span class="arc-partner-item arc-partner-item--arih">
+            <img src="arih-logo.svg?v=20261006" alt="ARIH" width="573" height="254" loading="lazy">
+          </span>
         </div>
       </div>
     </section>
