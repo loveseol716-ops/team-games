@@ -25,29 +25,27 @@
       font-family:var(--font-display);font-size:15px;font-weight:400;line-height:1.35;
       color:#fff;overflow-wrap:anywhere
     }
-    .arc-partners-logos{
-      display:flex;align-items:center;gap:54px;flex-wrap:wrap;
-      width:100%;min-width:0;margin-top:25px
-    }
-    .arc-partner-item{
-      display:flex;align-items:center;justify-content:flex-start;
-      width:min(260px,100%);max-width:100%;min-width:0;min-height:76px;
-      padding:8px 0;opacity:.94;
-      transition:opacity .15s ease,transform .15s ease
-    }
-    .arc-partner-item:hover{opacity:1;transform:translateY(-2px)}
-    .arc-partner-item img{
-      display:block;width:min(190px,100%);max-width:100%;height:auto;aspect-ratio:190/68;
-      object-fit:contain;object-position:left center
-    }
-    .arc-partner-item--arih img{filter:brightness(0) invert(1);aspect-ratio:572.61/253.53}
-    .arc-partner-item--boho img{filter:brightness(0) invert(1);aspect-ratio:2047/355}
+    .arc-partners-logos{width:100%;min-width:0;overflow:hidden;margin-top:18px}
+    .arc-partners-track{display:flex;width:max-content;animation:arc-partners-right 48s linear infinite;will-change:transform}
+    .arc-partners-group{display:flex;flex:none;align-items:center;gap:24px;padding-right:24px}
+    .arc-partners-set{display:flex;flex:none;align-items:center;gap:24px}
+    .arc-partners-strip .arc-partner-item{display:flex;flex:0 0 112px;width:112px;max-width:112px;min-width:0;min-height:40px;padding:4px 0;align-items:center;justify-content:center;opacity:.94}
+    body.station-site .arc-partners-strip .arc-partner-item img,.arc-partners-strip .arc-partner-item img{display:block;width:100%;height:30px;max-height:30px;max-width:112px;object-fit:contain;object-position:center;aspect-ratio:auto}
+    .arc-partner-item--arih img,.arc-partner-item--boho img{filter:brightness(0) invert(1)}
+    .arc-partners-logos:hover .arc-partners-track,.arc-partners-logos:focus-within .arc-partners-track{animation-play-state:paused}
+    .arc-partners-toggle{margin-top:10px;padding:4px 0;border:0;background:none;color:#aaa;font:10px/1.4 Arial,sans-serif;cursor:pointer}
+    .arc-partners-logos.is-paused .arc-partners-track{animation-play-state:paused}
+    @keyframes arc-partners-right{from{transform:translateX(-50%)}to{transform:translateX(0)}}
     @media(max-width:720px){
-      .arc-partners-strip{padding:32px 0 34px}
       .arc-partners-label strong{font-size:13px;line-height:1.25}
-      .arc-partners-logos{gap:22px;margin-top:18px}
-      .arc-partner-item{width:100%;min-height:68px;padding:8px 0}
-      .arc-partner-item img{width:min(190px,100%)}
+      .arc-partners-group{gap:18px;padding-right:18px}
+      .arc-partners-set{gap:18px}
+      .arc-partners-strip .arc-partner-item{flex-basis:96px;width:96px;max-width:96px}
+      body.station-site .arc-partners-strip .arc-partner-item img,.arc-partners-strip .arc-partner-item img{height:26px;max-height:26px;max-width:96px}
+    }
+    @media(prefers-reduced-motion:reduce){
+      .arc-partners-track{animation:none;transform:none;will-change:auto}
+      .arc-partners-group[aria-hidden],.arc-partners-set[aria-hidden],.arc-partners-toggle{display:none}
     }
   `;
   document.head.appendChild(style);
@@ -110,8 +108,9 @@ function shell(active){
           <span>ARC STATION</span>
           <strong>OFFICIAL PARTNERS</strong>
         </div>
-        <div class="arc-partners-logos">
-          <a class="arc-partner-item" href="https://www.instagram.com/welwelwel.official/" target="_blank" rel="noopener noreferrer" aria-label="WELWELWEL Instagram">
+        <div class="arc-partners-logos" id="arcPartnersLogos">
+          <div class="arc-partners-track">
+            <div class="arc-partners-group"><div class="arc-partners-set">          <a class="arc-partner-item" href="https://www.instagram.com/welwelwel.official/" target="_blank" rel="noopener noreferrer" aria-label="WELWELWEL Instagram">
             <img src="wel-logo.svg?v=20260919-account1" alt="WEL">
           </a>
           <span class="arc-partner-item arc-partner-item--arih">
@@ -119,8 +118,67 @@ function shell(active){
           </span>
           <span class="arc-partner-item arc-partner-item--boho">
             <img src="boho-logo.png?v=20261006" alt="BOHO" width="2047" height="355" loading="lazy">
+          </span></div><div class="arc-partners-set" aria-hidden="true" inert>          <a class="arc-partner-item" href="https://www.instagram.com/welwelwel.official/" target="_blank" rel="noopener noreferrer" aria-label="WELWELWEL Instagram">
+            <img src="wel-logo.svg?v=20260919-account1" alt="WEL">
+          </a>
+          <span class="arc-partner-item arc-partner-item--arih">
+            <img src="arih-logo.svg?v=20261006" alt="ARIH" width="573" height="254" loading="lazy">
           </span>
+          <span class="arc-partner-item arc-partner-item--boho">
+            <img src="boho-logo.png?v=20261006" alt="BOHO" width="2047" height="355" loading="lazy">
+          </span></div><div class="arc-partners-set" aria-hidden="true" inert>          <a class="arc-partner-item" href="https://www.instagram.com/welwelwel.official/" target="_blank" rel="noopener noreferrer" aria-label="WELWELWEL Instagram">
+            <img src="wel-logo.svg?v=20260919-account1" alt="WEL">
+          </a>
+          <span class="arc-partner-item arc-partner-item--arih">
+            <img src="arih-logo.svg?v=20261006" alt="ARIH" width="573" height="254" loading="lazy">
+          </span>
+          <span class="arc-partner-item arc-partner-item--boho">
+            <img src="boho-logo.png?v=20261006" alt="BOHO" width="2047" height="355" loading="lazy">
+          </span></div><div class="arc-partners-set" aria-hidden="true" inert>          <a class="arc-partner-item" href="https://www.instagram.com/welwelwel.official/" target="_blank" rel="noopener noreferrer" aria-label="WELWELWEL Instagram">
+            <img src="wel-logo.svg?v=20260919-account1" alt="WEL">
+          </a>
+          <span class="arc-partner-item arc-partner-item--arih">
+            <img src="arih-logo.svg?v=20261006" alt="ARIH" width="573" height="254" loading="lazy">
+          </span>
+          <span class="arc-partner-item arc-partner-item--boho">
+            <img src="boho-logo.png?v=20261006" alt="BOHO" width="2047" height="355" loading="lazy">
+          </span></div></div>
+            <div class="arc-partners-group" aria-hidden="true" inert><div class="arc-partners-set">          <a class="arc-partner-item" href="https://www.instagram.com/welwelwel.official/" target="_blank" rel="noopener noreferrer" aria-label="WELWELWEL Instagram">
+            <img src="wel-logo.svg?v=20260919-account1" alt="WEL">
+          </a>
+          <span class="arc-partner-item arc-partner-item--arih">
+            <img src="arih-logo.svg?v=20261006" alt="ARIH" width="573" height="254" loading="lazy">
+          </span>
+          <span class="arc-partner-item arc-partner-item--boho">
+            <img src="boho-logo.png?v=20261006" alt="BOHO" width="2047" height="355" loading="lazy">
+          </span></div><div class="arc-partners-set" aria-hidden="true" inert>          <a class="arc-partner-item" href="https://www.instagram.com/welwelwel.official/" target="_blank" rel="noopener noreferrer" aria-label="WELWELWEL Instagram">
+            <img src="wel-logo.svg?v=20260919-account1" alt="WEL">
+          </a>
+          <span class="arc-partner-item arc-partner-item--arih">
+            <img src="arih-logo.svg?v=20261006" alt="ARIH" width="573" height="254" loading="lazy">
+          </span>
+          <span class="arc-partner-item arc-partner-item--boho">
+            <img src="boho-logo.png?v=20261006" alt="BOHO" width="2047" height="355" loading="lazy">
+          </span></div><div class="arc-partners-set" aria-hidden="true" inert>          <a class="arc-partner-item" href="https://www.instagram.com/welwelwel.official/" target="_blank" rel="noopener noreferrer" aria-label="WELWELWEL Instagram">
+            <img src="wel-logo.svg?v=20260919-account1" alt="WEL">
+          </a>
+          <span class="arc-partner-item arc-partner-item--arih">
+            <img src="arih-logo.svg?v=20261006" alt="ARIH" width="573" height="254" loading="lazy">
+          </span>
+          <span class="arc-partner-item arc-partner-item--boho">
+            <img src="boho-logo.png?v=20261006" alt="BOHO" width="2047" height="355" loading="lazy">
+          </span></div><div class="arc-partners-set" aria-hidden="true" inert>          <a class="arc-partner-item" href="https://www.instagram.com/welwelwel.official/" target="_blank" rel="noopener noreferrer" aria-label="WELWELWEL Instagram">
+            <img src="wel-logo.svg?v=20260919-account1" alt="WEL">
+          </a>
+          <span class="arc-partner-item arc-partner-item--arih">
+            <img src="arih-logo.svg?v=20261006" alt="ARIH" width="573" height="254" loading="lazy">
+          </span>
+          <span class="arc-partner-item arc-partner-item--boho">
+            <img src="boho-logo.png?v=20261006" alt="BOHO" width="2047" height="355" loading="lazy">
+          </span></div></div>
+          </div>
         </div>
+        <button class="arc-partners-toggle" type="button" aria-controls="arcPartnersLogos" aria-pressed="false">PAUSE LOGOS</button>
       </div>
     </section>
     <footer class="footer arc-legal-footer">
@@ -147,6 +205,12 @@ function shell(active){
         </div>
       </div>
     </footer>`;
+  const partnerToggle=document.querySelector('.arc-partners-toggle');
+  partnerToggle?.addEventListener('click',()=>{
+    const paused=document.querySelector('#arcPartnersLogos').classList.toggle('is-paused');
+    partnerToggle.setAttribute('aria-pressed',String(paused));
+    partnerToggle.textContent=paused?'PLAY LOGOS':'PAUSE LOGOS';
+  });
   syncArcAccountNav();
   enforceAccountSetup().catch(()=>{location.replace('account.html?mode=login&next='+encodeURIComponent(safeNextUrl(location.pathname.split('/').pop()+location.search,'my.html')));});
 }
