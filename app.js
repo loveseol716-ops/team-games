@@ -41,6 +41,7 @@
       object-fit:contain;object-position:left center
     }
     .arc-partner-item--arih img{filter:brightness(0) invert(1);aspect-ratio:572.61/253.53}
+    .arc-partner-item--boho img{filter:brightness(0) invert(1);aspect-ratio:2047/355}
     @media(max-width:720px){
       .arc-partners-strip{padding:32px 0 34px}
       .arc-partners-label strong{font-size:13px;line-height:1.25}
@@ -115,6 +116,9 @@ function shell(active){
           </a>
           <span class="arc-partner-item arc-partner-item--arih">
             <img src="arih-logo.svg?v=20261006" alt="ARIH" width="573" height="254" loading="lazy">
+          </span>
+          <span class="arc-partner-item arc-partner-item--boho">
+            <img src="boho-logo.png?v=20261006" alt="BOHO" width="2047" height="355" loading="lazy">
           </span>
         </div>
       </div>
