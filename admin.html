@@ -207,7 +207,7 @@
           </div>
           <p class="muted">Saving A or B publishes that record immediately. 1 round = 42 reps. Saving or correcting a record automatically recalculates the category. Standings may change as more teams finish.</p>
           <label>FIND TEAM<input id="resultSearch" type="search" placeholder="Team name / heat" oninput="filterResultCards()"></label>
-          <div id="resultRows" class="result-cards"></div>
+          <details class="admin-tool"><summary>RESET EVENT RESULTS</summary><p>Clear all A/B records, rankings and athlete points awarded from these results. Teams and payments stay unchanged.</p><button class="btn danger" type="button" onclick="resetResults(null,this)">RESET ALL RESULTS</button><p id="resetResultsMsg" role="status"></p></details><div id="resultRows" class="result-cards"></div>
         </section>
       </div>
     </div>
@@ -706,7 +706,7 @@ async function loadResults(){
    <div id="a-cap-${id}" ${!cap?'hidden':''}><label>FULL ROUNDS<input id="a-rounds-${id}" type="number" min="0" max="3" step="1" value="${cap?Math.floor(x.workout_a_reps/42):''}" oninput="previewAReps('${id}')"></label><label>EXTRA REPS<input id="a-reps-${id}" type="number" min="0" max="41" step="1" value="${cap?x.workout_a_reps%42:''}" oninput="previewAReps('${id}')"></label><p id="a-total-${id}">${cap?x.workout_a_reps+' / 168 REPS':'0–3 full rounds + 0–41 reps'}</p></div>
    <button type="button" class="btn dark" onclick="saveWorkout('${id}','a',this)">SAVE A</button><p id="a-msg-${id}" role="status">${x.workout_a_reps!=null?'SAVED · '+esc(ArcScore.aLabel(x)):''}</p></fieldset>
    <fieldset><legend>WORKOUT B · 8-MIN ROW</legend><label>TOTAL METERS<input id="b-meters-${id}" type="number" min="0" max="100000" step="1" placeholder="e.g. 1850" value="${x.workout_b_meters??''}"></label><p>Record the monitor distance at 8:00.</p><button type="button" class="btn dark" onclick="saveWorkout('${id}','b',this)">SAVE B</button><p id="b-msg-${id}" role="status">${x.workout_b_meters!=null?'SAVED · '+x.workout_b_meters+' m':''}</p></fieldset></div>
-   <p id="standing-${id}" role="status">${x.rank!=null?'OVERALL #'+x.rank+' · A '+x.workout_a_rank+' + B '+x.workout_b_rank+' = '+x.total_points+' PTS':'Awaiting A and B records'}</p></article>`;
+   <p id="standing-${id}" role="status">${x.rank!=null?'OVERALL #'+x.rank+' · A '+x.workout_a_rank+' + B '+x.workout_b_rank+' = '+x.total_points+' PTS':'Awaiting A and B records'}</p><button type="button" class="btn danger" onclick="resetResults('${id}',this)">RESET THIS TEAM</button></article>`;
  }).join('')||'<p>NO CONFIRMED TEAMS.</p>';filterResultCards();
 }
 window.filterResultCards=()=>{const q=$('resultSearch').value.trim().toLowerCase();document.querySelectorAll('.result-card').forEach(c=>c.hidden=!c.dataset.search.includes(q));};
@@ -729,6 +729,17 @@ async function refreshScoreStandings(){
  if(r.error){return;} // The record is already committed; do not report a failed save.
  (r.data||[]).forEach(x=>{const el=$(`standing-${x.team_id}`);if(el)el.textContent=x.rank!=null?`OVERALL #${x.rank} · A ${x.workout_a_rank} + B ${x.workout_b_rank} = ${x.total_points} PTS`:`A #${x.workout_a_rank??'—'} / B #${x.workout_b_rank??'—'} · Awaiting both records`;});
 }
+
+window.resetResults=async(id,button)=>{
+ const team=allAdminTeams.find(t=>t.id===id);
+ if(id&&!team)return;
+ const label=id?team.team_name:'ALL TEAMS IN THIS EVENT';
+ if(!confirm(`Reset results for ${label}?\nA/B records and awarded athlete points will be cleared. Remaining rankings recalculate automatically.`))return;
+ if(!id&&prompt('Type RESET to clear all event results.')!=='RESET')return;
+ button.disabled=true;
+ try{const r=await db.rpc('arc_reset_results',{p_event:currentEvent.id,p_team:id});if(r.error)throw r.error;await loadResults();alert(`Results reset: ${label}`);}
+ catch(e){alert(e.message||adminError(e));}finally{if(button.isConnected)button.disabled=false;}
+};
 
 $('login').onclick=async()=>{
   if(!$('email').value.trim()||!$('pass').value){notice('adminMsg','Enter email and password.',true);return}
