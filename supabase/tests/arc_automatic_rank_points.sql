@@ -1,0 +1,21 @@
+begin;
+create temporary table arc_auto_test as select row_number() over(order by id) n,id team_id,event_id from public.tg_teams where status='confirmed' and division='PRO' and category='MM';
+grant select on arc_auto_test to authenticated;
+select set_config('request.jwt.claim.sub',(select user_id::text from public.tg_admins limit 1),true);
+set local role authenticated;
+do $$ declare ev uuid;t uuid[];r public.tg_results;begin
+select array_agg(team_id order by n),min(event_id::text)::uuid into t,ev from arc_auto_test;
+perform public.arc_save_workout(ev,t[1],'a',300,168,null);perform public.arc_save_workout(ev,t[1],'b',null,null,1000);
+perform public.arc_save_workout(ev,t[2],'a',350,168,null);perform public.arc_save_workout(ev,t[2],'b',null,null,1500);
+perform public.arc_save_workout(ev,t[3],'a',null,143,null);perform public.arc_save_workout(ev,t[3],'b',null,null,2000);
+for i in 1..3 loop select * into r from public.tg_results where team_id=t[i];if r.total_points<>4 or r.rank<>i or r.workout_a_rank<>i then raise exception 'A_TIEBREAK_FAILED %',i;end if;end loop;
+perform public.arc_save_workout(ev,t[4],'a',300,168,null);perform public.arc_save_workout(ev,t[4],'b',null,null,1000);
+select * into r from public.tg_results where team_id=t[4];if r.rank<>1 or r.total_points<>4 then raise exception 'SHARED_RANK_FAILED';end if;
+select * into r from public.tg_results where team_id=t[2];if r.workout_a_rank<>3 or r.rank<>3 then raise exception 'RANK_GAPS_FAILED';end if;
+perform public.arc_save_workout(ev,t[5],'a',200,168,null);
+select * into r from public.tg_results where team_id=t[5];if r.rank is not null or r.total_points is not null or r.workout_a_rank<>1 then raise exception 'PARTIAL_FAILED';end if;
+perform public.arc_save_workout(ev,t[1],'b',null,null,2500);
+select * into r from public.tg_results where team_id=t[1];if r.rank<>1 or r.total_points<>3 then raise exception 'CORRECTION_FAILED';end if;
+select * into r from public.tg_results where team_id=t[3];if r.workout_b_rank<>2 then raise exception 'OTHER_TEAM_RECALC_FAILED';end if;
+end $$;
+rollback;select 'PASS: rank points, A tiebreak, shared ranks, gaps, partial records, correction and other-team recalculation; rolled back' as result;
