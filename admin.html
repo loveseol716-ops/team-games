@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="station.css?v=20260922s2">
 <link rel="stylesheet" href="station-navigation.css?v=20260922nav1">
 <link rel="stylesheet" href="admin-accounts.css?v=20260923-1">
-<style>.admin-results-wrap table{min-width:1100px}.admin-results-wrap label{display:block;font-size:11px;margin:6px 0}.admin-results-wrap input{min-width:100px}.admin-results-wrap .table-scroll{overflow-x:auto}</style><link rel="stylesheet" href="admin-workspace.css?v=20260928-clean"></head>
+<style>.admin-results-wrap table{min-width:1100px}.admin-results-wrap label{display:block;font-size:11px;margin:6px 0}.admin-results-wrap input{min-width:100px}.admin-results-wrap .table-scroll{overflow-x:auto}</style><link rel="stylesheet" href="admin-workspace.css?v=20261007-results-20260928-clean"></head>
 <body class="ug-site station-site admin-workspace">
 <div id="nav"></div>
 <main>
@@ -203,16 +203,11 @@
               <div class="kicker">SCOREBOARD</div>
               <h3>SCORE INPUT</h3>
             </div>
-            <p class="muted">Record A and B separately. Enter official workout ranks and points; the total is calculated automatically. Enter the final placing after applying the official points and tie rules. Saving an official placing also updates each active teammate’s season points: 1st 3,000 / 2nd 2,000 / 3rd 1,500 / 4th–8th 1,000 / 9th–24th 500. Corrections replace the previous award.</p>
+            <p class="muted">Save A time or time-cap progress, then B meters. Each record goes straight to the public scoreboard. Official points and final placing are a separate confirmation step.</p>
           </div>
-          <div class="card admin-results-wrap">
-            <div class="table-scroll">
-              <table>
-                <thead><tr><th>TEAM</th><th>SLOT</th><th>WORKOUT A</th><th>WORKOUT B</th><th>TOTAL / FINAL PLACE</th><th>GAME STATUS</th><th></th></tr></thead>
-                <tbody id="resultRows"></tbody>
-              </table>
-            </div>
-          </div>
+          <p class="muted">Saving A or B publishes that record immediately. 1 round = 42 reps. Correcting a record clears that team’s official points and placing; review the category before confirming results.</p>
+          <label>FIND TEAM<input id="resultSearch" type="search" placeholder="Team name / heat" oninput="filterResultCards()"></label>
+          <div id="resultRows" class="result-cards"></div>
         </section>
       </div>
     </div>
@@ -222,7 +217,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script src="app.js?v=20261006-partners3"></script>
-<script src="score-utils.js?v=20260928-ab"></script>
+<script src="score-utils.js?v=20261007-results"></script>
 <script src="admin-layout.js?v=20260928-clean"></script>
 <script src="admin-accounts.js?v=20260928-clean"></script>
 <script>
@@ -699,33 +694,46 @@ window.settlePredictionMarket=async marketId=>{
 };
 
 async function loadResults(){
-  const approved=allAdminTeams.filter(t=>t.status==='confirmed');
-  const r=await db.from('tg_results').select('*').eq('event_id',currentEvent.id);
-  if(r.error)throw r.error;
-  const map={};(r.data||[]).forEach(x=>map[x.team_id]=x);
-  const workout=(t,x,k)=>`<label>TIME<input id="${k}-time-${t.id}" value="${esc(ArcScore.time(x[`workout_${k}_seconds`]))}" placeholder="4:35.20" aria-label="Workout ${k.toUpperCase()} completion time"></label><label>RANK<input id="${k}-rank-${t.id}" type="number" min="1" step="1" value="${x[`workout_${k}_rank`]??''}"></label><label>POINTS<input id="${k}-points-${t.id}" type="number" min="0" step="0.01" oninput="updateScoreTotal('${t.id}')" value="${x[`workout_${k}_points`]??''}"></label>`;
-  $('resultRows').innerHTML=approved.map(t=>{
-    const x=map[t.id]||{};
-    return `<tr><td><strong>${esc(t.team_name)}</strong><div class="table-sub">${esc(t.player_1)} × ${esc(t.player_2)}</div><small>${esc(divisionLabel(t.division))} / ${esc(({MM:'MEN’S DOUBLES',WW:'WOMEN’S DOUBLES',MIXED:'MIXED DOUBLES'})[t.category]||t.category)}</small></td><td>H${t.heat_no??'—'} · S${t.station_no??'—'}</td><td>${workout(t,x,'a')}</td><td>${workout(t,x,'b')}</td><td><strong id="total-${t.id}">${x.total_points??'—'} PTS</strong><label>FINAL PLACE<input id="final-rank-${t.id}" type="number" min="1" step="1" value="${x.rank??''}"></label></td><td><select id="status-${t.id}">${['Not Started','Running','Finished','Time Cap'].map(v=>`<option ${x.status===v?'selected':''}>${v}</option>`).join('')}</select></td><td><button class="btn dark" type="button" onclick="saveResult('${t.id}')">SAVE SCORE</button></td></tr>`;
-  }).join('')||'<tr><td colspan="7" class="muted">NO LOCKED-IN TEAMS.</td></tr>';
+ const r=await db.from('tg_results').select('*').eq('event_id',currentEvent.id);if(r.error)throw r.error;
+ const map={};(r.data||[]).forEach(x=>map[x.team_id]=x);
+ $('resultRows').innerHTML=allAdminTeams.filter(t=>t.status==='confirmed').map(t=>{
+  const x=map[t.id]||{},id=t.id,cap=x.workout_a_reps!=null&&x.workout_a_reps<168;
+  return `<article class="card result-card" data-search="${esc((t.team_name+' '+(t.heat_no??'')).toLowerCase())}">
+   <h3>${esc(t.team_name)}</h3><p>${esc(t.player_1||'—')} × ${esc(t.player_2||'—')} · ${esc(divisionLabel(t.division))} / ${esc(t.category)} · H${t.heat_no??'—'} / S${t.station_no??'—'}</p>
+   <div class="result-workouts"><fieldset><legend>WORKOUT A · 4 ROUNDS</legend>
+   <label>RESULT<select id="a-mode-${id}" onchange="toggleAResult('${id}')"><option value="finish" ${!cap?'selected':''}>FINISHED · TIME</option><option value="cap" ${cap?'selected':''}>TIME CAP · ROUNDS + REPS</option></select></label>
+   <div id="a-finish-${id}" ${cap?'hidden':''}><label>FINISH TIME<input id="a-time-${id}" placeholder="7:25.30" value="${esc(ArcScore.time(x.workout_a_seconds))}"></label></div>
+   <div id="a-cap-${id}" ${!cap?'hidden':''}><label>FULL ROUNDS<input id="a-rounds-${id}" type="number" min="0" max="3" step="1" value="${cap?Math.floor(x.workout_a_reps/42):''}" oninput="previewAReps('${id}')"></label><label>EXTRA REPS<input id="a-reps-${id}" type="number" min="0" max="41" step="1" value="${cap?x.workout_a_reps%42:''}" oninput="previewAReps('${id}')"></label><p id="a-total-${id}">${cap?x.workout_a_reps+' / 168 REPS':'0–3 full rounds + 0–41 reps'}</p></div>
+   <button type="button" class="btn dark" onclick="saveWorkout('${id}','a',this)">SAVE A</button><p id="a-msg-${id}" role="status">${x.workout_a_reps!=null?'SAVED · '+esc(ArcScore.aLabel(x)):''}</p></fieldset>
+   <fieldset><legend>WORKOUT B · 8-MIN ROW</legend><label>TOTAL METERS<input id="b-meters-${id}" type="number" min="0" max="100000" step="1" placeholder="e.g. 1850" value="${x.workout_b_meters??''}"></label><p>Record the monitor distance at 8:00.</p><button type="button" class="btn dark" onclick="saveWorkout('${id}','b',this)">SAVE B</button><p id="b-msg-${id}" role="status">${x.workout_b_meters!=null?'SAVED · '+x.workout_b_meters+' m':''}</p></fieldset></div>
+   <details><summary>OFFICIAL POINTS & FINAL PLACE</summary><p>Confirm after all teams in this category finish and the points / tie rules are applied. This awards athlete season points.</p><div class="result-official">${['a','b'].map(k=>`<label>${k.toUpperCase()} RANK<input id="${k}-rank-${id}" type="number" min="1" value="${x['workout_'+k+'_rank']??''}"></label><label>${k.toUpperCase()} POINTS<input id="${k}-points-${id}" type="number" min="0" step="0.01" oninput="updateScoreTotal('${id}')" value="${x['workout_'+k+'_points']??''}"></label>`).join('')}<label>FINAL PLACE<input id="final-rank-${id}" type="number" min="1" value="${x.rank??''}"></label></div><p id="total-${id}">${x.total_points??'—'} PTS</p><button class="btn dark" onclick="saveResult('${id}',this)">CONFIRM OFFICIAL RESULT</button><p id="official-msg-${id}" role="status"></p></details></article>`;
+ }).join('')||'<p>NO CONFIRMED TEAMS.</p>';filterResultCards();
 }
-window.updateScoreTotal=id=>{
- try{const a=ArcScore.number($(`a-points-${id}`).value,'A points'),b=ArcScore.number($(`b-points-${id}`).value,'B points');$(`total-${id}`).textContent=(ArcScore.total(a,b)??'—')+' PTS';}catch(e){$(`total-${id}`).textContent='CHECK POINTS';}
+window.filterResultCards=()=>{const q=$('resultSearch').value.trim().toLowerCase();document.querySelectorAll('.result-card').forEach(c=>c.hidden=!c.dataset.search.includes(q));};
+window.toggleAResult=id=>{const cap=$(`a-mode-${id}`).value==='cap';$(`a-cap-${id}`).hidden=!cap;$(`a-finish-${id}`).hidden=cap;};
+window.previewAReps=id=>{try{$(`a-total-${id}`).textContent=ArcScore.capReps($(`a-rounds-${id}`).value,$(`a-reps-${id}`).value)+' / 168 REPS';}catch(e){$(`a-total-${id}`).textContent=e.message;}};
+window.saveWorkout=async(id,k,button)=>{
+ const msg=$(`${k}-msg-${id}`);button.disabled=true;msg.textContent='SAVING…';
+ try{
+  const args={p_event:currentEvent.id,p_team:id,p_workout:k};
+  if(k==='a'){const cap=$(`a-mode-${id}`).value==='cap';args.p_reps=cap?ArcScore.capReps($(`a-rounds-${id}`).value,$(`a-reps-${id}`).value):168;args.p_seconds=cap?null:ArcScore.parseTime($(`a-time-${id}`).value);if(!cap&&!(args.p_seconds>0))throw Error('Enter a finish time from 0:00.01 to 8:00.');}
+  else args.p_meters=ArcScore.meters($(`b-meters-${id}`).value);
+  const r=await db.rpc('arc_save_workout',args);if(r.error)throw r.error;
+  // Keep other unsaved cards and the other workout intact.
+  for(const field of ['a-rank','b-rank','a-points','b-points','final-rank'])$(`${field}-${id}`).value='';
+  $(`total-${id}`).textContent='— PTS';$(`official-msg-${id}`).textContent='Official points and placing need review.';
+  msg.textContent='SAVED · '+(k==='b'?args.p_meters+' m':args.p_reps===168?ArcScore.time(args.p_seconds):Math.floor(args.p_reps/42)+' R + '+args.p_reps%42+' REPS')+' · PUBLISHED';
+ }catch(e){msg.textContent='NOT SAVED · '+(e.message||adminError(e));}finally{button.disabled=false;}
 };
-window.saveResult=async id=>{
-  try{
-    const payload={event_id:currentEvent.id,team_id:id,finish_seconds:null,reps_completed:null,status:$(`status-${id}`).value,rank:ArcScore.number($(`final-rank-${id}`).value,'final place',true),updated_at:new Date().toISOString()};
-    for(const k of ['a','b']){
-      payload[`workout_${k}_seconds`]=ArcScore.parseTime($(`${k}-time-${id}`).value);
-      payload[`workout_${k}_rank`]=ArcScore.number($(`${k}-rank-${id}`).value,k+' rank',true);
-      payload[`workout_${k}_points`]=ArcScore.number($(`${k}-points-${id}`).value,k+' points');
-    }
-    if(payload.status==='Finished'&&(payload.workout_a_seconds==null||payload.workout_b_seconds==null))throw Error('Enter both completion times for a finished team.');
-    if(payload.rank!=null&&(payload.workout_a_points==null||payload.workout_b_points==null||!['Finished','Time Cap'].includes(payload.status)))throw Error('Enter both official workout scores and a completed status before the final place.');
-    const r=await db.from('tg_results').upsert(payload,{onConflict:'event_id,team_id'});
-    if(r.error)throw r.error;
-    await loadResults();
-  }catch(e){alert(e.message||adminError(e))}
+window.updateScoreTotal=id=>{try{$(`total-${id}`).textContent=(ArcScore.total(ArcScore.number($(`a-points-${id}`).value,'A points'),ArcScore.number($(`b-points-${id}`).value,'B points'))??'—')+' PTS';}catch(e){$(`total-${id}`).textContent='CHECK POINTS';}};
+window.saveResult=async(id,button)=>{
+ const msg=$(`official-msg-${id}`);button.disabled=true;
+ try{
+  const payload={rank:ArcScore.number($(`final-rank-${id}`).value,'final place',true),updated_at:new Date().toISOString()};
+  for(const k of ['a','b']){payload[`workout_${k}_rank`]=ArcScore.number($(`${k}-rank-${id}`).value,k+' rank',true);payload[`workout_${k}_points`]=ArcScore.number($(`${k}-points-${id}`).value,k+' points');}
+  if(Object.values(payload).some(v=>v==null))throw Error('Enter both workout ranks, points and final place.');
+  const r=await db.from('tg_results').update(payload).eq('event_id',currentEvent.id).eq('team_id',id).in('status',['Finished','Time Cap']).select('team_id');if(r.error)throw r.error;if(!r.data?.length)throw Error('Save both A and B before confirming.');msg.textContent='OFFICIAL RESULT SAVED';
+ }catch(e){msg.textContent='NOT SAVED · '+e.message;}finally{button.disabled=false;}
 };
 
 $('login').onclick=async()=>{
