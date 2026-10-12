@@ -59,12 +59,13 @@ function divisionLabel(v){return v==='OPEN'?'BEGINNER':v==='PRO'?'ATHLETE':v||'â
 function esc(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
 
 function nav(active){
+  if(!document.getElementById('arcHeatStyles')){const l=document.createElement('link');l.id='arcHeatStyles';l.rel='stylesheet';l.href='my-heat.css?v=20261012-easy1';document.head.append(l);}
   const page=location.pathname.split('/').pop();
   const eventPages=['event.html','athlete.html','rulebook.html','teams.html','fanpick.html','ranking.html','live.html','player.html','player-profile.html'];
   const inEvent=eventPages.includes(page);
   const links=[['GAME','event.html'],['REGISTER','athlete.html'],['RULEBOOK','rulebook.html'],['TEAMS','teams.html'],['FAN PICK','fanpick.html'],['RESULTS','ranking.html'],['LIVE','live.html']];
   const eventNav=inEvent?`<div class="station-event-nav"><div class="container station-event-nav-inner"><a class="station-event-name" href="event.html">#1 NOLTO</a><nav aria-label="#1 NOLTO navigation">${links.map(([label,href])=>`<a href="${href}"${page===href?' aria-current="page"':''}>${label}</a>`).join('')}</nav></div></div>`:'';
-  return `<header class="nav station-brand-nav"><div class="container navin"><a class="brand" href="index.html">ARC STATION</a><nav class="station-brand-links" aria-label="Primary navigation"><a href="events.html"${active==='EVENTS'?' aria-current="page"':''}>EVENTS</a></nav><a id="arcAccountNav" class="cta arcade-cta ${active==='ACCOUNT'?'active':''}" href="account.html">LOG IN</a></div></header>${eventNav}`;
+  return `<header class="nav station-brand-nav"><div class="container navin"><a class="brand" href="index.html">ARC STATION</a><nav class="station-brand-links" aria-label="Primary navigation"><a href="events.html"${active==='EVENTS'?' aria-current="page"':''}>EVENTS</a></nav><a class="arc-heat-access" href="my-heat.html">MY HEAT</a><a id="arcAccountNav" class="cta arcade-cta ${active==='ACCOUNT'?'active':''}" href="account.html">LOG IN</a></div></header>${eventNav}`;
 }
 
 function initMobileNav(){
