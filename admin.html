@@ -268,7 +268,8 @@ function adminError(x){
   if(m.includes('Email rate limit exceeded')) return 'Too many reset requests. Try again later.';
   if(m.includes('DUPLICATE_PHONE')) return 'This phone number belongs to another active team.';
   if(m.includes('SLOT_TAKEN')||m.includes('tg_teams_confirmed_slot_unique')) return 'This heat / station is already in use.';
-  if(m.includes('INVALID_HEAT')) return 'Set heat between 1 and 6.';
+  if(m.includes('SLOT_CHANGED_REFRESH')) return 'This slot changed. Refresh and try again.';
+  if(m.includes('INVALID_HEAT')) return 'Set heat between 1 and 12.';
   if(m.includes('INVALID_STATION')) return 'Station must be 1 or 2.';
   if(m.includes('INVALID_PLAYERS')) return 'Select two different players.';
   if(m.includes('ATHLETE_ALREADY_LOCKED_IN')) return 'One of these players is already on a confirmed team.';
@@ -460,8 +461,9 @@ function renderTeamManagement(){
           <div><label>Partner</label><input value="${esc(partner)}" disabled>${!t.partner_id&&t.pending_invite?`<small class="pending-partner">PENDING REQUEST: ${esc(t.pending_invite.name)}</small>`:''}</div>
           <div class="full"><label>Contact</label><input id="phone-${t.id}" value="${esc(t.phone)}" inputmode="tel" ${pending?'disabled':''}></div>
           ${pending?'<div class="full"><label>Roster Status</label><input value="PAYMENT PENDING" disabled></div>':`
-          <div><label>Heat</label><input id="heat-${t.id}" type="number" min="1" max="12" value="${t.heat_no}"></div>
-          <div><label>Station</label><select id="station-${t.id}"><option value="1" ${t.station_no===1?'selected':''}>1</option><option value="2" ${t.station_no===2?'selected':''}>2</option></select></div>
+          <div><label for="heat-${t.id}">HEAT</label><select id="heat-${t.id}">${Array.from({length:12},(_,i)=>'<option value="'+(i+1)+'" '+(t.heat_no===i+1?'selected':'')+'>HEAT '+String(i+1).padStart(2,'0')+'</option>').join('')}</select></div>
+          <div><label>LANE</label><select id="station-${t.id}"><option value="1" ${t.station_no===1?'selected':''}>1</option><option value="2" ${t.station_no===2?'selected':''}>2</option></select></div>
+          ${t.status==='confirmed'?`<div class="full"><button class="btn dark" type="button" id="heat-save-${t.id}" onclick="saveTeamHeat('${t.id}')">SAVE HEAT / SWAP</button><div id="heat-msg-${t.id}" class="notice" role="status"></div><small>Choose heat and lane. If occupied, confirm to swap the two teams.</small></div>`:''}
           <div class="full"><label>Roster Status</label><select id="teamstatus-${t.id}"><option value="confirmed" ${t.status==='confirmed'?'selected':''}>LOCKED IN</option><option value="cancelled" ${t.status==='cancelled'?'selected':''}>OUT</option></select></div>`}
         </div>
         ${t.status==='confirmed'&&!t.partner_id?`<div class="admin-partner-add"><h5>ADD PARTNER</h5><p>Select a registered account. The player joins immediately, without a separate acceptance step.</p><label for="partner-search-${t.id}">FIND PLAYER<input id="partner-search-${t.id}" type="search" placeholder="Name or email" oninput="filterAdminPartners('${t.id}')"></label><label for="partner-select-${t.id}">PLAYER<select id="partner-select-${t.id}" onchange="adminPartnerHint('${t.id}')">${adminPartnerOptions(t)}</select></label><small id="partner-hint-${t.id}" aria-live="polite"></small><div class="admin-actions-row"><button class="btn dark" onclick="editAdminPartner('${t.id}')" type="button">EDIT PROFILE</button><button class="btn arcade-primary" id="partner-add-${t.id}" onclick="addAdminPartner('${t.id}')" type="button">ADD TO TEAM</button></div><div id="partner-msg-${t.id}" class="notice" role="status"></div></div>`:''}
@@ -474,6 +476,22 @@ function renderTeamManagement(){
     </details>`;
   }).join('');
 }
+
+window.saveTeamHeat=async id=>{
+ const t=allAdminTeams.find(x=>x.id===id);if(!t)return;
+ const heat=Number($(`heat-${id}`).value),lane=Number($(`station-${id}`).value);
+ const other=allAdminTeams.find(x=>x.id!==id&&x.status==='confirmed'&&x.heat_no===heat&&x.station_no===lane&&x.event_id===t.event_id);
+ const message=other?`${t.team_name} → H${heat} / L${lane}\n${other.team_name} → H${t.heat_no||'—'} / L${t.station_no||'—'}\n\nSwap these teams?`:`${t.team_name} → H${heat} / L${lane}\n\nSave heat assignment?`;
+ if(!confirm(message))return;
+ const btn=$(`heat-save-${id}`);btn.disabled=true;
+ try{
+  const r=await db.rpc('arc_admin_assign_heat',{p_team:id,p_heat:heat,p_station:lane,p_expected_target:other?.id||null});
+  if(r.error)throw r.error;
+  await refreshAdmin();
+  notice(`heat-msg-${id}`,other?'HEATS SWAPPED.':'HEAT SAVED.');
+ }catch(e){notice(`heat-msg-${id}`,adminError(e),true)}
+ finally{const b=$(`heat-save-${id}`);if(b)b.disabled=false}
+};
 
 window.saveTeamDivision=async id=>{
   const t=allAdminTeams.find(x=>x.id===id);if(!t)return;
