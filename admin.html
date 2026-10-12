@@ -172,6 +172,11 @@
             </div>
             <div class="admin-filters">
               <input id="teamSearch" type="search" placeholder="SEARCH TEAM / PLAYER / CONTACT">
+              <select id="divisionFilter" aria-label="Filter teams by division">
+                <option value="all">ALL DIVISIONS</option>
+                <option value="OPEN">BEGINNER</option>
+                <option value="PRO">ATHLETE</option>
+              </select>
               <select id="statusFilter">
                 <option value="all">ALL TEAMS</option><option value="needs_partner">PARTNER NEEDED</option>
                 <option value="payment_check">PAYMENT CHECK</option>
@@ -402,8 +407,10 @@ $('addTeamBtn').onclick=async()=>{
 function renderTeamManagement(){
   const q=$('teamSearch').value.trim().toLowerCase();
   const sf=$('statusFilter').value;
+  const df=$('divisionFilter').value;
   const opened=new Set([...document.querySelectorAll('details.admin-team-card[open]')].map(el=>el.dataset.team));
   const list=allAdminTeams.filter(t=>{
+    if(df!=='all'&&t.division!==df)return false;
     if(sf==='needs_partner'&&!(t.status==='confirmed'&&!t.partner_id))return false;
     if(sf==='payment_check'&&!(t.status==='pending_payment'&&t.payment_status==='payment_check'))return false;
     if(sf!=='all'&&sf!=='payment_check'&&sf!=='needs_partner'&&t.status!==sf)return false;
@@ -800,6 +807,7 @@ $('saveNewPassword').onclick=async()=>{
 $('logoutBtn').onclick=async()=>{await db.auth.signOut();location.reload()};
 $('teamSearch').oninput=renderTeamManagement;
 $('statusFilter').onchange=renderTeamManagement;
+$('divisionFilter').onchange=renderTeamManagement;
 $('fanWalletSearch').oninput=renderFanWalletRows;
 $('fanWalletSort').onchange=renderFanWalletRows;
 $('closeWalletEditor').onclick=closeFanWalletEditor;
