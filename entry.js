@@ -23,18 +23,19 @@ async function runEntryAction(fn){if(entryBusy)return;entryBusy=true;document.qu
 function invalidateQuote(){entryQuote=null;entryEl('submitEntry').disabled=true;entryEl('priceQuote').textContent='Review your team fee with this code.'}
 function fillProfile(p){if(!p)return;entryEl('entryName').value=p.full_name||'';entryEl('entryGender').value=p.gender||'';entryEl('entryPhone').value=p.phone||'';entryEl('entryGym').value=p.gym||'';entryEl('entryInstagram').value=p.instagram||'';}
 async function refreshEntry(){
- const [s,p]=await Promise.all([entryRpc('state'),db.rpc('arc_player_profile')]);if(p.error)throw p.error;
+ const [s,p,h]=await Promise.all([entryRpc('state'),db.rpc('arc_player_profile'),db.rpc('arc_my_heat',{p_event_slug:C.eventSlug})]);
+ s.my_heat=h.error?{status:'error'}:h.data;if(p.error)throw p.error;
  entryState=s;playerProfile=p.data?.[0];fillProfile(playerProfile);
  entryEl('entryLoading').hidden=true;entryEl('entryClosed').hidden=s.registration_open;
  entryEl('entryApplication').hidden=!!s.entry||!s.registration_open;
 
  entryEl('invitePanel').hidden=!s.invites?.length;
  entryEl('inviteCards').innerHTML=(s.invites||[]).map(i=>'<article class="entry-panel"><h2>'+esc(i.team_name)+'</h2><p>'+esc(divisionLabel(i.division))+' / '+esc(categoryName(i.category))+'<br>CAPTAIN: '+esc(i.captain)+'</p><p>The team fee is paid. Accept to join; no extra payment is needed.</p>'+(!playerProfile?.profile_complete?'<p><a href="player-profile.html?next=athlete.html">COMPLETE PLAYER PROFILE →</a></p>':'')+'<label class="entry-consent"><input type="checkbox" id="consent-'+esc(i.id)+'"><span><a href="terms.html" target="_blank" rel="noopener" >TERMS</a>, <a href="privacy.html" target="_blank" rel="noopener">PRIVACY POLICY</a> and <a href="refund.html" target="_blank" rel="noopener">REFUND POLICY</a>. I agree to join this team.</span></label><div class="entry-actions"><button class="btn arcade-primary" data-respond="'+esc(i.id)+'" data-accept="true">ACCEPT</button><button class="btn dark" data-respond="'+esc(i.id)+'" data-accept="false">DECLINE</button></div></article>').join('');
- renderEntryStatus(s.entry);
+ renderEntryStatus(s.entry,s.my_heat);
  setEntryStep(s.entry?3:entryStep===3?1:entryStep,false);
  if(!s.entry&&s.registration_open)await updateEntryQuote();
 }
-function renderEntryStatus(t){
+function renderEntryStatus(t,heat){
  const box=entryEl('entryStatus');box.hidden=!t;if(!t)return;
  const paid=t.status==='confirmed',reported=t.payment_status==='payment_check',expired=!paid&&!reported&&new Date(t.deadline)<=new Date();
  let content='<p class="entry-status-label">'+(paid?'ENTRY CONFIRMED':reported?'PAYMENT REVIEW':expired?'PAYMENT WINDOW EXPIRED':'AWAITING TRANSFER')+'</p><h2>'+esc(t.team_name)+'</h2><p>'+esc(divisionLabel(t.division))+' / '+esc(categoryName(t.category))+'</p><div class="entry-total">CAPTAIN '+won(t.captain_fee)+' + PARTNER '+won(t.partner_fee)+'<br>TEAM TOTAL <strong>'+won(t.amount_due)+'</strong></div>';
@@ -44,6 +45,11 @@ function renderEntryStatus(t){
  else if(expired)content+='<p>If you already transferred, do not re-enter. <a href="mailto:lovesol716@gmail.com">contact us</a>. Otherwise, cancel and enter again.</p>';
  else if(t.is_captain)content+='<form id="paymentForm"><label>NAME ON BANK TRANSFER<input id="depositorName" required minlength="2" maxlength="50" autocomplete="name"></label><label class="entry-consent"><input type="checkbox" required><span>I transferred the team total shown above.</span></label><button class="btn arcade-primary" type="submit">REPORT TRANSFER</button></form>';
  if(t.is_captain&&!reported)content+='<div class="entry-actions"><button class="btn dark" data-entry-action="cancel">CANCEL UNPAID ENTRY</button></div>';}
+ if(paid){
+ const formatTime=v=>new Date(v).toLocaleTimeString('en-GB',{timeZone:'Asia/Seoul',hour:'2-digit',minute:'2-digit',hour12:false});
+ if(heat?.status==='ready')content+='<section class="entry-panel" style="margin-top:24px;border:1px solid #777;padding:20px"><p class="entry-status-label">YOUR HEAT · 31 OCT 2026 · KST</p><h2>HEAT '+esc(heat.heat)+' / LANE '+esc(heat.lane)+'</h2><p style="font-size:24px">'+formatTime(heat.starts_at)+' – '+formatTime(heat.ends_at)+'</p><p>8 MIN RACE · 5 MIN CHANGEOVER</p></section>';
+ else content+='<section class="entry-panel" style="margin-top:24px;border:1px solid #555;padding:20px"><h3>YOUR HEAT</h3><p>'+(heat?.status==='partner_needed'?'Complete your team to unlock your heat. Add your partner’s ARC account above. No separate acceptance is needed.':heat?.status==='unassigned'?'Your team is complete. Your heat assignment will appear here soon.':'Could not load your heat. Refresh status to try again.')+'</p></section>';
+ }
  content+='<div class="entry-actions"><button class="btn dark" data-refresh-entry>REFRESH STATUS</button></div>';
  box.innerHTML=content;
 }
