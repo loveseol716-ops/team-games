@@ -431,6 +431,14 @@ function renderTeamManagement(){
         <div class="admin-team-title-row"><div><div class="entry-label">TEAM</div><h4>${esc(t.team_name)}</h4></div><div class="admin-slot-mini">${slot}</div></div>
         <div class="admin-contact"><a href="tel:${esc(fmtPhone(t.phone))}">${esc(fmtPhone(t.phone))}</a></div>
         ${paymentInfo}
+        <div class="admin-partner-add">
+          <h5>DIVISION</h5>
+          <label for="division-${t.id}">Registered division</label>
+          <select id="division-${t.id}"><option value="OPEN" ${t.division==='OPEN'?'selected':''}>BEGINNER</option><option value="PRO" ${t.division==='PRO'?'selected':''}>ATHLETE</option></select>
+          <p>Existing results are kept. Rankings and points update automatically.</p>
+          <button class="btn dark" type="button" id="division-save-${t.id}" onclick="saveTeamDivision('${t.id}')">SAVE DIVISION</button>
+          <div id="division-msg-${t.id}" class="notice" role="status"></div>
+        </div>
         <div class="admin-edit-grid">
           <div class="full"><label>Team Name</label><input id="team-${t.id}" value="${esc(t.team_name)}" maxlength="60" ${pending?'disabled':''}></div>
           <div><label>Player 1</label><input value="${esc(t.player_1)}" disabled></div>
@@ -451,6 +459,21 @@ function renderTeamManagement(){
     </details>`;
   }).join('');
 }
+
+window.saveTeamDivision=async id=>{
+  const t=allAdminTeams.find(x=>x.id===id);if(!t)return;
+  const division=$(`division-${id}`).value;
+  if(division===t.division){notice(`division-msg-${id}`,'No change to save.');return}
+  if(!confirm(`${t.team_name}\n${divisionLabel(t.division)} → ${divisionLabel(division)}\n\nChange this team’s division? Existing results will be re-ranked.`))return;
+  const btn=$(`division-save-${id}`);btn.disabled=true;btn.textContent='SAVING…';
+  try{
+    const r=await db.rpc('arc_admin_change_division',{p_team:id,p_division:division});
+    if(r.error)throw r.error;
+    await refreshAdmin();
+    notice(`division-msg-${id}`,`SAVED · ${divisionLabel(division)}`);
+  }catch(e){notice(`division-msg-${id}`,adminError(e),true)}
+  finally{const current=$(`division-save-${id}`);if(current){current.disabled=false;current.textContent='SAVE DIVISION'}}
+};
 
 window.saveTeam=async id=>{
   const t=allAdminTeams.find(x=>x.id===id);if(!t)return;
