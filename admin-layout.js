@@ -6,6 +6,7 @@
  const add=section('addTeamBtn'),wallet=section('fanWalletSummary'),discount=control.querySelector(':scope > .admin-block');
  const nav=document.createElement('nav');nav.className='admin-tabs';nav.setAttribute('aria-label','Admin sections');
  nav.innerHTML=[['teams','TEAMS'],['accounts','ACCOUNTS'],['results','RESULTS'],['picks','FAN PICK']].map(([id,name])=>`<button type="button" data-admin-tab="${id}" aria-controls="admin-panel-${id}">${name}</button>`).join('')+'<button type="button" class="admin-refresh" id="adminRefresh">REFRESH ↻</button>';
+ const heatLink=document.createElement('a');heatLink.href='admin-heats.html';heatLink.className='btn dark';heatLink.textContent='HEAT SCHEDULE ↗';nav.prepend(heatLink);
  document.getElementById('summary').after(nav);
  const msg=document.createElement('div');msg.id='adminLoadMsg';msg.className='notice';msg.setAttribute('role','status');nav.after(msg);
  const panels={};Object.entries(sections).forEach(([id,el])=>{const p=document.createElement('div');p.id='admin-panel-'+id;p.className='admin-tab-panel';p.hidden=true;p.append(el);control.append(p);panels[id]=p;});
