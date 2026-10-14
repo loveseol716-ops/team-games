@@ -60,10 +60,10 @@ function esc(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&l
 
 function nav(active){
   const page=location.pathname.split('/').pop();
-  const eventPages=['my-heat.html','event.html','athlete.html','rulebook.html','teams.html','fanpick.html','ranking.html','live.html','player.html','player-profile.html'];
+  const eventPages=['my-heat.html','event.html','athlete.html','rulebook.html','rulebook-ko.html','teams.html','fanpick.html','ranking.html','live.html','player.html','player-profile.html'];
   const inEvent=eventPages.includes(page);
   const links=[['GAME','event.html'],['MY HEAT','my-heat.html'],['REGISTER','athlete.html'],['RULEBOOK','rulebook.html'],['TEAMS','teams.html'],['FAN PICK','fanpick.html'],['RESULTS','ranking.html'],['LIVE','live.html']];
-  const eventNav=inEvent?`<div class="station-event-nav"><div class="container station-event-nav-inner"><a class="station-event-name" href="event.html">#1 NOLTO</a><nav aria-label="#1 NOLTO navigation">${links.map(([label,href])=>`<a href="${href}"${page===href?' aria-current="page"':''}>${label}</a>`).join('')}</nav></div></div>`:'';
+  const eventNav=inEvent?`<div class="station-event-nav"><div class="container station-event-nav-inner"><a class="station-event-name" href="event.html">#1 NOLTO</a><nav aria-label="#1 NOLTO navigation">${links.map(([label,href])=>`<a href="${href}"${(page===href||(page==='rulebook-ko.html'&&href==='rulebook.html'))?' aria-current="page"':''}>${label}</a>`).join('')}</nav></div></div>`:'';
   return `<header class="nav station-brand-nav"><div class="container navin"><a class="brand" href="index.html">ARC STATION</a><nav class="station-brand-links" aria-label="Primary navigation"><a href="events.html"${active==='EVENTS'?' aria-current="page"':''}>EVENTS</a></nav><a id="arcAccountNav" class="cta arcade-cta ${active==='ACCOUNT'?'active':''}" href="account.html">LOG IN</a></div></header>${eventNav}`;
 }
 
