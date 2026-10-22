@@ -5,8 +5,8 @@
  const sections={teams:section('adminTeams'),accounts:section('accountControl'),results:section('resultRows'),picks:section('predictionAdminGrid')};
  const add=section('addTeamBtn'),wallet=section('fanWalletSummary'),discount=control.querySelector(':scope > .admin-block');
  const nav=document.createElement('nav');nav.className='admin-tabs';nav.setAttribute('aria-label','Admin sections');
- nav.innerHTML=[['teams','TEAMS'],['accounts','ACCOUNTS'],['results','RESULTS'],['picks','FAN PICK']].map(([id,name])=>`<button type="button" data-admin-tab="${id}" aria-controls="admin-panel-${id}">${name}</button>`).join('')+'<button type="button" class="admin-refresh" id="adminRefresh">REFRESH ↻</button>';
- const heatLink=document.createElement('a');heatLink.href='admin-heats.html';heatLink.className='btn dark';heatLink.textContent='HEAT SCHEDULE ↗';nav.prepend(heatLink);
+ nav.innerHTML=[['teams','TEAMS'],['accounts','ACCOUNTS'],['results','RESULTS']].map(([id,name])=>`<button type="button" data-admin-tab="${id}" aria-controls="admin-panel-${id}">${name}</button>`).join('')+'<button type="button" class="admin-refresh" id="adminRefresh">REFRESH ↻</button>';
+ const heatLink=document.createElement('a');heatLink.href='admin-heats.html';heatLink.className='btn dark';heatLink.textContent='HEAT SCHEDULE ↗';nav.prepend(heatLink);const raffleLink=document.createElement('a');raffleLink.href='admin-raffle.html';raffleLink.className='btn dark';raffleLink.textContent='FAN PICK / DRAW ↗';nav.prepend(raffleLink);
  document.getElementById('summary').after(nav);
  const msg=document.createElement('div');msg.id='adminLoadMsg';msg.className='notice';msg.setAttribute('role','status');nav.after(msg);
  const panels={};Object.entries(sections).forEach(([id,el])=>{const p=document.createElement('div');p.id='admin-panel-'+id;p.className='admin-tab-panel';p.hidden=true;p.append(el);control.append(p);panels[id]=p;});
@@ -14,7 +14,7 @@
  panels.teams.prepend(disclosure(add,'+ CREATE A TEAM'));
  panels.teams.append(disclosure(discount,'DISCOUNT CODES'));
  panels.picks.append(disclosure(wallet,'FAN WALLETS & POINT ADJUSTMENTS'));
- window.showAdminPanel=id=>{if(!panels[id])id='teams';Object.entries(panels).forEach(([key,p])=>p.hidden=key!==id);nav.querySelectorAll('[data-admin-tab]').forEach(b=>{const active=b.dataset.adminTab===id;b.setAttribute('aria-current',active?'page':'false');});try{sessionStorage.setItem('arc-admin-panel',id);}catch{};};
+ window.showAdminPanel=id=>{if(!panels[id]||id==='picks')id='teams';Object.entries(panels).forEach(([key,p])=>p.hidden=key!==id);nav.querySelectorAll('[data-admin-tab]').forEach(b=>{const active=b.dataset.adminTab===id;b.setAttribute('aria-current',active?'page':'false');});try{sessionStorage.setItem('arc-admin-panel',id);}catch{};};
  nav.addEventListener('click',e=>{const b=e.target.closest('[data-admin-tab]');if(b)showAdminPanel(b.dataset.adminTab);});
  document.getElementById('adminRefresh').onclick=async()=>{const b=document.getElementById('adminRefresh');b.disabled=true;try{await refreshAdmin();}catch(e){notice('adminLoadMsg',adminError(e),true);}finally{b.disabled=false;}};
  let initial='teams';try{initial=sessionStorage.getItem('arc-admin-panel')||initial;}catch{}showAdminPanel(initial);
@@ -39,3 +39,4 @@ window.addAdminPartner=async id=>{
  b.disabled=true;b.textContent='ADDING…';
  try{const r=await db.rpc('arc_admin_add_partner',{p_team_id:id,p_partner_id:a.athlete_id});if(r.error)throw r.error;await refreshAdmin();notice('teamAdminMsg',`${a.display_name} ADDED TO ${t.team_name}.`);}catch(e){notice('partner-msg-'+id,adminError(e),true);}finally{if(b.isConnected){b.disabled=false;b.textContent='ADD TO TEAM';}}
 };
+

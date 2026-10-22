@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="ARC STATION MY PAGE — ARC ID, PLAY POINT, PLAYER PROFILE.">
+  <meta name="description" content="ARC STATION MY PAGE — ARC ID, FAN PICK, PLAYER PROFILE.">
   <meta property="og:site_name" content="ARC STATION">
   <meta property="og:title" content="ARC STATION — MY PAGE">
-  <meta property="og:description" content="Manage your ARC ID, PLAY POINT and game entry profile.">
+  <meta property="og:description" content="Manage your ARC ID, raffle entry and player profile.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://arcstation.kr/my.html">
   <meta property="og:image" content="https://arcstation.kr/station-social.png">
@@ -30,7 +30,7 @@
         <div>
           <div class="arcade-eyebrow">YOUR ACCOUNT / YOUR GAME</div>
           <h1>YOUR STATION.</h1>
-          <p>Your points, picks and team in one place.</p>
+          <p>Your team and raffle entry in one place.</p>
         </div>
         <div class="arc-my-head-status">
           <span>ACCOUNT STATUS</span>
@@ -50,20 +50,9 @@
           <div class="arc-id-status"><i></i> ACCOUNT ACTIVE</div>
         </article>
 
-        <article class="arc-my-panel arc-wallet-card">
-          <div class="arc-panel-label">PLAY POINT WALLET</div>
-          <h2 id="arcBalance">— P</h2>
-          <div class="arc-stat-row">
-            <div><span>TOTAL STAKED</span><b id="arcTotalBet">— P</b></div>
-            <div><span>WINS / SETTLED</span><b id="arcWins">—</b></div>
-          </div>
-          <div class="arc-stat-row">
-            <div><span>HIT RATE</span><b id="arcHitRate">—%</b></div>
-            <div><span>NET POINTS</span><b id="arcNetWin">— P</b></div>
-          </div>
-        </article>
+        <article class="arc-my-panel"><div class="arc-panel-label">FAN PICK / MY NUMBER</div><h2 id="myRaffleNumber">—</h2><p id="myRaffleTeam">응원 팀을 고르고 현장 추첨에 참여하세요.</p><a class="arc-button" href="fanpick.html">VIEW MY TICKET →</a></article>
 
-        <article class="arc-my-panel"><div class="arc-panel-label">ATHLETE POINTS</div><h2 id="arcAthletePoints">— P</h2><p>Earned through official race placings. Separate from PLAY POINT.</p><a class="arc-button" href="event.html#athlete-rewards">VIEW POINT RULES →</a><p>Ticket and product redemption is not available yet.</p></article>
+        <article class="arc-my-panel"><div class="arc-panel-label">ATHLETE POINTS</div><h2 id="arcAthletePoints">— P</h2><p>Earned through official race placings. </p><a class="arc-button" href="event.html#athlete-rewards">VIEW POINT RULES →</a><p>Ticket and product redemption is not available yet.</p></article>
         <article class="arc-my-panel arc-access-card">
           <div class="arc-panel-label">GAME ACCESS</div>
           <h3 id="arcPlayerState">CHECKING PLAYER PROFILE...</h3>
@@ -128,11 +117,11 @@ async function loadMy(){
 
   el('arcDisplayName').textContent=a.display_name||'ARC PLAYER';
   el('arcEmail').textContent=a.email||'SOCIAL LOGIN ACCOUNT';
-  el('arcBalance').textContent=fmtP(a.balance);
-  el('arcTotalBet').textContent=fmtP(a.total_staked);
-  el('arcWins').textContent=(a.wins||0)+' / '+(a.settled_bets||0);
-  el('arcHitRate').textContent=Number(a.hit_rate||0).toFixed(1)+'%';
-  el('arcNetWin').textContent=signed(a.net_win);
+
+
+
+
+
   el('editNickname').value=a.display_name||'';
 
   if(a.athlete_ready){
@@ -217,5 +206,6 @@ loadMy().catch(e=>{
   el('arcEmail').textContent='LOAD ERROR';
 });
 </script>
-</body>
+<script>(async()=>{try{const r=await db.rpc('arc_raffle',{p_slug:C.eventSlug,p_action:'board'});if(r.error)throw r.error;const m=r.data.mine;document.getElementById('myRaffleNumber').textContent=m?'#'+String(m.ticket).padStart(3,'0'):'NO ENTRY YET';if(m)document.getElementById('myRaffleTeam').textContent=m.team_name+' · 현장에 있어야 상품 수령 가능';}catch{document.getElementById('myRaffleNumber').textContent='FAN PICK에서 확인';}})();</script></body>
 </html>
+
