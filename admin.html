@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="station.css?v=20260922s2">
 <link rel="stylesheet" href="station-navigation.css?v=20260922nav1">
 <link rel="stylesheet" href="admin-accounts.css?v=20260923-1">
-<style>.admin-results-wrap table{min-width:1100px}.admin-results-wrap label{display:block;font-size:11px;margin:6px 0}.admin-results-wrap input{min-width:100px}.admin-results-wrap .table-scroll{overflow-x:auto}</style><link rel="stylesheet" href="admin-workspace.css?v=20261007-auto-20260928-clean"></head>
+<style>.admin-results-wrap table{min-width:1100px}.admin-results-wrap label{display:block;font-size:11px;margin:6px 0}.admin-results-wrap input{min-width:100px}.admin-results-wrap .table-scroll{overflow-x:auto}</style><link rel="stylesheet" href="admin-workspace.css?v=20261031-heat-lanes"></head>
 <body class="ug-site station-site admin-workspace">
 <div id="nav"></div>
 <main>
@@ -217,7 +217,8 @@
             <p class="muted">Save A time or time-cap progress, then B meters. Each record goes straight to the public scoreboard. Ranks and points are calculated automatically within each division and category. Lowest total wins; ties go to the better A rank.</p>
           </div>
           <p class="muted">Saving A or B publishes that record immediately. 1 round = 42 reps. Saving or correcting a record automatically recalculates the category. Standings may change as more teams finish.</p>
-          <label>FIND TEAM<input id="resultSearch" type="search" placeholder="Team name / heat" oninput="filterResultCards()"></label>
+          <p class="result-lane-guide"><strong>칠판을 바라보는 기준: A = 왼쪽 · B = 오른쪽</strong><br>레인은 팀의 경기 위치입니다. 각 레인에서 WORKOUT A와 WORKOUT B 기록을 모두 입력합니다.</p>
+          <div class="result-controls"><label for="resultHeatFilter">히트 선택<select id="resultHeatFilter" onchange="filterResultCards()"><option value="all">전체 히트</option></select></label><div class="result-heat-nav"><button id="resultPrevHeat" class="btn dark" type="button" onclick="stepResultHeat(-1)">← 이전 히트</button><button id="resultNextHeat" class="btn dark" type="button" onclick="stepResultHeat(1)">다음 히트 →</button></div><label for="resultSearch">팀 / 선수 찾기<input id="resultSearch" type="search" placeholder="팀명 또는 선수 이름" oninput="filterResultCards()"></label></div><p id="resultFilterStatus" role="status" aria-live="polite"></p>
           <details class="admin-tool"><summary>RESET EVENT RESULTS</summary><p>Clear all A/B records, rankings and athlete points awarded from these results. Teams and payments stay unchanged.</p><button class="btn danger" type="button" onclick="resetResults(null,this)">RESET ALL RESULTS</button><p id="resetResultsMsg" role="status"></p></details><div id="resultRows" class="result-cards"></div>
         </section>
       </div>
@@ -229,6 +230,7 @@
 <script src="config.js"></script>
 <script src="app.js?v=20261013-nolto-nav2"></script>
 <script src="score-utils.js?v=20261007-auto"></script>
+<script src="heat-utils.js?v=20261031-heat-lanes"></script>
 <script src="admin-layout.js?v=20261022-raffle"></script>
 <script src="admin-accounts.js?v=20260928-clean"></script>
 <script>
@@ -430,7 +432,7 @@ function renderTeamManagement(){
   $('adminTeams').innerHTML=list.map(t=>{
     const pending=t.status==='pending_payment';
     const check=pending&&t.payment_status==='payment_check';
-    const slot=t.status==='confirmed'&&t.heat_no&&t.station_no?`H${t.heat_no} · S${t.station_no}`:'SLOT NOT SET';
+    const slot=t.status==='confirmed'&&t.heat_no&&t.station_no?`H${t.heat_no} · ${ArcHeat.laneLabel(t.station_no)}`:'SLOT NOT SET';
     const partner=t.partner_id?t.player_2:'PARTNER NEEDED';
     const photo=adminPhotoUrl(t.photo_url);
     const paymentInfo=(t.amount_due||t.pricing_tier)?`
@@ -462,8 +464,8 @@ function renderTeamManagement(){
           <div class="full"><label>Contact</label><input id="phone-${t.id}" value="${esc(t.phone)}" inputmode="tel" ${pending?'disabled':''}></div>
           ${pending?'<div class="full"><label>Roster Status</label><input value="PAYMENT PENDING" disabled></div>':`
           <div><label for="heat-${t.id}">HEAT</label><select id="heat-${t.id}">${Array.from({length:12},(_,i)=>'<option value="'+(i+1)+'" '+(t.heat_no===i+1?'selected':'')+'>HEAT '+String(i+1).padStart(2,'0')+'</option>').join('')}</select></div>
-          <div><label>LANE</label><select id="station-${t.id}"><option value="1" ${t.station_no===1?'selected':''}>1</option><option value="2" ${t.station_no===2?'selected':''}>2</option></select></div>
-          ${t.status==='confirmed'?`<div class="full"><button class="btn dark" type="button" id="heat-save-${t.id}" onclick="saveTeamHeat('${t.id}')">SAVE HEAT / SWAP</button><div id="heat-msg-${t.id}" class="notice" role="status"></div><small>Choose heat and lane. If occupied, confirm to swap the two teams.</small></div>`:''}
+          <div><label>LANE</label><select id="station-${t.id}"><option value="1" ${t.station_no===1?'selected':''}>A · 왼쪽</option><option value="2" ${t.station_no===2?'selected':''}>B · 오른쪽</option></select></div>
+          ${t.status==='confirmed'?`<div class="full"><button class="btn dark" type="button" id="heat-save-${t.id}" onclick="saveTeamHeat('${t.id}')">SAVE HEAT / SWAP</button><div id="heat-msg-${t.id}" class="notice" role="status"></div><small>칠판을 바라보는 기준 A = 왼쪽, B = 오른쪽. If occupied, confirm to swap the two teams.</small></div>`:''}
           <div class="full"><label>Roster Status</label><select id="teamstatus-${t.id}"><option value="confirmed" ${t.status==='confirmed'?'selected':''}>LOCKED IN</option><option value="cancelled" ${t.status==='cancelled'?'selected':''}>OUT</option></select></div>`}
         </div>
         ${t.status==='confirmed'&&!t.partner_id?`<div class="admin-partner-add"><h5>ADD PARTNER</h5><p>Select a registered account. The player joins immediately, without a separate acceptance step.</p><label for="partner-search-${t.id}">FIND PLAYER<input id="partner-search-${t.id}" type="search" placeholder="Name or email" oninput="filterAdminPartners('${t.id}')"></label><label for="partner-select-${t.id}">PLAYER<select id="partner-select-${t.id}" onchange="adminPartnerHint('${t.id}')">${adminPartnerOptions(t)}</select></label><small id="partner-hint-${t.id}" aria-live="polite"></small><div class="admin-actions-row"><button class="btn dark" onclick="editAdminPartner('${t.id}')" type="button">EDIT PROFILE</button><button class="btn arcade-primary" id="partner-add-${t.id}" onclick="addAdminPartner('${t.id}')" type="button">ADD TO TEAM</button></div><div id="partner-msg-${t.id}" class="notice" role="status"></div></div>`:''}
@@ -481,7 +483,7 @@ window.saveTeamHeat=async id=>{
  const t=allAdminTeams.find(x=>x.id===id);if(!t)return;
  const heat=Number($(`heat-${id}`).value),lane=Number($(`station-${id}`).value);
  const other=allAdminTeams.find(x=>x.id!==id&&x.status==='confirmed'&&x.heat_no===heat&&x.station_no===lane&&x.event_id===t.event_id);
- const message=other?`${t.team_name} → H${heat} / L${lane}\n${other.team_name} → H${t.heat_no||'—'} / L${t.station_no||'—'}\n\nSwap these teams?`:`${t.team_name} → H${heat} / L${lane}\n\nSave heat assignment?`;
+ const message=other?`${t.team_name} → H${heat} / ${ArcHeat.laneLabel(lane)}\n${other.team_name} → H${t.heat_no||'—'} / ${ArcHeat.laneLabel(t.station_no)}\n\nSwap these teams?`:`${t.team_name} → H${heat} / ${ArcHeat.laneLabel(lane)}\n\nSave heat assignment?`;
  if(!confirm(message))return;
  const btn=$(`heat-save-${id}`);btn.disabled=true;
  try{
@@ -752,10 +754,14 @@ window.settlePredictionMarket=async marketId=>{
 async function loadResults(){
  const r=await db.from('tg_results').select('*').eq('event_id',currentEvent.id);if(r.error)throw r.error;
  const map={};(r.data||[]).forEach(x=>map[x.team_id]=x);
- $('resultRows').innerHTML=allAdminTeams.filter(t=>t.status==='confirmed').map(t=>{
+ const groups=ArcHeat.groups(allAdminTeams.filter(t=>t.status==='confirmed'&&t.event_id===currentEvent.id));
+ const select=$('resultHeatFilter'),selected=select.value;
+ select.innerHTML='<option value="all">전체 히트</option>'+groups.map(g=>`<option value="${g.heat??'unassigned'}">${g.heat?'HEAT '+String(g.heat).padStart(2,'0')+' · '+ArcHeat.timeRange(currentEvent.event_date,g.heat):'히트 미배정'}</option>`).join('');
+ select.value=[...select.options].some(o=>o.value===selected)?selected:'all';
+ $('resultRows').innerHTML=groups.map(g=>`<section class="result-heat-group" data-heat="${g.heat??'unassigned'}" aria-label="${g.heat?'HEAT '+g.heat:'히트 미배정'}"><header class="result-heat-heading"><h3>${g.heat?'HEAT '+String(g.heat).padStart(2,'0'):'히트 미배정'}</h3><span>${ArcHeat.timeRange(currentEvent.event_date,g.heat)}</span></header><div class="result-heat-teams">${g.teams.map(t=>{
   const x=map[t.id]||{},id=t.id,cap=x.workout_a_reps!=null&&x.workout_a_reps<168;
-  return `<article class="card result-card" data-search="${esc((t.team_name+' '+(t.heat_no??'')).toLowerCase())}">
-   <h3>${esc(t.team_name)}</h3><p>${esc(t.player_1||'—')} × ${esc(t.player_2||'—')} · ${esc(divisionLabel(t.division))} / ${esc(t.category)} · H${t.heat_no??'—'} / S${t.station_no??'—'}</p>
+  return `<article class="card result-card" data-team-id="${esc(t.id)}" data-search="${esc([t.team_name,t.player_1,t.player_2].join(' ').toLowerCase())}">
+   <div class="result-team-heading"><span class="result-lane-badge">레인 ${ArcHeat.laneLabel(t.station_no)}</span><h4>${esc(t.team_name)}</h4></div><p>${esc(t.player_1||'—')} × ${esc(t.player_2||'—')} · ${esc(divisionLabel(t.division))} / ${esc(t.category)}</p>
    <div class="result-workouts"><fieldset><legend>WORKOUT A · 4 ROUNDS</legend>
    <label>RESULT<select id="a-mode-${id}" onchange="toggleAResult('${id}')"><option value="finish" ${!cap?'selected':''}>FINISHED · TIME</option><option value="cap" ${cap?'selected':''}>TIME CAP · ROUNDS + REPS</option></select></label>
    <div id="a-finish-${id}" ${cap?'hidden':''}><label>FINISH TIME<input id="a-time-${id}" placeholder="7:25.30" value="${esc(ArcScore.time(x.workout_a_seconds))}"></label></div>
@@ -763,9 +769,24 @@ async function loadResults(){
    <button type="button" class="btn dark" onclick="saveWorkout('${id}','a',this)">SAVE A</button><p id="a-msg-${id}" role="status">${x.workout_a_reps!=null?'SAVED · '+esc(ArcScore.aLabel(x)):''}</p></fieldset>
    <fieldset><legend>WORKOUT B · 8-MIN ROW</legend><label>TOTAL METERS<input id="b-meters-${id}" type="number" min="0" max="100000" step="1" placeholder="e.g. 1850" value="${x.workout_b_meters??''}"></label><p>Record the monitor distance at 8:00.</p><button type="button" class="btn dark" onclick="saveWorkout('${id}','b',this)">SAVE B</button><p id="b-msg-${id}" role="status">${x.workout_b_meters!=null?'SAVED · '+x.workout_b_meters+' m':''}</p></fieldset></div>
    <p id="standing-${id}" role="status">${x.rank!=null?'OVERALL #'+x.rank+' · A '+x.workout_a_rank+' + B '+x.workout_b_rank+' = '+x.total_points+' PTS':'Awaiting A and B records'}</p><button type="button" class="btn danger" onclick="resetResults('${id}',this)">RESET THIS TEAM</button></article>`;
- }).join('')||'<p>NO CONFIRMED TEAMS.</p>';filterResultCards();
+ }).join('')}</div></section>`).join('')||'<p>NO CONFIRMED TEAMS.</p>';filterResultCards();
 }
-window.filterResultCards=()=>{const q=$('resultSearch').value.trim().toLowerCase();document.querySelectorAll('.result-card').forEach(c=>c.hidden=!c.dataset.search.includes(q));};
+window.filterResultCards=()=>{
+ const q=$('resultSearch').value.trim().toLowerCase(),select=$('resultHeatFilter'),heat=select.value;let visible=0;
+ document.querySelectorAll('.result-heat-group').forEach(group=>{
+  let count=0;group.querySelectorAll('.result-card').forEach(card=>{card.hidden=!card.dataset.search.includes(q);if(!card.hidden)count++;});
+  group.hidden=(heat!=='all'&&group.dataset.heat!==heat)||count===0;if(!group.hidden)visible+=count;
+ });
+ $('resultFilterStatus').textContent=visible?visible+'팀 표시 · 히트 순서 / A → B':'조건에 맞는 팀이 없습니다.';
+ const values=[...select.options].map(o=>o.value),index=values.indexOf(heat);
+ $('resultPrevHeat').disabled=values.length<2||index===1;
+ $('resultNextHeat').disabled=values.length<2||index===values.length-1;
+};
+window.stepResultHeat=direction=>{
+ const select=$('resultHeatFilter'),values=[...select.options].map(o=>o.value).filter(v=>v!=='all');if(!values.length)return;
+ const index=values.indexOf(select.value),next=index<0?(direction>0?0:values.length-1):Math.max(0,Math.min(values.length-1,index+direction));
+ select.value=values[next];filterResultCards();
+};
 window.toggleAResult=id=>{const cap=$(`a-mode-${id}`).value==='cap';$(`a-cap-${id}`).hidden=!cap;$(`a-finish-${id}`).hidden=cap;};
 window.previewAReps=id=>{try{$(`a-total-${id}`).textContent=ArcScore.capReps($(`a-rounds-${id}`).value,$(`a-reps-${id}`).value)+' / 168 REPS';}catch(e){$(`a-total-${id}`).textContent=e.message;}};
 window.saveWorkout=async(id,k,button)=>{
