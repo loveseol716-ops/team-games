@@ -15,14 +15,16 @@
 <link rel="stylesheet" href="home-brand.css?v=20260922h3">
 <link rel="stylesheet" href="station-navigation.css?v=20260922nav1">
 <style>.station-brand-nav a[href="my-heat.html"]{display:none!important}</style>
+<link rel="stylesheet" href="station-film.css?v=20261112">
 </head>
 <body class="arc-refresh ug-site station-site station-home">
 <div id="nav"></div>
 <main>
 
 <section class="arc-brand-hero" aria-labelledby="brand-title">
+  <video class="arc-hero-video" muted loop playsinline preload="none" poster="media/nolto-poster.webp" aria-hidden="true" tabindex="-1"><source data-src="media/nolto-hero.mp4" type="video/mp4"></video>
+  <button class="arc-motion-toggle" type="button" hidden aria-label="Play background video">PLAY VIDEO</button>
   <div class="container arc-brand-inner">
-    <p class="arc-brand-kicker">AN INDEPENDENT HOME FOR MOVEMENT</p>
     <h1 id="brand-title"><span>ARC</span> <span>STATION<span class="arc-brand-dot">.</span></span></h1>
     <p class="arc-brand-line">WHERE MOVEMENT BECOMES CULTURE.</p>
     <a class="arc-brand-cta" href="events.html">FIND AN EVENT <span aria-hidden="true">↗</span></a>
@@ -33,4 +35,5 @@
 </main>
 <div id="footer"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script src="app.js?v=20261013-nolto-nav2"></script><script>shell('HOME');</script>
+<script src="station-film.js?v=20261112"></script>
 </body></html>
