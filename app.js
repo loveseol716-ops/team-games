@@ -64,7 +64,7 @@ function nav(active){
   const inEvent=eventPages.includes(page);
   const links=[['GAME','event.html'],['MY HEAT','my-heat.html'],['REGISTER','athlete.html'],['RULEBOOK','rulebook.html'],['TEAMS','teams.html'],['FAN PICK','fanpick.html'],['RESULTS','ranking.html'],['LIVE','live.html']];
   const eventNav=inEvent?`<div class="station-event-nav"><div class="container station-event-nav-inner"><a class="station-event-name" href="event.html">#1 NOLTO</a><nav aria-label="#1 NOLTO navigation">${links.map(([label,href])=>`<a href="${href}"${(page===href||(page==='rulebook-ko.html'&&href==='rulebook.html'))?' aria-current="page"':''}>${label}</a>`).join('')}</nav></div></div>`:'';
-  return `<header class="nav station-brand-nav"><div class="container navin"><a class="brand" href="index.html">ARC STATION</a><nav class="station-brand-links" aria-label="Primary navigation"><a href="events.html"${active==='EVENTS'?' aria-current="page"':''}>EVENTS</a></nav><a id="arcAccountNav" class="cta arcade-cta ${active==='ACCOUNT'?'active':''}" href="account.html">LOG IN</a></div></header>${eventNav}`;
+  return `<header class="nav station-brand-nav"><div class="container navin"><a class="brand" href="index.html">ARC STATION</a><nav class="station-brand-links" aria-label="Primary navigation"><a href="about.html"${active==='ABOUT'?' aria-current="page"':''}>ABOUT</a><a href="events.html"${active==='EVENTS'?' aria-current="page"':''}>EVENTS</a><a href="archive.html"${active==='ARCHIVE'?' aria-current="page"':''}>ARCHIVE</a></nav><a id="arcAccountNav" class="cta arcade-cta ${active==='ACCOUNT'?'active':''}" href="account.html">LOG IN</a></div></header>${eventNav}`;
 }
 
 function initMobileNav(){
@@ -186,6 +186,7 @@ function shell(active){
         <div class="arc-footer-top">
           <div class="arc-footer-brand">
             <b>ARC STATION</b>
+            <span>UNDERGROUND FITNESS RACE</span>
             <span>OPERATED BY BIRD COMPANY LLC</span>
           </div>
           <nav class="arc-footer-links" aria-label="legal">
